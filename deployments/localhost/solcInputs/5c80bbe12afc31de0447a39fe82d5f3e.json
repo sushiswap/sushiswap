@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/mocks/WETH9Mock.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n\npragma solidity 0.6.12;\n\ncontract WETH9Mock {\n\tstring public name = \"Wrapped Ether\";\n\tstring public symbol = \"WETH\";\n\tuint8 public decimals = 18;\n\n\tevent Approval(address indexed src, address indexed guy, uint256 wad);\n\tevent Transfer(address indexed src, address indexed dst, uint256 wad);\n\tevent Deposit(address indexed dst, uint256 wad);\n\tevent Withdrawal(address indexed src, uint256 wad);\n\n\tmapping(address => uint256) public balanceOf;\n\tmapping(address => mapping(address => uint256)) public allowance;\n\n\tfunction deposit() public payable {\n\t\tbalanceOf[msg.sender] += msg.value;\n\t\temit Deposit(msg.sender, msg.value);\n\t}\n\n\tfunction withdraw(uint256 wad) public {\n\t\trequire(balanceOf[msg.sender] >= wad, \"WETH9: Error\");\n\t\tbalanceOf[msg.sender] -= wad;\n\t\tmsg.sender.transfer(wad);\n\t\temit Withdrawal(msg.sender, wad);\n\t}\n\n\tfunction totalSupply() public view returns (uint256) {\n\t\treturn address(this).balance;\n\t}\n\n\tfunction approve(address guy, uint256 wad) public returns (bool) {\n\t\tallowance[msg.sender][guy] = wad;\n\t\temit Approval(msg.sender, guy, wad);\n\t\treturn true;\n\t}\n\n\tfunction transfer(address dst, uint256 wad) public returns (bool) {\n\t\treturn transferFrom(msg.sender, dst, wad);\n\t}\n\n\tfunction transferFrom(\n\t\taddress src,\n\t\taddress dst,\n\t\tuint256 wad\n\t) public returns (bool) {\n\t\trequire(balanceOf[src] >= wad, \"WETH9: Error\");\n\n\t\tif (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {\n\t\t\trequire(allowance[src][msg.sender] >= wad, \"WETH9: Error\");\n\t\t\tallowance[src][msg.sender] -= wad;\n\t\t}\n\n\t\tbalanceOf[src] -= wad;\n\t\tbalanceOf[dst] += wad;\n\n\t\temit Transfer(src, dst, wad);\n\n\t\treturn true;\n\t}\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

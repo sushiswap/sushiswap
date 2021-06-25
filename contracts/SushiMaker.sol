@@ -9,6 +9,8 @@ import "./uniswapv2/interfaces/IUniswapV2ERC20.sol";
 import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
 
+import "./oracles/ValidationOracle.sol";
+
 import "./Ownable.sol";
 
 // SushiMaker is MasterChef's left hand and kinda a wizard. He can cook up Sushi from pretty much anything!
@@ -32,6 +34,10 @@ contract SushiMaker is Ownable {
     address private immutable weth;
     //0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
 
+    ValidationOracle public validationOracle;
+    
+    uint256 private impactDivisor;
+
     // V1 - V5: OK
     mapping(address => address) internal _bridges;
 
@@ -51,12 +57,15 @@ contract SushiMaker is Ownable {
         address _factory,
         address _bar,
         address _sushi,
-        address _weth
+        address _weth,
+        ValidationOracle _validationOracle
     ) public {
         factory = IUniswapV2Factory(_factory);
         bar = _bar;
         sushi = _sushi;
         weth = _weth;
+        impactDivisor = 10;
+        validationOracle = _validationOracle;
     }
 
     // F1 - F10: OK
@@ -70,7 +79,7 @@ contract SushiMaker is Ownable {
 
     // F1 - F10: OK
     // C1 - C24: OK
-    function setBridge(address token, address bridge) external onlyOwner {
+    function setBridge(address token, address bridge) public onlyOwner {
         // Checks
         require(
             token != sushi && token != weth && token != bridge,
@@ -80,6 +89,14 @@ contract SushiMaker is Ownable {
         // Effects
         _bridges[token] = bridge;
         emit LogBridgeSet(token, bridge);
+    }
+
+    function setValidationOracle (ValidationOracle _validationOracle) public onlyOwner {
+        validationOracle = _validationOracle;
+    }
+
+    function setImpactDivisor (uint256 _impactDivisor) public onlyOwner{
+        impactDivisor = _impactDivisor;
     }
 
     // M1 - M5: OK
@@ -97,7 +114,7 @@ contract SushiMaker is Ownable {
     //     As the size of the SushiBar has grown, this requires large amounts of funds and isn't super profitable anymore
     //     The onlyEOA modifier prevents this being done with a flash loan.
     // C1 - C24: OK
-    function convert(address token0, address token1) external onlyEOA() {
+    function convert(address token0, address token1) public onlyEOA() {
         _convert(token0, token1);
     }
 
@@ -234,6 +251,9 @@ contract SushiMaker is Ownable {
         // Interactions
         // X1 - X5: OK
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
+        
+        validationOracle.isWithinBounds(pair);
+
         uint256 amountInWithFee = amountIn.mul(997);
         if (fromToken == pair.token0()) {
             amountOut =
@@ -241,6 +261,7 @@ contract SushiMaker is Ownable {
                 reserve0.mul(1000).add(amountInWithFee);
             IERC20(fromToken).safeTransfer(address(pair), amountIn);
             pair.swap(0, amountOut, to, new bytes(0));
+            require(amountIn < reserve0 / impactDivisor, "Maker: Impact too high");
             // TODO: Add maximum slippage?
         } else {
             amountOut =
@@ -248,6 +269,9 @@ contract SushiMaker is Ownable {
                 reserve1.mul(1000).add(amountInWithFee);
             IERC20(fromToken).safeTransfer(address(pair), amountIn);
             pair.swap(amountOut, 0, to, new bytes(0));
+
+            require(amountIn < reserve1 / impactDivisor, "Maker: Impact too high");
+
             // TODO: Add maximum slippage?
         }
     }

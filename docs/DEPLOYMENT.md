@@ -41,11 +41,11 @@ hardhat tenderly:verify --network ropsten ContractName=Address
 ## Kovan
 
 ```sh
-yarn ropsten:deploy
+yarn kovan:deploy
 ```
 
 ```sh
-yarn ropsten:verify
+yarn kovan:verify
 ```
 
 ```sh

@@ -235,8 +235,20 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         UserInfo storage user = userInfo[pid][msg.sender];
 
         // Effects
-        user.rewardDebt = user.rewardDebt.sub(int256(amount.mul(pool.accSushiPerShare) / ACC_SUSHI_PRECISION));
-        user.amount = user.amount.sub(amount);
+        uint256 userAmount = user.amount;
+        int256 accumulatedSushi = int256(userAmount.mul(pool.accSushiPerShare) / ACC_SUSHI_PRECISION);
+        uint256 _pendingSushi = accumulatedSushi.sub(user.rewardDebt).toUInt256();
+
+        // calculate the reward against amount being withdrawn
+        uint256 debtToDecrease;
+        if (userAmount != 0) {
+            debtToDecrease = _pendingSushi
+            .mul(amount) / userAmount;
+        }
+
+        // decrease the reward debt only by the reward amount against amount being withdrawn
+        user.rewardDebt = user.rewardDebt.sub(int256(debtToDecrease));
+        user.amount = userAmount.sub(amount);
 
         // Interactions
         IRewarder _rewarder = rewarder[pid];

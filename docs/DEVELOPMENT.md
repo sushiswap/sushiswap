@@ -36,7 +36,9 @@ Mocha & Chai with Waffle matchers (these are really useful).
 
 ## Seeding
 
+```sh
 npx hardhat run --network localhost scripts/seed.js
+```
 
 ## Console
 

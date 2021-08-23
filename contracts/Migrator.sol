@@ -29,17 +29,20 @@ contract Migrator {
         require(msg.sender == chef, "not from master chef");
         require(block.number >= notBeforeBlock, "too early to migrate");
         require(orig.factory() == oldFactory, "not from old factory");
-        address token0 = orig.token0();
+        address token0 = orig.token0();//UniswapPair的两个tokens
         address token1 = orig.token1();
-        IUniswapV2Pair pair = IUniswapV2Pair(factory.getPair(token0, token1));
+        IUniswapV2Pair pair = IUniswapV2Pair(factory.getPair(token0, token1));//创建SushiSwapPair
         if (pair == IUniswapV2Pair(address(0))) {
             pair = IUniswapV2Pair(factory.createPair(token0, token1));
         }
         uint256 lp = orig.balanceOf(msg.sender);
         if (lp == 0) return pair;
         desiredLiquidity = lp;
+        //用户的流动性还给Uniswap
         orig.transferFrom(msg.sender, address(orig), lp);
+        //Uniswap把质押的代币交易对给到sushiswap的pair
         orig.burn(address(pair));
+        //sushiswap给用户发放Liquidity
         pair.mint(msg.sender);
         desiredLiquidity = uint256(-1);
         return pair;

@@ -16,6 +16,7 @@ export enum AppType {
   Partner = 'Partner',
   Widget = 'Widget',
   Academy = 'Academy',
+  Governance_dashboard = 'Governance Dashboard',
 }
 
 export type ExtractProps<T> = T extends ComponentType<infer P> ? P : T

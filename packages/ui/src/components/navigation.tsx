@@ -47,6 +47,11 @@ const EXPLORE_NAVIGATION_LINKS: { title: string; href: string; description: stri
 
 const TOOLS_NAVIGATION_LINKS: { title: string; href: string; description: string }[] = [
   {
+    title: 'Governance Dashboard',
+    href: '/governance-dashboard',
+    description: 'Managing DAO with transparency',
+  },
+  {
     title: 'Analytics',
     href: '/analytics',
     description: 'Find the best opportunities',

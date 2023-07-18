@@ -91,6 +91,8 @@
     "react-redux": "8.0.7",
     "react-slider": "2.0.4",
     "react-virtualized-auto-sizer": "1.0.7",
+    "recharts": "^2.6.0",
+    "swiper": "^9.2.0",
     "swr": "2.1.5",
     "viem": "1.0.2",
     "wagmi": "0.12.18",

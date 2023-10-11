@@ -23,6 +23,9 @@ import { SelectFeeConcentratedWidget } from '../../../ui/pool/SelectFeeConcentra
 import { SelectNetworkWidget } from '../../../ui/pool/SelectNetworkWidget'
 import { SelectPricesWidget } from '../../../ui/pool/SelectPricesWidget'
 import { SelectTokensWidget } from '../../../ui/pool/SelectTokensWidget'
+import { isTokenSecurityChainId } from '@sushiswap/react-query'
+import { TaxTokenDialog } from 'ui/pool/TaxTokenDialog'
+import { GoPlusLabsIcon } from '@sushiswap/ui'
 
 export default function Page() {
   return (
@@ -91,6 +94,7 @@ const _Add: FC = () => {
 
   return (
     <>
+      {token0 && isTokenSecurityChainId(token0.chainId) ? <TaxTokenDialog token0={token0} token1={token1} /> : null}
       {/*<div className="hidden lg:block">*/}
       {/*  <div className="lg:grid grid-cols-2 items-center gap-6 sticky top-[96px]">*/}
       {/*    <div className="col-span-2 flex gap-7">*/}
@@ -214,6 +218,12 @@ const _Add: FC = () => {
         tokenId={tokenId}
         successLink={`/pools/${chainId}:${poolAddress}?activeTab=myPositions`}
       />
+      {token0?.chainId && isTokenSecurityChainId(token0.chainId) ? (
+        <div className="text-right">
+          <span className="text-xs text-muted-foreground">Token security powered by GoPlus</span>
+          <GoPlusLabsIcon width={16} height={20} className="inline-flex" />
+        </div>
+      ) : null}
     </>
   )
 }

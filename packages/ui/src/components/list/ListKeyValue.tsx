@@ -31,7 +31,7 @@ export const ListKeyValue: FC<ListKeyValueProps> = ({
 }) => {
   if (skeleton) {
     return (
-      <div className="grid grid-cols-2 gap-2 px-4 py-3">
+      <div className="grid grid-cols-2 gap-2 px-3 py-3">
         <div className="flex flex-col gap-0.5">
           <SkeletonText fontSize="sm" />
           {subtitle && <SkeletonText fontSize="xs" />}
@@ -48,21 +48,17 @@ export const ListKeyValue: FC<ListKeyValueProps> = ({
       className={classNames(
         className,
         flex ? 'flex justify-between items-center' : 'grid grid-cols-2',
-        'gap-2 py-3 px-4',
+        'gap-2 py-3 px-3 rounded-lg',
       )}
     >
       <div className="flex flex-col gap-0.5">
-        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
-          {title}
-        </span>
+        <span className="text-sm font-medium">{title}</span>
         {subtitle && (
           <span className="text-xs text-muted-foreground">{subtitle}</span>
         )}
       </div>
-      <div className="flex justify-end">
-        <span className="flex justify-end w-full text-sm font-medium text-right text-gray-900 truncate dark:text-slate-50">
-          {children}
-        </span>
+      <div className="flex justify-end w-full text-sm font-medium text-right truncate">
+        {children}
       </div>
     </div>
   )

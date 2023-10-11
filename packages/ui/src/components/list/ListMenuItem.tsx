@@ -68,7 +68,7 @@ export const ListMenuItem: ListMenuItemComponent = ({
         className,
         disabled ? 'opacity-40 !pointer-events-none cursor-default' : '',
         subtitle ? 'items-start' : 'items-center',
-        'hover:bg-muted relative flex gap-4 px-4 py-3 w-full cursor-pointer rounded-xl',
+        'hover:bg-muted relative flex gap-4 px-3 py-3 w-full cursor-pointer rounded-xl',
       )}
     >
       {Icon && (

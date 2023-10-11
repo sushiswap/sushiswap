@@ -1,10 +1,11 @@
-import { ChainId } from 'sushi/chain'
 import { Separator } from '@sushiswap/ui'
 import { notFound } from 'next/navigation'
+import { ChainId } from 'sushi/chain'
 import { ManageV2LiquidityCard } from 'ui/pool/ManageV2LiquidityCard'
 import { PoolTransactionsV2 } from 'ui/pool/PoolTransactionsV2'
-import { isAddress } from 'viem'
 
+import { Pool } from '@sushiswap/client'
+import React from 'react'
 import {
   PoolPositionProvider,
   PoolPositionRewardsProvider,
@@ -18,7 +19,6 @@ import { PoolPageV3 } from '../../../ui/pool/PoolPageV3'
 import { PoolPosition } from '../../../ui/pool/PoolPosition'
 import { PoolRewards } from '../../../ui/pool/PoolRewards'
 import { PoolStats } from '../../../ui/pool/PoolStats'
-import { Pool } from '@sushiswap/client'
 
 export default async function PoolPage({ params }: { params: { id: string } }) {
   const [chainId, address] = params.id.split(
@@ -40,45 +40,43 @@ export default async function PoolPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-6">
       <UnknownTokenAlert pool={pool} />
-      <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-[auto_400px] gap-6">
-          <div>
-            <ManageV2LiquidityCard pool={pool} />
-          </div>
-          <div className="flex flex-col gap-6">
-            <PoolPositionProvider pool={pool}>
-              <PoolPositionStakedProvider pool={pool}>
-                <PoolPositionRewardsProvider pool={pool}>
-                  <PoolPosition pool={pool} />
-                  <PoolMyRewards pool={pool} />
-                </PoolPositionRewardsProvider>
-              </PoolPositionStakedProvider>
-            </PoolPositionProvider>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-[auto_400px] gap-6">
+        <div>
+          <ManageV2LiquidityCard pool={pool} />
         </div>
-        <div className="py-4">
-          <Separator />
+        <div className="flex flex-col gap-6">
+          <PoolPositionProvider pool={pool}>
+            <PoolPositionStakedProvider pool={pool}>
+              <PoolPositionRewardsProvider pool={pool}>
+                <PoolPosition pool={pool} />
+                <PoolMyRewards pool={pool} />
+              </PoolPositionRewardsProvider>
+            </PoolPositionStakedProvider>
+          </PoolPositionProvider>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-[auto_400px] gap-6">
-          <div>
-            <PoolChartV2
-              address={pool.address}
-              chainId={pool.chainId as ChainId}
-            />
-          </div>
-          <div className="flex flex-col gap-6">
-            <PoolComposition pool={pool} />
-            <PoolStats pool={pool} />
-            <PoolRewards pool={pool} />
-          </div>
-        </div>
-        <div className="py-4">
-          <Separator />
-        </div>
-        <PoolTransactionsV2 pool={pool} poolId={pool.address} />
       </div>
-    </>
+      <div className="py-4">
+        <Separator />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-[auto_400px] gap-6">
+        <div>
+          <PoolChartV2
+            address={pool.address}
+            chainId={pool.chainId as ChainId}
+          />
+        </div>
+        <div className="flex flex-col gap-6">
+          <PoolComposition pool={pool} />
+          <PoolStats pool={pool} />
+          <PoolRewards pool={pool} />
+        </div>
+      </div>
+      <div className="py-4">
+        <Separator />
+      </div>
+      <PoolTransactionsV2 pool={pool} poolId={pool.address} />
+    </div>
   )
 }

@@ -53,7 +53,7 @@ export const ListItem: ListItemComponent = ({
       className={classNames(
         className,
         subtitle ? 'items-start' : 'items-center',
-        'relative flex gap-4 px-4 py-3 w-full cursor-pointer',
+        'relative flex gap-4 px-3 py-3 w-full cursor-pointer',
       )}
     >
       {loading ? (

@@ -2,6 +2,7 @@ import { getAddress } from '@ethersproject/address'
 import { Token } from 'sushi/currency'
 import { saveTokens } from '@sushiswap/dexie'
 import { useQuery } from '@tanstack/react-query'
+import { useLocalStorage } from '@sushiswap/hooks'
 
 interface UseTokensParams {
   chainId: number
@@ -15,10 +16,22 @@ type Data = {
   decimals: number
 }
 
-export const fetchTokensQueryFn = async () => {
-  const resp = await fetch('https://tokens.sushi.com/v0')
-  if (resp.status === 200) {
-    const data: Data[] = await resp.json()
+export const fetchTokensQueryFn = async (tokenApi: boolean) => {
+  const resp = tokenApi && (await fetch('https://tokens.sushi.com/v0'))
+
+  let data: Array<Data>
+  if (resp && resp.status === 200) {
+    data = await resp.json()
+  } else {
+    data = (
+      await import('@sushiswap/default-token-list').then((list) => list.tokens)
+    ).map((data) => ({
+      ...data,
+      id: `${data.chainId}:${data.address?.toLowerCase()}`,
+    }))
+  }
+
+  if (data) {
     await saveTokens({
       tokens: data.map(({ id, address, symbol, decimals, name }) => {
         const [chainId] = id.split(':')
@@ -63,9 +76,11 @@ export const fetchTokensQueryFn = async () => {
 }
 
 export const useTokens = ({ chainId }: UseTokensParams) => {
+  const [tokenApi] = useLocalStorage('tokenApi', true)
+
   return useQuery({
-    queryKey: ['tokens'],
-    queryFn: fetchTokensQueryFn,
+    queryKey: ['tokens', tokenApi],
+    queryFn: () => fetchTokensQueryFn(tokenApi),
     select: (data) => data[chainId],
     keepPreviousData: true,
     staleTime: 900000, // 15 mins

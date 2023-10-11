@@ -1,5 +1,5 @@
 import { Amount, Token } from 'sushi/currency'
-import { useCustomTokens } from '@sushiswap/hooks'
+import { useCustomTokens, useLocalStorage } from '@sushiswap/hooks'
 import { useAllPrices } from '@sushiswap/react-query'
 import {
   Position,
@@ -38,13 +38,14 @@ export const useConcentratedLiquidityPositions = ({
   chainIds,
   enabled = true,
 }: UseConcentratedLiquidityPositionsParams) => {
+  const [tokenApi] = useLocalStorage('tokenApi', true)
   const { data: customTokens, hasToken } = useCustomTokens()
   const { data: prices, isError: isPriceError } = useAllPrices()
 
   return useQuery({
     queryKey: [
       'useConcentratedLiquidityPositions',
-      { chainIds, account, prices },
+      { chainIds, account, prices, tokenApi },
     ],
     queryFn: async () => {
       const data = await getConcentratedLiquidityPositions({
@@ -61,12 +62,14 @@ export const useConcentratedLiquidityPositions = ({
                 hasToken,
                 customTokens,
                 address: el.token0,
+                tokenApi,
               }),
               getTokenWithCacheQueryFn({
                 chainId: el.chainId,
                 hasToken,
                 customTokens,
                 address: el.token1,
+                tokenApi,
               }),
             ])
 

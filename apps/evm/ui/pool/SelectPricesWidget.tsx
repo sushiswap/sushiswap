@@ -338,10 +338,15 @@ export const SelectPricesWidget: FC<SelectPricesWidget> = ({
             <Card>
               <CardHeader>
                 <CardDescription>
-                  We{`'`}re excited to share that Sushi integration is now live on{' '}
-                  <LinkExternal href="https://poolfish.xyz/calculators/sushi">Poolfish.xyz</LinkExternal>! To get an
-                  estimate of the fees you could earn based on your chosen parameters, please visit our platform by
-                  clicking here. We look forward to assisting you with your earnings calculations.
+                  We{`'`}re excited to share that Sushi integration is now live
+                  on{' '}
+                  <LinkExternal href="https://poolfish.xyz/calculators/sushi">
+                    Poolfish.xyz
+                  </LinkExternal>
+                  ! To get an estimate of the fees you could earn based on your
+                  chosen parameters, please visit our platform by clicking here.
+                  We look forward to assisting you with your earnings
+                  calculations.
                 </CardDescription>
               </CardHeader>
               <CardFooter>

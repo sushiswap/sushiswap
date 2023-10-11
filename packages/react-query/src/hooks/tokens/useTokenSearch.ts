@@ -1,5 +1,6 @@
 import { getAddress, isAddress } from '@ethersproject/address'
 import { Token } from 'sushi/currency'
+import { useLocalStorage } from '@sushiswap/hooks'
 import { useQuery } from '@tanstack/react-query'
 
 interface UseTokensParams {
@@ -20,12 +21,34 @@ export const useTokenSearch = ({
   address,
   enabled = true,
 }: UseTokensParams) => {
+  const [tokenApi] = useLocalStorage('tokenApi', true)
+
   return useQuery({
-    queryKey: ['tokenSearch', { address }],
+    queryKey: ['tokenSearch', { address }, tokenApi],
     queryFn: async () => {
-      const data: Data = await fetch(
-        `https://tokens.sushi.com/v0/search/${address}`,
-      ).then((response) => response.json())
+      const resp =
+        tokenApi &&
+        (await fetch(`https://tokens.sushi.com/v0/search/${address}`))
+
+      let data: Data
+      if (resp && resp.status === 200) {
+        data = await resp.json()
+      } else {
+        data = (
+          await import('@sushiswap/default-token-list').then(
+            (list) => list.tokens,
+          )
+        )
+          .filter(
+            (token) => token.address.toLowerCase() === address?.toLowerCase(),
+          )
+          .map((token) => ({
+            ...token,
+            id: `${token.chainId}:${token.address.toLowerCase()}`,
+            status: 'APPROVED',
+          }))
+      }
+
       return data.reduce<Record<string, { token: Token; official: boolean }>>(
         (acc, { id, name, symbol, decimals, status }) => {
           const [chainId, address] = id.split(':')

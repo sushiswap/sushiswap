@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { fetchToken } from 'wagmi/actions'
 import { Address } from 'wagmi'
-import { useCustomTokens } from '@sushiswap/hooks'
+import { useCustomTokens, useLocalStorage } from '@sushiswap/hooks'
 
 interface UseTokenParams<T extends boolean> {
   chainId: ChainId | undefined
@@ -62,6 +62,7 @@ interface GetTokenWithQueryCacheFn {
   address: string | undefined | null
   customTokens: Record<string, Token>
   hasToken: (cur: string | Token) => boolean
+  tokenApi: boolean
 }
 
 export const getTokenWithCacheQueryFn = async ({
@@ -69,6 +70,7 @@ export const getTokenWithCacheQueryFn = async ({
   address,
   customTokens,
   hasToken,
+  tokenApi,
 }: GetTokenWithQueryCacheFn) => {
   // Try fetching from localStorage
   if (chainId && hasToken(`${chainId}:${address}`)) {
@@ -96,8 +98,10 @@ export const getTokenWithCacheQueryFn = async ({
   }
 
   // Try fetching from API
-  const resp = await fetch(`https://tokens.sushi.com/v0/${chainId}/${address}`)
-  if (resp.status === 200) {
+  const resp =
+    tokenApi &&
+    (await fetch(`https://tokens.sushi.com/v0/${chainId}/${address}`))
+  if (resp && resp.status === 200) {
     const { address, name, symbol, decimals, status, id }: Data =
       await resp.json()
     const [chainId] = id.split(':')
@@ -156,6 +160,7 @@ export const useTokenWithCache = <T extends boolean = false>({
   enabled = true,
   keepPreviousData = true,
 }: UseTokenParams<T>) => {
+  const [tokenApi] = useLocalStorage('tokenApi', true)
   const { data: customTokens, hasToken } = useCustomTokens()
   const select = useCallback(
     (data: Data) => getTokenWithQueryCacheHydrate<T>(chainId, data, withStatus),
@@ -165,7 +170,13 @@ export const useTokenWithCache = <T extends boolean = false>({
   return useQuery({
     queryKey: ['token', { chainId, address }],
     queryFn: async () =>
-      getTokenWithCacheQueryFn({ chainId, address, customTokens, hasToken }),
+      getTokenWithCacheQueryFn({
+        chainId,
+        address,
+        customTokens,
+        hasToken,
+        tokenApi,
+      }),
     enabled: Boolean(enabled && chainId && address && isAddress(address)),
     select,
     keepPreviousData,

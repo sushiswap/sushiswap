@@ -1791,9 +1791,15 @@ importers:
       '@sushiswap/database':
         specifier: workspace:*
         version: link:../database
+      '@sushiswap/default-token-list':
+        specifier: ^41.5.0
+        version: 41.5.0
       '@sushiswap/dexie':
         specifier: workspace:*
         version: link:../dexie
+      '@sushiswap/hooks':
+        specifier: workspace:*
+        version: link:../hooks
       '@sushiswap/route-processor-sdk':
         specifier: workspace:*
         version: link:../route-processor-sdk

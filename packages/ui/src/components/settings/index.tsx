@@ -24,6 +24,7 @@ import { CarbonOffset } from './CarbonOffset'
 import { ExpertMode } from './ExpertMode'
 import { SlippageTolerance } from './SlippageTolerance'
 import { SwapApi } from './SwapApi'
+import { TokenApi } from './TokenApi'
 
 export enum SettingsModule {
   CarbonOffset = 'CarbonOffset',
@@ -31,6 +32,7 @@ export enum SettingsModule {
   SlippageTolerance = 'SlippageTolerance',
   ExpertMode = 'ExpertMode',
   SwapApi = 'SwapApi',
+  TokenApi = 'TokenApi',
 }
 
 interface SettingsOverlayProps {
@@ -126,6 +128,13 @@ export const SettingsOverlay: FC<SettingsOverlayProps> = ({
             <List className="!pt-0">
               <List.Control>
                 <SwapApi />
+              </List.Control>
+            </List>
+          )}
+          {modules.includes(SettingsModule.TokenApi) && (
+            <List className="!pt-0">
+              <List.Control>
+                <TokenApi />
               </List.Control>
             </List>
           )}

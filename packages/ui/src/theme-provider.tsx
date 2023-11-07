@@ -3,7 +3,7 @@
 import { ThemeProvider as NextThemeProvider } from 'next-themes'
 import { FC, ReactNode } from 'react'
 
-import { OnramperProvider } from './components/onramper'
+import { OnramperProvider, Toaster } from './components'
 import { ToastContainer } from './components/toast'
 
 interface ThemeProviderProps {
@@ -22,6 +22,7 @@ export const ThemeProvider: FC<ThemeProviderProps> = ({
       forcedTheme={forcedTheme}
     >
       <OnramperProvider>
+        <Toaster />
         <ToastContainer />
         <div id="network-check-portal" />
         {children}

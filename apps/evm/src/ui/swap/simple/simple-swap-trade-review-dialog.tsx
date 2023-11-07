@@ -5,28 +5,28 @@ import { UseTradeReturn } from '@sushiswap/react-query'
 import { Bridge, LiquidityProviders } from '@sushiswap/router'
 import {
   Button,
-  DialogConfirm,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogProvider,
   DialogReview,
+  DialogSuccess,
   DialogTitle,
   List,
   SkeletonBox,
   SkeletonText,
   classNames,
-  createErrorToast,
-  createToast,
+  useToast,
 } from '@sushiswap/ui'
+import { LinkExternal } from '@sushiswap/ui'
 import {
   useAccount,
   useBalanceWeb3Refetch,
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
-  useWaitForTransaction,
+  useTransactionAdder,
 } from '@sushiswap/wagmi'
 import {
   SendTransactionResult,
@@ -81,6 +81,8 @@ export const SimpleSwapTradeReviewDialog: FC<{
   const { address } = useAccount()
   const { chain } = useNetwork()
   const tradeRef = useRef<UseTradeReturn | null>(null)
+  const { mutate } = useTransactionAdder({ account: address })
+  const { toast } = useToast()
 
   const refetchBalances = useBalanceWeb3Refetch()
 
@@ -150,45 +152,64 @@ export const SimpleSwapTradeReviewDialog: FC<{
 
   const onSettled = useCallback(
     (data: SendTransactionResult | undefined) => {
-      if (!trade || !chainId || !data) return
+      const trade = tradeRef.current
+      if (!trade || !chainId || !data || !address) return
 
-      const ts = new Date().getTime()
-      void createToast({
+      mutate({
         account: address,
-        type: 'swap',
-        chainId: chainId,
-        txHash: data.hash,
-        promise: waitForTransaction({ hash: data.hash }),
-        summary: {
-          pending: `${
-            isWrap ? 'Wrapping' : isUnwrap ? 'Unwrapping' : 'Swapping'
-          } ${trade.amountIn?.toSignificant(6)} ${
-            trade.amountIn?.currency.symbol
-          } ${
-            isWrap ? 'to' : isUnwrap ? 'to' : 'for'
-          } ${trade.amountOut?.toSignificant(6)} ${
-            trade.amountOut?.currency.symbol
-          }`,
-          completed: `${
-            isWrap ? 'Wrap' : isUnwrap ? 'Unwrap' : 'Swap'
-          } ${trade.amountIn?.toSignificant(6)} ${
-            trade.amountIn?.currency.symbol
-          } ${
-            isWrap ? 'to' : isUnwrap ? 'to' : 'for'
-          } ${trade.amountOut?.toSignificant(6)} ${
-            trade.amountOut?.currency.symbol
-          }`,
-          failed: `Something went wrong when trying to ${
-            isWrap ? 'wrap' : isUnwrap ? 'unwrap' : 'swap'
-          } ${trade.amountIn?.currency.symbol} ${
-            isWrap ? 'to' : isUnwrap ? 'to' : 'for'
-          } ${trade.amountOut?.currency.symbol}`,
-        },
-        timestamp: ts,
-        groupTimestamp: ts,
+        chainId,
+        hash: data.hash,
+        payload: JSON.stringify({
+          type: 'swap',
+          inputAmount: trade?.amountIn?.toSignificant(6),
+          outputAmount: trade?.amountOut?.toSignificant(6),
+          inputToken: {
+            address: trade?.route?.fromToken.address,
+            decimals: trade?.route?.fromToken.decimals,
+            symbol: trade?.route?.fromToken.symbol,
+          },
+          outputToken: {
+            address: trade?.route?.toToken.address,
+            decimals: trade?.route?.toToken.decimals,
+            symbol: trade?.route?.toToken.symbol,
+          },
+        }),
+        timestamp: new Date().getTime(),
       })
+
+      waitForTransaction({ chainId, hash: data.hash })
+        .then(() => {
+          toast({
+            variant: 'success',
+            caption: Chain.from(chainId)?.name,
+            description: (
+              <LinkExternal href={Chain.from(chainId)?.getTxUrl(data.hash)}>
+                {isWrap ? 'Wrap' : isUnwrap ? 'Unwrap' : 'Swap'}{' '}
+                <b>
+                  {trade.amountIn?.toSignificant(6)}{' '}
+                  {trade.amountIn?.currency.symbol}{' '}
+                </b>
+                {isWrap ? 'to' : isUnwrap ? 'to' : 'for'}{' '}
+                <b>
+                  {trade.amountOut?.toSignificant(6)}{' '}
+                  {trade.amountOut?.currency.symbol}{' '}
+                </b>
+              </LinkExternal>
+            ),
+          })
+        })
+        .catch(() => {
+          toast({
+            variant: 'destructive',
+            description: (
+              <>
+                <b>Oops!</b> Something went wrong.
+              </>
+            ),
+          })
+        })
     },
-    [trade, chainId, address, isWrap, isUnwrap],
+    [chainId, address, mutate, toast, isWrap, isUnwrap],
   )
 
   const {
@@ -360,19 +381,18 @@ export const SimpleSwapTradeReviewDialog: FC<{
         args: stringify(trade?.writeArgs),
         error: stringify(error),
       })
-      createErrorToast(error.message, false)
-    },
-  })
 
-  const { status } = useWaitForTransaction({
-    chainId: chainId,
-    hash: data?.hash,
+      toast({
+        variant: 'destructive',
+        description: <>Transaction rejected.</>,
+      })
+    },
   })
 
   return (
     <DialogProvider>
       <DialogReview>
-        {({ confirm }) => (
+        {({ confirm, close }) => (
           <>
             <div className="flex flex-col">
               <SimpleSwapErrorMessage
@@ -519,7 +539,7 @@ export const SimpleSwapTradeReviewDialog: FC<{
                     fullWidth
                     size="xl"
                     loading={!writeAsync && !isError}
-                    onClick={() => writeAsync?.().then(() => confirm())}
+                    onClick={() => writeAsync?.().then(confirm).catch(close)}
                     disabled={Boolean(
                       !!error ||
                         isWritePending ||
@@ -549,14 +569,13 @@ export const SimpleSwapTradeReviewDialog: FC<{
           </>
         )}
       </DialogReview>
-      <DialogConfirm
+      <DialogSuccess
         chainId={chainId}
-        status={status}
         testId="make-another-swap"
-        buttonText="Make another swap"
-        txHash={data?.hash}
-        successMessage={`You ${
-          isWrap ? 'wrapped' : isUnwrap ? 'unwrapped' : 'sold'
+        buttonText="Close"
+        hash={data?.hash}
+        summary={`${
+          isWrap ? 'Wrapping' : isUnwrap ? 'Unwrapping' : 'Swapping'
         } ${tradeRef.current?.amountIn?.toSignificant(6)} ${token0?.symbol} ${
           isWrap ? 'to' : isUnwrap ? 'to' : 'for'
         } ${tradeRef.current?.amountOut?.toSignificant(6)} ${token1?.symbol}`}

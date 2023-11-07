@@ -123,14 +123,12 @@ export const SimpleSwapTradeStats: FC = () => {
             <span className="font-medium text-sm text-gray-700 dark:text-slate-300">
               Recipient
             </span>
-            <span className="font-semibold text-gray-700 text-right dark:text-slate-400">
+            <span className="text-sm hover:underline underline-offset-1 font-semibold text-gray-700 text-right dark:text-slate-400">
               <a
                 target="_blank"
                 href={Chain.from(chainId)?.getAccountUrl(recipient)}
                 className={classNames(
-                  address !== recipient
-                    ? 'text-yellow-600'
-                    : 'text-gray-700 dark:text-slate-300',
+                  address !== recipient ? 'text-yellow-600' : 'text-blue',
                   'transition-all flex gap-1 items-center',
                 )}
                 rel="noreferrer"

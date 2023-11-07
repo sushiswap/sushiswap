@@ -17,7 +17,7 @@ export const useLayerZeroScanLink = ({
   txHash: string | undefined
 }) => {
   return useQuery({
-    queryKey: ['lzLink', { txHash, network0, network1, tradeId }],
+    queryKey: ['lzLink', { tradeId }],
     queryFn: async () => {
       if (
         txHash &&

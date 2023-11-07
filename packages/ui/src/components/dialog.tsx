@@ -18,9 +18,14 @@ import {
 import { Chain, ChainId } from 'sushi/chain'
 
 import {
+  ArrowTopRightOnSquareIcon,
+  ArrowUpIcon,
+} from '@heroicons/react/20/solid'
+import {
   Button,
   Dots,
   IconButton,
+  LinkExternal,
   LinkInternal,
   Loader,
   classNames,
@@ -34,8 +39,8 @@ const dialogVariants = cva(
     variants: {
       variant: {
         default:
-          'rounded-b-none md:rounded-b-2xl bottom-0 md:bottom-[unset] fixed left-[50%] md:top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] md:translate-y-[-50%] gap-4 bg-gray-100 dark:bg-slate-800 p-6 shadow-lg rounded-2xl md:w-full data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-bottom-[48%] md:data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-bottom-[48%] md:data-[state=open]:slide-in-from-top-[48%]',
-        opaque: 'px-4 fixed z-50 top-4 grid w-full max-w-xl',
+          'rounded-b-none md:rounded-b-2xl bottom-0 md:bottom-[unset] fixed left-[50%] md:top-[50%] z-[52] grid w-full max-w-lg translate-x-[-50%] md:translate-y-[-50%] gap-4 bg-gray-100 dark:bg-slate-800 p-6 shadow-lg rounded-2xl md:w-full data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-bottom-[48%] md:data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-bottom-[48%] md:data-[state=open]:slide-in-from-top-[48%]',
+        opaque: 'px-4 fixed z-[52] top-4 grid w-full max-w-xl',
       },
     },
     defaultVariants: {
@@ -45,7 +50,7 @@ const dialogVariants = cva(
 )
 
 const dialogOverlayVariants = cva(
-  'fixed inset-0 z-50 transition-all duration-100 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in',
+  'fixed inset-0 z-[52] transition-all duration-100 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in',
   {
     variants: {
       variant: {
@@ -81,7 +86,7 @@ const DialogPortal = ({
   ...props
 }: DialogPrimitive.DialogPortalProps) => (
   <DialogPrimitive.Portal className={classNames(className)} {...props}>
-    <div className="fixed inset-0 z-50 flex items-start justify-center sm:items-center">
+    <div className="fixed inset-0 z-[52] flex items-start justify-center sm:items-center">
       {children}
     </div>
   </DialogPrimitive.Portal>
@@ -198,14 +203,20 @@ interface DialogReviewProps
     React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>,
     'children' | 'open'
   > {
-  children: ({ confirm }: { confirm(): void }) => ReactNode
+  children: ({
+    confirm,
+    close,
+  }: { confirm(): void; close(): void }) => ReactNode
 }
 
 const DialogReview: FC<DialogReviewProps> = ({ children, ...props }) => {
   const { confirm, open, setOpen } = useDialog(DialogType.Review)
+
+  const close = useCallback(() => setOpen(false), [setOpen])
+
   return (
     <Dialog {...props} open={open} onOpenChange={setOpen}>
-      {children({ confirm })}
+      {children({ confirm, close })}
     </Dialog>
   )
 }
@@ -225,6 +236,82 @@ const DialogCustom: FC<DialogCustomProps> = ({ children, ...props }) => {
   )
 }
 DialogCustom.displayName = 'DialogCustom'
+
+interface DialogSuccessProps extends DialogContentProps {
+  chainId: ChainId
+  hash: string | undefined
+  testId: string
+  summary: ReactNode
+  buttonText: ReactNode
+  onClose?(): void
+}
+
+const DialogSuccess: FC<DialogSuccessProps> = ({
+  chainId,
+  hash,
+  testId,
+  buttonText = 'Close',
+  summary,
+  onClose,
+  ...props
+}) => {
+  const { open, setOpen } = useDialog(DialogType.Confirm)
+
+  // Call onClose handler with delayed timeout to allow for animation to finish
+  const onOpenChangeHandler = useCallback(
+    (open: boolean) => {
+      setOpen(false)
+
+      if (!open && onClose) {
+        setTimeout(() => {
+          onClose()
+        }, 200)
+      }
+    },
+    [setOpen, onClose],
+  )
+
+  return (
+    <Dialog {...props} open={open} onOpenChange={onOpenChangeHandler}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Transaction sent!</DialogTitle>
+          <DialogDescription className="font-medium">
+            {summary}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-6 justify-center items-center py-4">
+          <div className="p-8 rounded-full border-[3px] border-green">
+            <ArrowUpIcon width={40} height={40} className="text-green" />
+          </div>
+        </div>
+        <DialogFooter className="flex !flex-col !space-x-0 gap-4">
+          <LinkExternal
+            href={chainId && hash ? Chain.from(chainId)?.getTxUrl(hash) : ''}
+            className="text-unset"
+          >
+            <Button
+              variant="outline"
+              testId={testId}
+              fullWidth
+              size="xl"
+              iconPosition="end"
+              icon={ArrowTopRightOnSquareIcon}
+            >
+              View on Explorer
+            </Button>
+          </LinkExternal>
+          <DialogClose asChild>
+            <Button testId={testId} fullWidth size="xl">
+              {buttonText}
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+DialogSuccess.displayName = 'DialogSuccess'
 
 interface DialogConfirmProps extends DialogContentProps {
   chainId: ChainId
@@ -412,6 +499,7 @@ export {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogSuccess,
   DialogOverlay,
   DialogPrimitive,
   DialogProvider,

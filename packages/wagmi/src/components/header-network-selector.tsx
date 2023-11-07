@@ -54,7 +54,7 @@ export const HeaderNetworkSelector: FC<{
       onSelect={onSwitchNetwork}
       networks={networks}
     >
-      <Button variant="secondary" testId="network-selector">
+      <Button variant="outline" testId="network-selector">
         <Suspense fallback={null}>
           <NetworkIcon chainId={selected} width={20} height={20} />
           <div className="hidden xl:block">{Chain.from(selected)?.name}</div>

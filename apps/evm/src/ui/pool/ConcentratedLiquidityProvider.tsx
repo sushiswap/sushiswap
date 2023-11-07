@@ -285,6 +285,8 @@ export function useConcentratedDerivedMintInfo({
     feeAmount,
   })
 
+  console.log(usePool)
+
   const { data: pool, isInitialLoading, isError } = usePool
   const noLiquidity = !isInitialLoading && !isError && !pool
 

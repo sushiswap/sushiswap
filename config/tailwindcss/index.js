@@ -2,6 +2,7 @@ const aspectRatio = require('@tailwindcss/aspect-ratio')
 const forms = require('@tailwindcss/forms')
 const typography = require('@tailwindcss/typography')
 const defaultTheme = require('tailwindcss/defaultTheme')
+const plugin = require('tailwindcss/plugin')
 
 /**
  * @type {import('tailwindcss').Config}
@@ -29,7 +30,23 @@ module.exports = {
   //   // include packages if not transpiling
   //   '../../packages/**/*.{js,ts,jsx,tsx}',
   // ],
-  plugins: [forms, aspectRatio, typography, require('tailwindcss-animate')],
+  plugins: [
+    forms,
+    aspectRatio,
+    typography,
+    require('tailwindcss-animate'),
+    plugin(function ({ matchUtilities, theme }) {
+      matchUtilities(
+        {
+          'translate-3d': () => ({
+            transform:
+              'translate3d(var(--tw-translate-x), var(--tw-translate-y), var(--tw-translate-z))',
+          }), // this is actual CSS
+        },
+        { values: theme('translate'), supportsNegativeValues: true },
+      )
+    }),
+  ],
   theme: {
     screens: {
       ...defaultTheme.screens,

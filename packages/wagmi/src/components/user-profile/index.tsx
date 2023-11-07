@@ -2,8 +2,8 @@
 
 import { useIsMounted } from '@sushiswap/hooks'
 import { useBreakpoint } from '@sushiswap/ui'
+import { Loader } from '@sushiswap/ui'
 import { Button } from '@sushiswap/ui/components/button'
-// import { JazzIcon } from '@sushiswap/ui/components/icons/JazzIcon'
 import {
   Popover,
   PopoverContent,
@@ -13,6 +13,7 @@ import React, { FC, useState } from 'react'
 import { ChainId } from 'sushi/chain'
 import { shortenAddress } from 'sushi/format'
 import { useAccount, useEnsAvatar, useEnsName, useNetwork } from 'wagmi'
+import { usePendingTransactions } from '../..'
 import { ConnectButton } from '../connect-button'
 import { ConnectView } from './ConnectView'
 import { DefaultView } from './DefaultView'
@@ -30,6 +31,7 @@ export const UserProfile: FC<ProfileProps> = () => {
   const [view, setView] = useState<ProfileView>(ProfileView.Default)
   const { chain } = useNetwork()
   const { address } = useAccount()
+  const { data: transactions } = usePendingTransactions({ account: address })
 
   const { data: name } = useEnsName({
     chainId: ChainId.ETHEREUM,
@@ -43,12 +45,12 @@ export const UserProfile: FC<ProfileProps> = () => {
 
   const chainId = (chain?.id as ChainId) || ChainId.ETHEREUM
 
-  if (!address || !isMounted) return <ConnectButton variant="secondary" />
+  if (!address || !isMounted) return <ConnectButton variant="outline" />
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="secondary">
+        <Button variant="outline">
           {
             avatar ? (
               <img
@@ -64,6 +66,14 @@ export const UserProfile: FC<ProfileProps> = () => {
           <span className="hidden sm:block">
             {shortenAddress(address, isSm ? 3 : 2)}
           </span>
+          {(transactions?.length || 0) > 0 ? (
+            <Button size="xs" asChild className="ml-1 mr-[-10px]">
+              <span className="flex items-center gap-1">
+                <Loader size={12} className="text-white" />
+                {transactions?.length} pending
+              </span>
+            </Button>
+          ) : null}
         </Button>
       </PopoverTrigger>
       <PopoverContent

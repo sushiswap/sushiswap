@@ -32,11 +32,6 @@ import { UniswapV2Provider } from './liquidity-providers/UniswapV2'
 import { UniswapV3Provider } from './liquidity-providers/UniswapV3'
 import type { PoolCode } from './pools/PoolCode'
 
-// TODO: Should be a mode on the config for DataFetcher
-const isTest =
-  process.env['APP_ENV'] === 'test' ||
-  process.env['NEXT_PUBLIC_APP_ENV'] === 'test'
-
 // Gathers pools info, creates routing in 'incremental' mode
 // This means that new routing recalculates each time new pool fetching data comes
 export class DataFetcher {
@@ -52,26 +47,30 @@ export class DataFetcher {
 
   private static cache: Record<number, DataFetcher> = {}
 
-  static onChain(chainId: ChainId): DataFetcher {
+  static onChain(chainId: ChainId, isTest = false): DataFetcher {
     const cache = this.cache[chainId]
     if (cache) {
       return cache
     }
-    const dataFetcher = new DataFetcher(chainId)
+    const dataFetcher = new DataFetcher({ chainId, isTest })
     this.cache[chainId] = dataFetcher
     return dataFetcher
   }
 
-  constructor(chainId: ChainId, publicClient?: PublicClient) {
+  constructor({
+    chainId,
+    client,
+    isTest,
+  }: { chainId: ChainId; client?: PublicClient; isTest?: boolean }) {
     this.chainId = chainId as Exclude<ChainId, TestnetChainId>
-    if (!publicClient && !config[this.chainId]) {
+    if (!client && !config[this.chainId]) {
       throw new Error(
         `No public client given and no viem config found for chainId ${chainId}`,
       )
     }
 
-    if (publicClient) {
-      this.web3Client = publicClient
+    if (client) {
+      this.web3Client = client
     } else if (isTest) {
       this.web3Client = createPublicClient({
         ...config[this.chainId],

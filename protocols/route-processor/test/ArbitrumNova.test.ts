@@ -80,7 +80,7 @@ describe('Arbitrum Nova RP3', async () => {
     transport: http('https://nova.arbitrum.io/rpc'),
   })
 
-  const dataFetcher = new DataFetcher(chainId, client)
+  const dataFetcher = new DataFetcher({ chainId, client })
   dataFetcher.startDataFetching([LiquidityProviders.SushiSwapV2])
 
   it('ETH => SUSHI', async () => {

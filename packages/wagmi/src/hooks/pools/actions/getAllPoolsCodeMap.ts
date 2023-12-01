@@ -7,7 +7,9 @@ import {
 
 import { UsePoolsParams } from '../types'
 
-const isTest = process.env.NEXT_PUBLIC_APP_ENV === 'test'
+const isTest =
+  process.env['APP_ENV'] === 'test' ||
+  process.env['NEXT_PUBLIC_APP_ENV'] === 'test'
 
 export const getAllPoolsCodeMap = async ({
   currencyA,
@@ -52,7 +54,7 @@ export const getAllPoolsCodeMap = async ({
 
   const testLiquidityProviders = [...sushiLiquidityProviders]
 
-  const dataFetcher = DataFetcher.onChain(chainId)
+  const dataFetcher = DataFetcher.onChain(chainId, isTest)
   // console.log('dataFetcher startDataFetching')
   dataFetcher.startDataFetching(
     isTest ? testLiquidityProviders : liquidityProviders,

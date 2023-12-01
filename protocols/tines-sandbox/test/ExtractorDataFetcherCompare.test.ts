@@ -157,7 +157,7 @@ async function CompareTest(args: {
     const add0 = ADDITIONAL_BASES[chainId]?.[tokens[i].address] ?? []
     const add1 = ADDITIONAL_BASES[chainId]?.[tokens[j].address] ?? []
 
-    const dataFetcher = new DataFetcher(chainId, client)
+    const dataFetcher = new DataFetcher({ chainId, client })
     dataFetcher.startDataFetching(args.liquidityProviders)
 
     const [poolCodesExtractor, poolCodesDataFetcher] = await Promise.all([

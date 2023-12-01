@@ -89,7 +89,7 @@ describe('Celo RP3', async () => {
     transport: http('https://forno.celo.org'),
   })
 
-  const dataFetcher = new DataFetcher(chainId, client)
+  const dataFetcher = new DataFetcher({ chainId, client })
   dataFetcher.startDataFetching()
 
   it('CELO => USDC', async () => {

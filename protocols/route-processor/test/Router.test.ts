@@ -84,7 +84,7 @@
 //   //console.log('    Create DataFetcher ...')
 //   const provider = ethers.provider
 //   const chainId = network.config.chainId as ChainId
-//   const dataFetcher = new DataFetcher(chainId, client)
+//   const dataFetcher = new DataFetcher({chainId, client})
 
 //   console.log({ chainId, url: ethers.provider.connection.url, otherurl: network.config.forking.url })
 

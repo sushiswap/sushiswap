@@ -102,7 +102,7 @@ async function testTaxToken(args: {
   const toToken = args.taxToken
   const amountIn = args.amountIn ?? BigInt(1e18)
 
-  const dataFetcher = new DataFetcher(chainId, client)
+  const dataFetcher = new DataFetcher({ chainId, client })
   dataFetcher.startDataFetching()
   await dataFetcher.fetchPoolsForToken(fromToken, toToken)
   const pcMap = dataFetcher.getCurrentPoolCodeMap(fromToken, toToken)

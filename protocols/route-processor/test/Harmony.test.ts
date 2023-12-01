@@ -90,7 +90,7 @@ describe.skip('Harmony', async () => {
     transport: http('https://api.harmony.one'),
   })
 
-  const dataFetcher = new DataFetcher(chainId, client)
+  const dataFetcher = new DataFetcher({ chainId, client })
   dataFetcher.startDataFetching()
 
   it('ONE => DAI', async () => {

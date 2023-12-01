@@ -45,7 +45,7 @@ async function getDataFetcherData(
   })
   const chainId = network.config.chainId as ChainId
 
-  const dataFetcher = new DataFetcher(chainId, client)
+  const dataFetcher = new DataFetcher({ chainId, client })
   dataFetcher.startDataFetching([LiquidityProviders.UniswapV3])
   await dataFetcher.fetchPoolsForToken(pool.token0, pool.token1, existedPools)
   const pcMap = dataFetcher.getCurrentPoolCodeMap(pool.token0, pool.token1)

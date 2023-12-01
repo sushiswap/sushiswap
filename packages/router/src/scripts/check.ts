@@ -108,7 +108,7 @@ function getEnvironment(
   //     break
   //   default:
   // }
-  const dataFetcher = new DataFetcher(chainId)
+  const dataFetcher = new DataFetcher({ chainId })
   dataFetcher.startDataFetching(lps)
 
   return {

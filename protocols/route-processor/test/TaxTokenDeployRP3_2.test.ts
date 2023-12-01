@@ -77,7 +77,7 @@ async function getTestEnvironment(
 
   const [userAddress] = await client.getAddresses()
 
-  const dataFetcher = new DataFetcher(chainId, client)
+  const dataFetcher = new DataFetcher({ chainId, client })
   dataFetcher.startDataFetching([
     LiquidityProviders.SushiSwapV2,
     LiquidityProviders.UniswapV2,

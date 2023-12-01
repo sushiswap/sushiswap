@@ -91,7 +91,7 @@ describe('Celo', async () => {
     transport: http('https://forno.celo.org'),
   })
 
-  const dataFetcher = new DataFetcher(chainId, client)
+  const dataFetcher = new DataFetcher({ chainId, client })
   dataFetcher.startDataFetching()
   // const chainId = ChainId.CELO
 

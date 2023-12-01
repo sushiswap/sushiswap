@@ -116,7 +116,7 @@ async function getTestEnvironment() {
   const user2 = mnemonicToAccount(accounts.mnemonic, { accountIndex: 1 })
 
   const chainId = network.config.chainId as ChainId
-  const dataFetcher = new DataFetcher(chainId, client)
+  const dataFetcher = new DataFetcher({ chainId, client })
 
   dataFetcher.startDataFetching()
   const poolCodes = new Map<string, PoolCode>()

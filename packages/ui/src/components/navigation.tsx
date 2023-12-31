@@ -3,8 +3,8 @@ import Link from 'next/link'
 import * as React from 'react'
 
 import classNames from 'classnames'
-import { SushiIcon } from './icons/SushiIcon'
-import { navigationMenuTriggerStyle } from './navigation-menu'
+import { SushiIcon } from './icons'
+import { MobileNavigation } from './mobile-navigation'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -12,6 +12,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
 } from './navigation-menu'
 import { OnramperButton } from './onramper'
 
@@ -133,14 +134,16 @@ const navigationContainerVariants = cva(
 interface NavContainerProps
   extends VariantProps<typeof navigationContainerVariants> {
   children: React.ReactNode
+  className?: string
 }
 
 const NavigationContainer: React.FC<NavContainerProps> = ({
   children,
   variant,
+  className,
 }) => {
   return (
-    <div className={navigationContainerVariants({ variant })}>
+    <div className={navigationContainerVariants({ variant, className })}>
       <SushiIcon width={24} height={24} />
       <div className="flex items-center justify-between flex-grow gap-4">
         {children}
@@ -160,128 +163,131 @@ const Navigation: React.FC<NavProps> = ({
   legacyBehavior = false,
 }) => {
   return (
-    <NavigationContainer variant={variant}>
-      <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem className="block md:hidden">
-            <NavigationMenuTrigger>Explore</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="min-w-[240px] gap-3 p-4">
-                {EXPLORE_NAVIGATION_LINKS.map((component) => (
-                  <NavigationListItem
-                    key={component.title}
-                    title={component.title}
-                    href={component.href}
-                  >
-                    {component.description}
-                  </NavigationListItem>
-                ))}
-                <OnramperButton>
-                  <NavigationListItem title="Buy Crypto">
-                    Need to buy some more crypto?
-                  </NavigationListItem>
-                </OnramperButton>
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem className="hidden md:block">
-            {legacyBehavior ? (
-              <NavigationMenuLink
-                asChild
-                className={navigationMenuTriggerStyle()}
-              >
-                <a href="/swap">Swap</a>
-              </NavigationMenuLink>
-            ) : (
-              <NavigationMenuLink
-                href="/swap"
-                className={navigationMenuTriggerStyle()}
-              >
-                Swap
-              </NavigationMenuLink>
-            )}
-          </NavigationMenuItem>
-          <NavigationMenuItem className="hidden md:block">
-            {legacyBehavior ? (
-              <NavigationMenuLink
-                asChild
-                className={navigationMenuTriggerStyle()}
-              >
-                <a href="/pools">Pools</a>
-              </NavigationMenuLink>
-            ) : (
-              <NavigationMenuLink
-                href="/pools"
-                className={navigationMenuTriggerStyle()}
-              >
-                Pools
-              </NavigationMenuLink>
-            )}
-          </NavigationMenuItem>
-          <NavigationMenuItem className="hidden md:block">
-            {legacyBehavior ? (
-              <NavigationMenuLink
-                asChild
-                className={navigationMenuTriggerStyle()}
-              >
-                <a href="/furo">Pay</a>
-              </NavigationMenuLink>
-            ) : (
-              <NavigationMenuLink
-                href="/furo"
-                className={navigationMenuTriggerStyle()}
-              >
-                Pay
-              </NavigationMenuLink>
-            )}
-          </NavigationMenuItem>
-          <NavigationMenuItem className="hidden md:block">
-            <NavigationMenuTrigger>More</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="w-[400px] gap-3 p-4">
-                {TOOLS_NAVIGATION_LINKS.map((component) => (
-                  <NavigationListItem
-                    key={component.title}
-                    title={component.title}
-                    href={component.href}
-                    legacyBehavior={legacyBehavior}
-                  >
-                    {component.description}
-                  </NavigationListItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem className="hidden md:block">
-            <NavigationMenuTrigger>Partners</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <ul className="w-[400px] gap-3 p-4">
-                {PARTNER_NAVIGATION_LINKS.map((component) => (
-                  <NavigationListItem
-                    key={component.title}
-                    title={component.title}
-                    href={component.href}
-                    legacyBehavior={legacyBehavior}
-                  >
-                    {component.description}
-                  </NavigationListItem>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem className="hidden md:block">
-            <OnramperButton>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                Buy Crypto
-              </NavigationMenuLink>
-            </OnramperButton>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
-      <div className="flex items-center gap-2">
-        {rightElement ? rightElement : null}
-      </div>
-    </NavigationContainer>
+    <>
+      <NavigationContainer variant={variant} className="hidden md:flex">
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem className="block md:hidden">
+              <NavigationMenuTrigger>Explore</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="min-w-[240px] gap-3 p-4">
+                  {EXPLORE_NAVIGATION_LINKS.map((component) => (
+                    <NavigationListItem
+                      key={component.title}
+                      title={component.title}
+                      href={component.href}
+                    >
+                      {component.description}
+                    </NavigationListItem>
+                  ))}
+                  <OnramperButton>
+                    <NavigationListItem title="Buy Crypto">
+                      Need to buy some more crypto?
+                    </NavigationListItem>
+                  </OnramperButton>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:block">
+              {legacyBehavior ? (
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <a href="/swap">Swap</a>
+                </NavigationMenuLink>
+              ) : (
+                <NavigationMenuLink
+                  href="/swap"
+                  className={navigationMenuTriggerStyle()}
+                >
+                  Swap
+                </NavigationMenuLink>
+              )}
+            </NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:block">
+              {legacyBehavior ? (
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <a href="/pools">Pools</a>
+                </NavigationMenuLink>
+              ) : (
+                <NavigationMenuLink
+                  href="/pools"
+                  className={navigationMenuTriggerStyle()}
+                >
+                  Pools
+                </NavigationMenuLink>
+              )}
+            </NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:block">
+              {legacyBehavior ? (
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <a href="/furo">Pay</a>
+                </NavigationMenuLink>
+              ) : (
+                <NavigationMenuLink
+                  href="/furo"
+                  className={navigationMenuTriggerStyle()}
+                >
+                  Pay
+                </NavigationMenuLink>
+              )}
+            </NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:block">
+              <NavigationMenuTrigger>More</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="w-[400px] gap-3 p-4">
+                  {TOOLS_NAVIGATION_LINKS.map((component) => (
+                    <NavigationListItem
+                      key={component.title}
+                      title={component.title}
+                      href={component.href}
+                      legacyBehavior={legacyBehavior}
+                    >
+                      {component.description}
+                    </NavigationListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:block">
+              <NavigationMenuTrigger>Partners</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="w-[400px] gap-3 p-4">
+                  {PARTNER_NAVIGATION_LINKS.map((component) => (
+                    <NavigationListItem
+                      key={component.title}
+                      title={component.title}
+                      href={component.href}
+                      legacyBehavior={legacyBehavior}
+                    >
+                      {component.description}
+                    </NavigationListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:block">
+              <OnramperButton>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Buy Crypto
+                </NavigationMenuLink>
+              </OnramperButton>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+        <div className="flex items-center gap-2">
+          {rightElement ? rightElement : null}
+        </div>
+      </NavigationContainer>
+      <MobileNavigation rightElement={rightElement} />
+    </>
   )
 }
 
@@ -341,6 +347,7 @@ export {
   EXPLORE_NAVIGATION_LINKS,
   Navigation,
   NavigationContainer,
+  navigationContainerVariants,
   NavigationListItem,
   PARTNER_NAVIGATION_LINKS,
   TOOLS_NAVIGATION_LINKS,

@@ -2,13 +2,15 @@
 
 import { Navigation } from '@sushiswap/ui'
 import { WagmiHeaderComponents } from '@sushiswap/wagmi/components'
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { SUPPORTED_CHAIN_IDS } from 'src/config'
 
 export const Header: FC = () => {
   return (
-    <Navigation
-      rightElement={<WagmiHeaderComponents chainIds={SUPPORTED_CHAIN_IDS} />}
-    />
+    <>
+      <Navigation
+        rightElement={<WagmiHeaderComponents chainIds={SUPPORTED_CHAIN_IDS} />}
+      />
+    </>
   )
 }

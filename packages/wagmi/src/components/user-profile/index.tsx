@@ -1,7 +1,6 @@
 'use client'
 
 import { useIsMounted } from '@sushiswap/hooks'
-import { useBreakpoint } from '@sushiswap/ui'
 import { Button } from '@sushiswap/ui/components/button'
 // import { JazzIcon } from '@sushiswap/ui/components/icons/JazzIcon'
 import {
@@ -26,7 +25,6 @@ interface ProfileProps {
 
 export const UserProfile: FC<ProfileProps> = () => {
   const isMounted = useIsMounted()
-  const { isSm } = useBreakpoint('sm')
   const [view, setView] = useState<ProfileView>(ProfileView.Default)
   const { chain } = useNetwork()
   const { address } = useAccount()
@@ -61,9 +59,7 @@ export const UserProfile: FC<ProfileProps> = () => {
             ) : null
             // <JazzIcon diameter={20} address={address} />
           }
-          <span className="hidden sm:block">
-            {shortenAddress(address, isSm ? 3 : 2)}
-          </span>
+          {shortenAddress(address, 3)}
         </Button>
       </PopoverTrigger>
       <PopoverContent

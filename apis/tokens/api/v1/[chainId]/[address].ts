@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { z } from 'zod'
-import { fetchTokensFromLists } from '../../../lib/api/v1.js'
+import { fetchTokensForChainIdFromLists } from '../../../lib/api/v1.js'
 
 const schema = z.object({
   chainId: z.coerce
@@ -19,7 +19,7 @@ const handler = async (request: VercelRequest, response: VercelResponse) => {
 
   const { chainId, address } = schema.parse(request.query)
 
-  const tokenList = await fetchTokensFromLists(chainId)
+  const tokenList = await fetchTokensForChainIdFromLists(chainId)
 
   // const result = await fetch(`https://tokens.sushi.com/v1/${chainId}`)
   // const tokenList = (await result.json()) as TokenInfo[]

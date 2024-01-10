@@ -79,6 +79,10 @@
     "api/v1/[chainId]/index.ts": {
       "memory": 256,
       "maxDuration": 15
+    },
+    "api/v1/index.ts": {
+      "memory": 256,
+      "maxDuration": 30
     }
   }
 }

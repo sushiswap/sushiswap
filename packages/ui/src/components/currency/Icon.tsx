@@ -4,8 +4,9 @@ import { ImageProps } from 'next/image'
 import { FC } from 'react'
 import { Chain, ChainId } from 'sushi/chain'
 import { Currency } from 'sushi/currency'
+import { WrappedTokenInfo } from 'sushi/token-list'
 
-import { cloudinaryImageLoader } from '../../cloudinary'
+import { cloudinaryFetchLoader, cloudinaryImageLoader } from '../../cloudinary'
 import { Avatar, AvatarFallback, AvatarImage } from '../avatar'
 import { LinkExternal } from '../link'
 
@@ -108,13 +109,17 @@ export const Icon: FC<IconProps> = ({
   disableLink = true,
   ...rest
 }) => {
+  const hasLogoUri = currency instanceof WrappedTokenInfo && currency.logoURI
+
   const src = currency.isNative
     ? `native-currency/${LOGO[currency.chainId]}`
+    : hasLogoUri
+    ? currency.logoURI
     : `tokens/${currency.chainId}/${currency.wrapped.address}.jpg`
   const avatar = (
     <Avatar style={{ width: rest.width, height: rest.height }}>
       <AvatarImage
-        loader={cloudinaryImageLoader}
+        loader={hasLogoUri ? cloudinaryFetchLoader : cloudinaryImageLoader}
         width={Number(rest.width) ?? 20}
         src={src}
       />

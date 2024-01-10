@@ -11,6 +11,11 @@ export const UNI_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 export const UNI_EXTENDED_LIST =
   'https://gateway.ipfs.io/ipns/extendedtokens.uniswap.org'
 
+// const AAVE_LIST = 'tokenlist.aave.eth'
+
+// const CMC_ALL_LIST =
+//   'https://s3.coinmarketcap.com/generated/dex/tokens/eth-tokens-all.json'
+
 const COINGECKO_LIST = 'https://tokens.coingecko.com/uniswap/all.json'
 const COINGECK_BASE_LIST = 'https://tokens.coingecko.com/base/all.json'
 const COINGECKO_BNB_LIST =
@@ -27,8 +32,10 @@ const COINGECKO_AVAX_LIST = 'https://tokens.coingecko.com/avalanche/all.json'
 const COMPOUND_LIST =
   'https://raw.githubusercontent.com/compound-finance/token-list/master/compound.tokenlist.json'
 const GEMINI_LIST = 'https://www.gemini.com/uniswap/manifest.json'
+// const KLEROS_LIST = 't2crtokens.eth'
 const SET_LIST =
   'https://raw.githubusercontent.com/SetProtocol/uniswap-tokenlist/main/set.tokenlist.json'
+// const WRAPPED_LIST = 'wrapped.tokensoft.eth'
 
 export const OPTIMISM_LIST =
   'https://static.optimism.io/optimism.tokenlist.json'
@@ -46,8 +53,10 @@ export const LINEA_LIST =
 // lower index == higher priority for token import
 export const DEFAULT_TOKEN_LIST_OF_TOKEN_LISTS_TO_DISPLAY: string[] = [
   SUSHI_DEFAULT_TOKEN_LIST,
-  UNI_LIST,
   UNI_EXTENDED_LIST,
+  COMPOUND_LIST,
+  // AAVE_LIST,
+  // CMC_ALL_LIST,
   COMPOUND_LIST,
   COINGECKO_LIST,
   COINGECK_BASE_LIST,

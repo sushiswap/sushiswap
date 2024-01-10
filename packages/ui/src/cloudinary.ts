@@ -7,10 +7,11 @@ export function cloudinaryFetchLoader({
   width,
   quality,
 }: ImageLoaderProps) {
-  const params = ['f_auto', 'c_limit', `w_${width}`, `q_${quality || 'auto'}`]
-  return `https://cdn.sushi.com/image/fetch/${params.join(',')}/${normalizeSrc(
-    src,
-  )}`
+  // https://res.cloudinary.com/demo/image/fetch/c_fill,g_face,h_300,w_300/r_max/f_auto
+  const params = [`w_${width}`, `q_${quality || 'auto'}`]
+  return `https://cdn.sushi.com/image/fetch/${params.join(
+    ',',
+  )}/r_max/f_auto/${normalizeSrc(src)}`
 }
 
 export function cloudinaryImageLoader({

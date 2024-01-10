@@ -26,7 +26,7 @@
     "@sushiswap/default-token-list": "41.4.0",
     "@sushiswap/wagmi-config": "workspace:*",
     "@upstash/redis": "1.22.1",
-    "@vercel/node": "3.0.9",
+    "@vercel/node": "3.0.15",
     "@wagmi/core": "1.4.13",
     "sushi": "workspace:*",
     "viem": "1.21.4",
@@ -38,6 +38,6 @@
     "@tsconfig/strictest": "2.0.2",
     "@types/node": "18",
     "typescript": "5.2.2",
-    "vercel": "32.5.3"
+    "vercel": "33.0.2"
   }
 }

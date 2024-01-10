@@ -9,13 +9,13 @@
   "dependencies": {
     "@sushiswap/chainlink-token-list": "^0.1.0",
     "@sushiswap/default-token-list": "^42.0.0",
-    "@vercel/node": "3.0.9"
+    "@vercel/node": "3.0.15"
   },
   "devDependencies": {
     "@sushiswap/jest-config": "workspace:*",
     "@tsconfig/esm": "1.0.4",
     "@tsconfig/strictest": "2.0.2",
     "typescript": "5.2.2",
-    "vercel": "32.5.3"
+    "vercel": "33.0.2"
   }
 }

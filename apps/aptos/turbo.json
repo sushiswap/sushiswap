@@ -1,0 +1,14 @@
+{
+  "extends": ["//"],
+  "pipeline": {
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**"],
+      "dependsOn": ["^build"],
+      "env": []
+    },
+    "check": {
+      "dependsOn": ["^build"],
+      "cache": false
+    }
+  }
+}

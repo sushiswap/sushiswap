@@ -162,12 +162,14 @@ const NavigationContainer: React.FC<NavContainerProps> = ({
 interface NavProps extends VariantProps<typeof navigationContainerVariants> {
   rightElement?: React.ReactNode
   legacyBehavior?: boolean
+  showOnramper?: boolean
 }
 
 const Navigation: React.FC<NavProps> = ({
   rightElement,
   variant,
   legacyBehavior = false,
+  showOnramper = true,
 }) => {
   return (
     <NavigationContainer variant={variant}>
@@ -217,11 +219,11 @@ const Navigation: React.FC<NavProps> = ({
                 asChild
                 className={navigationMenuTriggerStyle()}
               >
-                <a href="/pools">Pools</a>
+                <a href="/pool">Pools</a>
               </NavigationMenuLink>
             ) : (
               <NavigationMenuLink
-                href="/pools"
+                href="/pool"
                 className={navigationMenuTriggerStyle()}
               >
                 Pools
@@ -313,13 +315,15 @@ const Navigation: React.FC<NavProps> = ({
               </ul>
             </NavigationMenuContent>
           </NavigationMenuItem>
-          <NavigationMenuItem className="hidden md:block">
-            <OnramperButton>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                Buy Crypto
-              </NavigationMenuLink>
-            </OnramperButton>
-          </NavigationMenuItem>
+          {showOnramper ? (
+            <NavigationMenuItem className="hidden md:block">
+              <OnramperButton>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Buy Crypto
+                </NavigationMenuLink>
+              </OnramperButton>
+            </NavigationMenuItem>
+          ) : null}
         </NavigationMenuList>
       </NavigationMenu>
       <div className="flex items-center gap-2">

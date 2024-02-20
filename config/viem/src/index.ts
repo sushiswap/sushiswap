@@ -464,15 +464,17 @@ export const config: Record<
   },
   [ChainId.BOBA]: {
     chain: boba,
-    transport: fallback(
-      [
-        http(boba.rpcUrls.default.http[0]),
-        http('https://lightning-replica.boba.network'),
-      ],
-      {
-        rank: true,
-      },
-    ),
+    transport: http('https://mainnet.boba.network'),
+    // other checked variants -  don't work
+    // transport: fallback(
+    //   [
+    //     http(boba.rpcUrls.default.http[0]),
+    //     http('https://lightning-replica.boba.network'),
+    //   ],
+    //   {
+    //     rank: true,
+    //   },
+    // ),
   },
   [ChainId.BOBA_AVAX]: {
     chain: bobaAvax,
@@ -488,15 +490,16 @@ export const config: Record<
   },
   [ChainId.BOBA_BNB]: {
     chain: bobaBnb,
-    transport: fallback(
-      [
-        http(bobaBnb.rpcUrls.default.http[0]),
-        http('https://replica.bnb.boba.network'),
-      ],
-      {
-        rank: true,
-      },
-    ),
+    transport: http('https://bnb.boba.network'),
+    // transport: fallback(
+    //   [
+    //     http(bobaBnb.rpcUrls.default.http[0]),
+    //     http('https://replica.bnb.boba.network'),
+    //   ],
+    //   {
+    //     rank: true,
+    //   },
+    // ),
   },
   [ChainId.BSC]: {
     chain: bsc,
@@ -504,7 +507,8 @@ export const config: Record<
   },
   [ChainId.BTTC]: {
     chain: bttc,
-    transport: http(bttc.rpcUrls.default.http[0]),
+    transport: http('https://rpc.bittorrentchain.io'),
+    // transport: http(bttc.rpcUrls.default.http[0]),
   },
   [ChainId.CELO]: {
     chain: celo,
@@ -556,7 +560,14 @@ export const config: Record<
   },
   [ChainId.MOONRIVER]: {
     chain: moonriver,
-    transport: http(moonriver.rpcUrls.default.http[0]),
+    transport: http('https://rpc.api.moonriver.moonbeam.network'),
+    // other checked variants -  don't work
+    // transport: http(moonriver.rpcUrls.default.http[0]),
+    // transport: webSocket(moonriver.rpcUrls.default.webSocket[0]),
+    // transport: http('https://moonriver.public.blastapi.io'),
+    // transport: webSocket('https://moonriver.public.blastapi.io'),
+    // transport: http('https://moonriver.api.onfinality.io/public'),
+    // transport: http('https://moonriver.unitedbloc.com:2000'),
   },
   [ChainId.OPTIMISM]: {
     chain: optimism,
@@ -576,12 +587,13 @@ export const config: Record<
   },
   [ChainId.THUNDERCORE]: {
     chain: thundercore,
-    transport: fallback(
-      thundercore.rpcUrls.default.http.map((url) => http(url)),
-      {
-        rank: true,
-      },
-    ),
+    transport: http('https://mainnet-rpc.thundercore.com'),
+    // transport: fallback(
+    //   thundercore.rpcUrls.default.http.map((url) => http(url)),
+    //   {
+    //     rank: true,
+    //   },
+    // ),
   },
   [ChainId.HAQQ]: {
     chain: haqq,
@@ -594,15 +606,17 @@ export const config: Record<
   },
   [ChainId.CORE]: {
     chain: core,
-    transport: fallback(
-      core.rpcUrls.default.http.map((url) => http(url)),
-      {
-        rank: true,
-      },
-    ),
+    transport: http('https://rpc.coredao.org'),
+    // transport: fallback(
+    //   core.rpcUrls.default.http.map((url) => http(url)),
+    //   {
+    //     rank: true,
+    //   },
+    // ),
   },
   [ChainId.TELOS]: {
     chain: telos,
+    // no working RPC found
     transport: fallback(
       [
         http(telos.rpcUrls.default.http[0]),
@@ -611,6 +625,11 @@ export const config: Record<
       ],
       { rank: true },
     ),
+    // transport: http('https://mainnet.telos.net/evm'),
+    // transport: http('https://rpc1.eu.telos.net/evm'),
+    // transport: http('https://rpc1.us.telos.net/evm'),
+    // transport: http('https://api.kainosbp.com/evm'),
+    // transport: http('https://1rpc.io/telos/evm'),
   },
   [ChainId.PALM]: {
     chain: palm,

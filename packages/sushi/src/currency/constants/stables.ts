@@ -167,6 +167,7 @@ export const STABLES = {
     BTTC_TRON_BRIDGE_USDT,
   ],
   [ChainId.CELO]: [USDC[ChainId.CELO], USDT[ChainId.CELO], DAI[ChainId.CELO]],
+  [ChainId.CORE]: [USDC[ChainId.CORE], USDT[ChainId.CORE]],
   [ChainId.ETHEREUM]: [
     USDC[ChainId.ETHEREUM],
     USDT[ChainId.ETHEREUM],

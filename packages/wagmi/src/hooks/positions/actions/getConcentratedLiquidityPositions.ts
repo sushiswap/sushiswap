@@ -101,10 +101,12 @@ export const getConcentratedLiquidityPositions = async ({
     })
     .filter((el): el is NonNullable<typeof el> => el !== undefined)
 
-  const positions = await getConcentratedLiquidityPositionsFromTokenIds({
-    tokenIds,
-  })
-  const fees = await getConcentratedLiquidityPositionFees({ tokenIds })
+  const [positions, fees] = await Promise.all([
+    getConcentratedLiquidityPositionsFromTokenIds({
+      tokenIds,
+    }),
+    getConcentratedLiquidityPositionFees({ tokenIds }),
+  ])
 
   return positions.filter(Boolean).map((el, i) => ({
     ...el,

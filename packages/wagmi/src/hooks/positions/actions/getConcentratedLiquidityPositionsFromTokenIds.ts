@@ -89,7 +89,7 @@ export const getConcentratedLiquidityPositionsFromTokenIds = async ({
 }: {
   tokenIds: { chainId: SushiSwapV3ChainId; tokenId: bigint }[]
 }): Promise<ConcentratedLiquidityPosition[]> => {
-  const results = await readContracts({
+  const resultsP = readContracts({
     contracts: tokenIds.map((el) => ({
       address: getV3NonFungiblePositionManagerConractConfig(el.chainId)
         .address as Address,
@@ -100,7 +100,9 @@ export const getConcentratedLiquidityPositionsFromTokenIds = async ({
     })),
   }).then((results) => results.map((el) => el.result))
 
-  const fees = await getConcentratedLiquidityPositionFees({ tokenIds })
+  const feesP = getConcentratedLiquidityPositionFees({ tokenIds })
+
+  const [results, fees] = await Promise.all([resultsP, feesP])
 
   return results
     .map((result, i) => {

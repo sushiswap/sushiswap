@@ -87,7 +87,7 @@ const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
     // This handles the case where some params might not be provided by the user
     const defaultedParams = useMemo(() => {
       const params = new URLSearchParams(searchParams)
-      if (!params.has('chainId'))
+      if (!params.has('chainId') || !params.get('chainId'))
         params.set(
           'chainId',
           (chain?.id && isSupportedChainId(chain.id)

@@ -21,6 +21,7 @@ import { formatPercent, formatUSD } from 'sushi/format'
 
 import { SteerStrategyComponent } from '.'
 import { APRHoverCard } from '../../APRHoverCard'
+import FormattedPrice from '../../FormattedPrice'
 import { SteerAPRChart } from '../SteerAPRChart'
 import { SteerLiquidityInRangeChip } from '../SteerLiquidityDistributionWidget/SteerLiquidityInRangeChip'
 import {
@@ -37,7 +38,7 @@ export const SteerBaseStrategy: SteerStrategyComponent = ({
   generic: { priceExtremes, tokenRatios, adjustment, positions },
 }) => {
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className="grid gap-4 md:grid-cols-2">
       <div>
         <Card>
           <CardHeader>
@@ -210,11 +211,17 @@ export const SteerBaseStrategy: SteerStrategyComponent = ({
           <div className="grid grid-cols-2">
             <Stat className="p-6">
               <StatLabel size="sm">Minimum price</StatLabel>
-              <StatValue size="sm">{priceExtremes.min} ETH/DAI</StatValue>
+              <StatValue size="sm">
+                <FormattedPrice number={priceExtremes.min} />{' '}
+                {vault.token0.symbol}/{vault.token1.symbol}
+              </StatValue>
             </Stat>
             <Stat className="p-6">
               <StatLabel size="sm">Maximum price</StatLabel>
-              <StatValue size="sm">{priceExtremes.max} ETH/DAI</StatValue>
+              <StatValue size="sm">
+                <FormattedPrice number={priceExtremes.max} />{' '}
+                {vault.token0.symbol}/{vault.token1.symbol}
+              </StatValue>
             </Stat>
           </div>
         </Card>

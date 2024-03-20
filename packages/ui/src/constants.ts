@@ -17,4 +17,5 @@ export const APP_TYPE_LINKS = {
   [AppType.Partner]: '/partner',
   [AppType.Widget]: '/widget',
   [AppType.Academy]: '/academy',
+  [AppType.Governance_dashboard]: '/governance-dashboard',
 }

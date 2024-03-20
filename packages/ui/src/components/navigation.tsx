@@ -79,6 +79,11 @@ const TOOLS_NAVIGATION_LINKS: {
   description: string
 }[] = [
   {
+    title: 'Governance Dashboard',
+    href: '/governance-dashboard',
+    description: 'Managing DAO with transparency',
+  },
+  {
     title: 'Analytics',
     href: '/analytics',
     description: 'Find the best opportunities',

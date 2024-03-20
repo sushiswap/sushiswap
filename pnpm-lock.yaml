@@ -1137,8 +1137,6 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  packages/database2/generated: {}
-
   packages/dexie:
     dependencies:
       dexie:

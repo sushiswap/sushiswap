@@ -83,7 +83,7 @@ export const useToken = <T extends boolean = false>({
 
       // Fallback to api
       const resp = await fetch(
-        `https://tokens.sushi.com/v0/${chainId}/${address}`,
+        `https://tokens.sushi.com/v2/${chainId}/${address}`,
       )
       if (resp.status === 200) {
         const { address, name, symbol, decimals, status, id }: Data =
@@ -107,7 +107,7 @@ export const useToken = <T extends boolean = false>({
         return { address, name, symbol, decimals, status, id }
       } else {
         throw Error(
-          `https://tokens.sushi.com/v0/${chainId}/${address}: Token not found`,
+          `https://tokens.sushi.com/v2/${chainId}/${address}: Token not found`,
         )
       }
     },

@@ -132,7 +132,7 @@ test.beforeEach(async ({ page, next }) => {
   }
 
   try {
-    await page.route('https://tokens.sushi.com/v0', async (route) => {
+    await page.route('https://tokens.sushi.com/v2', async (route) => {
       // const response = await route.fetch()
       // const json = await response.json()
       await route.fulfill({

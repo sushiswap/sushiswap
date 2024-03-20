@@ -39,7 +39,7 @@ export async function GET(
   const { chainId, address } = querySchema.parse(params)
 
   const data = await (
-    await fetch(`https://tokens.sushi.com/v0/${chainId}/addresses`, {
+    await fetch(`https://tokens.sushi.com/v2/${chainId}/addresses`, {
       next: { revalidate: 3600 },
     })
   ).json()

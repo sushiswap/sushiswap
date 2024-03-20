@@ -8,9 +8,9 @@ import { tokenListValidator } from './validator'
 
 export const useTokenListQuery = (select: UseTokenListQuerySelect) =>
   useQuery({
-    queryKey: ['https://tokens.sushi.com/v0'],
+    queryKey: ['https://tokens.sushi.com/v2'],
     queryFn: async () => {
-      const res = await (await fetch('https://tokens.sushi.com/v0')).json()
+      const res = await (await fetch('https://tokens.sushi.com/v2')).json()
       return tokenListValidator.parse(res)
     },
     select,

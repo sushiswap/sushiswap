@@ -40,7 +40,7 @@ test.beforeEach(async ({ page, next }) => {
     await route.abort()
   })
 
-  await page.route('https://tokens.sushi.com/v0', async (route) => {
+  await page.route('https://tokens.sushi.com/v2', async (route) => {
     await route.fulfill({
       json: [wnative, usdc, usdt, wbtc].map((token) => ({
         id: token.id,

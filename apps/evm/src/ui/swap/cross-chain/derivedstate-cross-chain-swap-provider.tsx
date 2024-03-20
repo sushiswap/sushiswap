@@ -1,12 +1,7 @@
 'use client'
 
 import { useSlippageTolerance } from '@sushiswap/hooks'
-import {
-  useAccount,
-  useNetwork,
-  useTokenWithCache,
-  watchNetwork,
-} from '@sushiswap/wagmi'
+import { useAccount, useNetwork, useTokenWithCache } from '@sushiswap/wagmi'
 import { nanoid } from 'nanoid'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -16,7 +11,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -267,19 +261,6 @@ const DerivedstateCrossChainSwapProvider: FC<
     enabled: isAddress(defaultedParams.get('token1') as string),
     keepPreviousData: false,
   })
-
-  useEffect(() => {
-    const unwatch = watchNetwork(({ chain }) => {
-      if (
-        !chain ||
-        chain.id === chainId0 ||
-        !isSushiXSwap2ChainId(chain.id as ChainId)
-      )
-        return
-      push(pathname, { scroll: false })
-    })
-    return () => unwatch()
-  }, [chainId0, pathname, push])
 
   return (
     <DerivedStateCrossChainSwapContext.Provider

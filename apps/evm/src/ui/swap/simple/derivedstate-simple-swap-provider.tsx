@@ -87,7 +87,7 @@ const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
     // This handles the case where some params might not be provided by the user
     const defaultedParams = useMemo(() => {
       const params = new URLSearchParams(searchParams)
-      if (!params.has('chainId'))
+      if (!params.has('chainId') || !params.get('chainId'))
         params.set(
           'chainId',
           (chain?.id && isSupportedChainId(chain.id)
@@ -250,14 +250,6 @@ const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
       ChainId,
       TestnetChainId
     >
-
-    useEffect(() => {
-      const unwatch = watchNetwork(({ chain }) => {
-        if (!chain || chain.id === chainId) return
-        push(pathname, { scroll: false })
-      })
-      return () => unwatch()
-    }, [chainId, pathname, push])
 
     // Derive token0
     const { data: token0, isInitialLoading: token0Loading } = useTokenWithCache(

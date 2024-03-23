@@ -10,6 +10,7 @@
   ],
   "rewrites": [
     { "source": "/", "destination": "/api" },
-    { "source": "/chainlink", "destination": "/api/chainlink" }
+    { "source": "/chainlink", "destination": "/api/chainlink" },
+    { "source": "/legacy", "destination": "/api/legacy" }
   ]
 }

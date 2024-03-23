@@ -27,9 +27,9 @@ export const useBalancesQuery = (
   select: UseBalancesQuerySelect,
 ) => {
   return useQuery({
-    queryKey: [`/api/balance/v0/${chainId}/${account}`],
+    queryKey: [`/api/balance/v2/${chainId}/${account}`],
     queryFn: () => {
-      return fetch(`/api/balance/v0/${chainId}/${account}`).then((response) =>
+      return fetch(`/api/balance/v2/${chainId}/${account}`).then((response) =>
         response.json(),
       )
     },

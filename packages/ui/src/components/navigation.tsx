@@ -119,7 +119,7 @@ const PARTNER_NAVIGATION_LINKS: {
   },
   {
     title: 'List enquiry',
-    href: '/tokenlist-request',
+    href: 'https://docs.google.com/forms/d/e/1FAIpQLSeQExSIbcoRBIwaEECgJiBhe4qBB-yBvAypNm3EXugPWaSQnA/viewform',
     description: 'Get your token on our default token list.',
   },
 ]

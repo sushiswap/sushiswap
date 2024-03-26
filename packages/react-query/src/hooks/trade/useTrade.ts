@@ -15,7 +15,6 @@ import {
   WNATIVE_ADDRESS,
 } from 'sushi/currency'
 import { Percent, ZERO } from 'sushi/math'
-import { RouterLiquiditySource } from 'sushi/router'
 import { type Address, type Hex, stringify } from 'viem'
 import { usePrice } from '../prices'
 import { apiAdapter02To01 } from './apiAdapter'
@@ -31,13 +30,8 @@ const API_BASE_URL =
   process.env['NEXT_PUBLIC_API_BASE_URL'] ||
   'https://staging.sushi.com/swap'
 
-function getApiVersion(
-  chainId: ChainId,
-  source: RouterLiquiditySource = RouterLiquiditySource.Sender,
-) {
-  if (source === RouterLiquiditySource.XSwap) {
-    return '/v3.2'
-  } else if (isRouteProcessor4ChainId(chainId)) {
+function getApiVersion(chainId: ChainId) {
+  if (isRouteProcessor4ChainId(chainId)) {
     return '/v4'
   } else if (isRouteProcessor3_2ChainId(chainId)) {
     return '/v3.2'
@@ -78,7 +72,7 @@ export const useTradeQuery = (
     ],
     queryFn: async () => {
       const params = new URL(
-        `${API_BASE_URL}/swap${getApiVersion(chainId, source)}/${chainId}`,
+        `${API_BASE_URL}/swap${getApiVersion(chainId)}/${chainId}`,
       )
       // params.searchParams.set('chainId', `${chainId}`)
       params.searchParams.set(

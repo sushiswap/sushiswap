@@ -19,12 +19,11 @@ import {
 import { Button } from '@sushiswap/ui/components/button'
 import { Currency } from '@sushiswap/ui/components/currency'
 import { List } from '@sushiswap/ui/components/list/List'
-import { Address } from '@sushiswap/wagmi'
 import { Checker } from '@sushiswap/wagmi/systems/Checker'
 import React, { FC, ReactNode, useMemo } from 'react'
 import { Chain } from 'sushi/chain'
 import { formatNumber } from 'sushi/format'
-
+import { Address } from 'viem'
 import { ConcentratedLiquidityHarvestButton } from './ConcentratedLiquidityHarvestButton'
 
 interface RewardSlide {

@@ -40,6 +40,7 @@ export function useUserPositions(args: GetUserArgs, shouldFetch = true) {
     [positions],
   )
   const pools = useGraphPools(_positions)
+
   const isValidating =
     !positions || !pools || (positions.length > 0 && pools.length === 0)
 

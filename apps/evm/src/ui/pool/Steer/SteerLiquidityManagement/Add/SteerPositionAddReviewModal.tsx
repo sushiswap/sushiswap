@@ -20,27 +20,30 @@ import { Button } from '@sushiswap/ui/components/button'
 import { Dots } from '@sushiswap/ui/components/dots'
 import { List } from '@sushiswap/ui/components/list/List'
 import {
-  SendTransactionResult,
+  UseSimulateContractParameters,
   useAccount,
-  useNetwork,
-  usePrepareSendTransaction,
-  useSendTransaction,
+  useEstimateGas,
+  usePublicClient,
+  useSimulateContract,
   useSteerAccountPosition,
-  useWaitForTransaction,
-  waitForTransaction,
+  useWaitForTransactionReceipt,
+  useWriteContract,
 } from '@sushiswap/wagmi'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
 import { useApproved } from '@sushiswap/wagmi/systems/Checker/Provider'
 import React, { FC, ReactNode, useCallback, useMemo } from 'react'
 import { Chain, ChainId } from 'sushi/chain'
 import { Amount } from 'sushi/currency'
 import { formatUSD } from 'sushi/format'
 import { Percent } from 'sushi/math'
-import { Address, UserRejectedRequestError, encodeFunctionData } from 'viem'
+import {
+  Address,
+  SendTransactionReturnType,
+  UserRejectedRequestError,
+} from 'viem'
 
 import { useSlippageTolerance } from '@sushiswap/hooks'
 import { APPROVE_TAG_STEER } from 'src/lib/constants'
-import { slippageAmount } from 'sushi'
+import { gasMargin, slippageAmount } from 'sushi'
 import { useTokenAmountDollarValues } from '../../../../../lib/hooks'
 import { SteerStrategyConfig } from '../../constants'
 import { useSteerPositionAddDerivedInfo } from './SteerPositionAddProvider'
@@ -53,14 +56,14 @@ interface SteerPositionAddReviewModalProps {
 }
 
 export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
-  ({ vault, onSuccess, successLink, children }) => {
+  ({ vault, onSuccess: _onSuccess, successLink, children }) => {
     const { chainId } = vault as { chainId: ChainId }
     const { currencies, parsedAmounts } = useSteerPositionAddDerivedInfo({
       vault,
     })
 
-    const { chain } = useNetwork()
-    const { address } = useAccount()
+    const client = usePublicClient()
+    const { address, chain } = useAccount()
     const [slippageTolerance] = useSlippageTolerance('addSteerLiquidity')
     const { approved } = useApproved(APPROVE_TAG_STEER)
 
@@ -118,20 +121,19 @@ export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
       )
     }, [slippageTolerance])
 
-    const onSettled = useCallback(
-      (data: SendTransactionResult | undefined, error: Error | null) => {
-        if (error instanceof UserRejectedRequestError) {
-          createErrorToast(error?.message, true)
-        }
-        if (!data || !currencies) return
+    const onSuccess = useCallback(
+      (hash: SendTransactionReturnType) => {
+        _onSuccess()
+
+        if (!currencies) return
 
         const ts = new Date().getTime()
         void createToast({
           account: address,
           type: 'mint',
           chainId: chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
+          txHash: hash,
+          promise: client.waitForTransactionReceipt({ hash }),
           summary: {
             pending: `Adding liquidity to the ${currencies.CURRENCY_A?.symbol}/${currencies.CURRENCY_B?.symbol} smart pool`,
             completed: `Successfully added liquidity to the ${currencies.CURRENCY_A?.symbol}/${currencies.CURRENCY_B?.symbol} smart pool`,
@@ -141,28 +143,33 @@ export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
           groupTimestamp: ts,
         })
       },
-      [currencies, address, chainId],
+      [client, currencies, address, chainId, _onSuccess],
     )
 
-    const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
+    const onError = useCallback((e: Error) => {
+      if (e instanceof UserRejectedRequestError) {
+        createErrorToast(e?.message, true)
+      }
+    }, [])
+
+    const prepare = useMemo(() => {
       if (!address || !currencies || !parsedAmounts || !isSteerChainId(chainId))
-        return {}
+        return undefined
 
       return {
-        to: STEER_PERIPHERY_ADDRESS[chainId],
-        data: encodeFunctionData({
-          abi: steerPeripheryAbi,
-          functionName: 'deposit',
-          args: [
-            vault.address as Address,
-            parsedAmounts.CURRENCY_A.quotient,
-            parsedAmounts.CURRENCY_B.quotient,
-            slippageAmount(parsedAmounts.CURRENCY_A, slippagePercent)[0],
-            slippageAmount(parsedAmounts.CURRENCY_B, slippagePercent)[0],
-            address,
-          ],
-        }),
-      }
+        address: STEER_PERIPHERY_ADDRESS[chainId],
+        abi: steerPeripheryAbi,
+        chainId,
+        functionName: 'deposit',
+        args: [
+          vault.address as Address,
+          parsedAmounts.CURRENCY_A.quotient,
+          parsedAmounts.CURRENCY_B.quotient,
+          slippageAmount(parsedAmounts.CURRENCY_A, slippagePercent)[0],
+          slippageAmount(parsedAmounts.CURRENCY_B, slippagePercent)[0],
+          address,
+        ],
+      } satisfies UseSimulateContractParameters
     }, [
       address,
       chainId,
@@ -172,27 +179,51 @@ export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
       vault.address,
     ])
 
-    const { config, isError } = usePrepareSendTransaction({
+    const { data: simulation, isError } = useSimulateContract({
       ...prepare,
-      chainId: chainId,
-      enabled: Boolean(approved && chainId === chain?.id),
+      query: {
+        enabled: Boolean(approved && chainId === chain?.id),
+      },
     })
+
+    const { data: estimatedGas } = useEstimateGas({
+      ...prepare,
+      query: {
+        enabled: Boolean(approved && chainId === chain?.id),
+      },
+    })
+
+    const adjustedGas = estimatedGas ? gasMargin(estimatedGas) : undefined
 
     const {
-      sendTransactionAsync,
+      writeContractAsync,
       isLoading: isWritePending,
-      data,
-    } = useSendTransaction({
-      ...config,
-      gas: config?.gas ? (config.gas * 120n) / 100n : undefined,
-      chainId: chainId,
-      onSettled,
-      onSuccess,
+      data: hash,
+    } = useWriteContract({
+      mutation: {
+        onSuccess,
+        onError,
+      },
     })
 
-    const { status } = useWaitForTransaction({
+    const write = useMemo(() => {
+      if (!simulation || !adjustedGas) return undefined
+
+      return async (confirm: () => void) => {
+        try {
+          await writeContractAsync({
+            ...simulation.request,
+            gas: adjustedGas,
+          })
+
+          confirm()
+        } catch {}
+      }
+    }, [writeContractAsync, simulation, adjustedGas])
+
+    const { status } = useWaitForTransactionReceipt({
       chainId: chainId,
-      hash: data?.hash,
+      hash,
     })
 
     return (
@@ -270,10 +301,8 @@ export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
                   <Button
                     size="xl"
                     fullWidth
-                    loading={!sendTransactionAsync || isWritePending}
-                    onClick={() =>
-                      sendTransactionAsync?.().then(() => confirm())
-                    }
+                    loading={!write || isWritePending}
+                    onClick={() => write?.(confirm)}
                     testId="confirm-add-liquidity"
                     type="button"
                   >
@@ -295,7 +324,7 @@ export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
           status={status}
           testId="add-concentrated-liquidity-confirmation-modal"
           successMessage={`You successfully added liquidity to the ${vault.token0.symbol}/${vault.token1.symbol} pair`}
-          txHash={data?.hash}
+          txHash={hash}
           buttonLink={successLink}
           buttonText="View your position"
         />

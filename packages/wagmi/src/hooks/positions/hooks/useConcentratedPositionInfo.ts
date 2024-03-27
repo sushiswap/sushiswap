@@ -4,6 +4,7 @@ import { Type } from 'sushi/currency'
 import { Position } from 'sushi/pool'
 import { stringify } from 'viem'
 
+import { useConfig } from 'wagmi'
 import { getConcentratedLiquidityPool } from '../../pools'
 import { useConcentratedLiquidityPositionsFromTokenId } from './useConcentratedPositionsFromTokenId'
 
@@ -28,6 +29,8 @@ export const useConcentratedPositionInfo = ({
       tokenId,
     })
 
+  const config = useConfig()
+
   return useQuery({
     queryKey: [
       'useConcentratedPositionInfo',
@@ -39,6 +42,7 @@ export const useConcentratedPositionInfo = ({
         token0,
         token1,
         feeAmount: positionDetails?.fee,
+        config,
       })
 
       let position = null

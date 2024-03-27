@@ -1,10 +1,6 @@
 'use client'
 
-import {
-  Address,
-  useAccount,
-  useConcentratedLiquidityPositions,
-} from '@sushiswap/wagmi'
+import { useAccount, useConcentratedLiquidityPositions } from '@sushiswap/wagmi'
 import { useMemo } from 'react'
 import { ChainId } from 'sushi/chain'
 import {
@@ -13,6 +9,7 @@ import {
 } from 'sushi/config'
 import { Writeable } from 'zod'
 
+import { Address } from 'viem'
 import { usePoolFilters } from '../../../PoolsFiltersProvider'
 
 interface UseManualPositions {

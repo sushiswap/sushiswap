@@ -15,14 +15,14 @@ import {
 import { ResolvedNotification } from '@sushiswap/dexie'
 import { classNames } from '@sushiswap/ui'
 import { Currency as UICurrency } from '@sushiswap/ui/components/currency'
-import { NetworkIcon } from '@sushiswap/ui/components/icons'
+import { NetworkIcon, SquidIcon } from '@sushiswap/ui/components/icons'
 import { LinkExternal } from '@sushiswap/ui/components/link'
 import { Loader } from '@sushiswap/ui/components/loader'
 import { TimeAgo } from '@sushiswap/ui/components/time-ago'
 import React, { FC } from 'react'
 import { Chain, ChainId } from 'sushi/chain'
 import { Token } from 'sushi/currency'
-import { useWaitForTransaction } from 'wagmi'
+import { useWaitForTransactionReceipt } from 'wagmi'
 
 export const STARGATE_TOKEN = new Token({
   chainId: ChainId.ETHEREUM,
@@ -37,7 +37,7 @@ export const Notification: FC<{
   showExtra?: boolean
   hideStatus?: boolean
 }> = ({ data: notification, showExtra = false, hideStatus = false }) => {
-  const { status } = useWaitForTransaction({
+  const { status } = useWaitForTransactionReceipt({
     chainId: notification.chainId,
     hash: notification.txHash as `0x${string}`,
   })
@@ -106,6 +106,9 @@ export const Notification: FC<{
                 width={20}
                 height={20}
               />
+            )}
+            {notification.type === 'squid' && (
+              <SquidIcon width={20} height={20} />
             )}
             {status === 'success' && notification.type === 'send' && (
               <ArrowRightIcon width={20} height={20} />

@@ -1,14 +1,20 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { tridentStablePoolAbi, tridentStablePoolFactoryAbi } from 'sushi/abi'
 import { TridentChainId, isTridentChainId } from 'sushi/config'
 import { BentoBoxChainId } from 'sushi/config'
 import { Amount, Currency, Token, Type } from 'sushi/currency'
 import { Fee } from 'sushi/dex'
 import { TridentStablePool, computeTridentStablePoolAddress } from 'sushi/pool'
-import { Address, useContractReads } from 'wagmi'
+import {
+  UseReadContractsParameters,
+  useBlockNumber,
+  useReadContracts,
+} from 'wagmi'
 
+import { useQueryClient } from '@tanstack/react-query'
+import { Address } from 'viem'
 import { useBentoBoxTotals } from '../../bentobox'
 import { TridentStablePoolState } from '../actions'
 import { useTridentStablePoolFactoryContract } from './useTridentStablePoolFactoryContract'
@@ -33,15 +39,12 @@ interface PoolData {
   token1: Token
 }
 
-type Config = Omit<
-  NonNullable<Parameters<typeof useContractReads>['0']>,
-  'contracts'
->
+type Config = Omit<NonNullable<UseReadContractsParameters>, 'contracts'>
 
 export function useGetTridentStablePools(
-  chainId: BentoBoxChainId | undefined,
+  chainId: TridentChainId | undefined,
   currencies: [Currency | undefined, Currency | undefined][],
-  config: Config = { enabled: true },
+  config: Config = { query: { enabled: true } },
 ): {
   isLoading: boolean
   isError: boolean
@@ -81,11 +84,14 @@ export function useGetTridentStablePools(
     [pairsUnique],
   )
 
+  const queryClient = useQueryClient()
+
   const {
     data: callStatePoolsCount,
     isLoading: callStatePoolsCountLoading,
     isError: callStatePoolsCountError,
-  } = useContractReads({
+    queryKey: callStatePoolsCountQueryKey,
+  } = useReadContracts({
     contracts: pairsUniqueAddr.map((el) => ({
       chainId,
       address: contract?.address as Address,
@@ -93,9 +99,10 @@ export function useGetTridentStablePools(
       functionName: 'poolsCount' as const,
       args: el as [Address, Address],
     })),
-    enabled: Boolean(pairsUniqueAddr.length > 0 && config?.enabled),
-    watch: !config?.enabled,
-    select: (data) => data?.map((r) => r.result),
+    query: {
+      enabled: Boolean(pairsUniqueAddr.length > 0 && config.query?.enabled),
+      select: (data) => data?.map((r) => r.result),
+    },
   })
 
   const callStatePoolsCountProcessed = useMemo(() => {
@@ -124,7 +131,8 @@ export function useGetTridentStablePools(
     data: callStatePools,
     isLoading: callStatePoolsLoading,
     isError: callStatePoolsError,
-  } = useContractReads({
+    queryKey: callStatePoolsQueryKey,
+  } = useReadContracts({
     contracts: useMemo(() => {
       if (!callStatePoolsCountProcessed) return []
       return callStatePoolsCountProcessed.map((args) => ({
@@ -135,13 +143,14 @@ export function useGetTridentStablePools(
         args,
       }))
     }, [callStatePoolsCountProcessed, chainId, contract?.address]),
-    enabled: Boolean(
-      callStatePoolsCountProcessed &&
-        callStatePoolsCountProcessed?.length > 0 &&
-        config?.enabled,
-    ),
-    watch: !config?.enabled,
-    select: (data) => data?.map((r) => r.result),
+    query: {
+      enabled: Boolean(
+        callStatePoolsCountProcessed &&
+          callStatePoolsCountProcessed?.length > 0 &&
+          config.query?.enabled,
+      ),
+      select: (data) => data?.map((r) => r.result),
+    },
   })
 
   const pools = useMemo(() => {
@@ -165,36 +174,64 @@ export function useGetTridentStablePools(
     data: reserves,
     isLoading: reservesLoading,
     isError: reservesError,
-  } = useContractReads({
+    queryKey: reservesQueryKey,
+  } = useReadContracts({
     contracts: poolsAddresses.map((address) => ({
       chainId,
       address: address as Address,
       abi: tridentStablePoolAbi,
       functionName: 'getReserves' as const,
     })),
-    enabled: poolsAddresses.length > 0 && config?.enabled,
-    watch: !config?.enabled,
-    select: (data) =>
-      data?.map((r) =>
-        r.result ? { reserve0: r.result[0], reserve1: r.result[1] } : undefined,
-      ),
+    query: {
+      enabled: poolsAddresses.length > 0 && config.query?.enabled,
+      select: (data) =>
+        data?.map((r) =>
+          r.result
+            ? { reserve0: r.result[0], reserve1: r.result[1] }
+            : undefined,
+        ),
+    },
   })
 
   const {
     data: fees,
     isLoading: feesLoading,
     isError: feesError,
-  } = useContractReads({
+    queryKey: feesQueryKey,
+  } = useReadContracts({
     contracts: poolsAddresses.map((address) => ({
       chainId,
       address: address as Address,
       abi: tridentStablePoolAbi,
       functionName: 'swapFee' as const,
     })),
-    enabled: poolsAddresses.length > 0 && config?.enabled,
-    watch: !config?.enabled,
-    select: (data) => data?.map((r) => r.result),
+    query: {
+      enabled: poolsAddresses.length > 0 && config.query?.enabled,
+      select: (data) => data?.map((r) => r.result),
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({ chainId, watch: true })
+
+  useEffect(() => {
+    if (blockNumber) {
+      ;[
+        callStatePoolsCountQueryKey,
+        callStatePoolsQueryKey,
+        reservesQueryKey,
+        feesQueryKey,
+      ].forEach((key) => {
+        queryClient.invalidateQueries(key, {}, { cancelRefetch: false })
+      })
+    }
+  }, [
+    blockNumber,
+    queryClient,
+    callStatePoolsCountQueryKey,
+    callStatePoolsQueryKey,
+    reservesQueryKey,
+    feesQueryKey,
+  ])
 
   const { data: totals } = useBentoBoxTotals({
     chainId: chainId as BentoBoxChainId,
@@ -254,7 +291,7 @@ export function useGetTridentStablePools(
 }
 
 export function useTridentStablePools(
-  chainId: number,
+  chainId: TridentChainId,
   pools: PoolInput[],
 ): [TridentStablePoolState, TridentStablePool | null][] {
   const stablePoolFactory = useTridentStablePoolFactoryContract(chainId)
@@ -309,19 +346,31 @@ export function useTridentStablePools(
     [stablePoolFactory, input],
   )
 
-  const { data } = useContractReads({
+  const queryClient = useQueryClient()
+
+  const { data, queryKey } = useReadContracts({
     contracts: poolsAddresses.map((address) => ({
       chainId,
       address: address as Address,
       abi: tridentStablePoolAbi,
       functionName: 'getReserves' as const,
     })),
-    enabled:
-      poolsAddresses.length > 0 && isTridentChainId(chainId as TridentChainId),
-    watch: true,
-    keepPreviousData: true,
-    select: (data) => data?.map((r) => r.result),
+    query: {
+      enabled:
+        poolsAddresses.length > 0 &&
+        isTridentChainId(chainId as TridentChainId),
+      keepPreviousData: true,
+      select: (data) => data?.map((r) => r.result),
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({ chainId, watch: true })
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries(queryKey, {}, { cancelRefetch: false })
+    }
+  }, [blockNumber, queryClient, queryKey])
 
   return useMemo(() => {
     if (poolsAddresses.length === 0)
@@ -359,7 +408,7 @@ export function useTridentStablePools(
 }
 
 export function useTridentStablePool(
-  chainId: number,
+  chainId: TridentChainId,
   tokenA: Type | undefined,
   tokenB: Type | undefined,
   fee: Fee,

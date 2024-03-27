@@ -1,8 +1,9 @@
 'use client'
 
-import React, { FC, ReactNode, useEffect } from 'react'
+import { FC, ReactNode, useEffect } from 'react'
 
-import { watchAccount, watchNetwork } from '@wagmi/core'
+import { watchAccount } from '@wagmi/core'
+import { useConfig } from 'wagmi'
 import { useApprovedActions } from './Provider'
 
 interface SuccessProps {
@@ -12,6 +13,7 @@ interface SuccessProps {
 // If this gets mounted it sets checker approved to true
 const Success: FC<SuccessProps> = ({ children, tag }) => {
   const { setApproved } = useApprovedActions(tag)
+  const config = useConfig()
 
   useEffect(() => {
     setApproved(true)
@@ -21,18 +23,16 @@ const Success: FC<SuccessProps> = ({ children, tag }) => {
   }, [setApproved])
 
   useEffect(() => {
-    const unwatchAccountListener = watchAccount(() => {
-      setApproved(true)
-    })
-    const unwatchChainListener = watchNetwork(() => {
-      setApproved(true)
+    const unwatchAccountListener = watchAccount(config, {
+      onChange: () => {
+        setApproved(true)
+      },
     })
 
     return () => {
       unwatchAccountListener()
-      unwatchChainListener()
     }
-  }, [setApproved])
+  }, [setApproved, config])
 
   return <>{children}</>
 }

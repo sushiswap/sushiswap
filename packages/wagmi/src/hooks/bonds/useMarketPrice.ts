@@ -1,5 +1,5 @@
 import { MarketId, getMarketPricesContracts } from '@sushiswap/bonds-sdk'
-import { useContractReads } from 'wagmi'
+import { useReadContracts } from 'wagmi'
 
 interface UseBondMarketPrices {
   marketIds: MarketId[] | undefined
@@ -12,9 +12,9 @@ export const useBondMarketPrices = ({
 }: UseBondMarketPrices) => {
   const marketIds = _marketIds || []
 
-  return useContractReads({
+  return useReadContracts({
     allowFailure: false,
     contracts: getMarketPricesContracts({ marketIds: marketIds }),
-    enabled: Boolean(marketIds && enabled),
+    query: { enabled: Boolean(marketIds && enabled) },
   })
 }

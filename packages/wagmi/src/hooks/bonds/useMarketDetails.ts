@@ -12,12 +12,13 @@ import {
   getTotalSuppliesContracts,
   getVaultsReservesContracts,
 } from '@sushiswap/steer-sdk'
-import { useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
 import { uniswapV2PairAbi } from 'sushi/abi'
 import { Amount, Token } from 'sushi/currency'
 import { Fraction } from 'sushi/math'
 import { Address, getAddress } from 'viem'
-import { useContractReads } from 'wagmi'
+import { useBlockNumber, useReadContracts } from 'wagmi'
 
 interface UseBondMarketDetails {
   bond: Bond
@@ -35,7 +36,7 @@ function useQuoteTokenPriceUSD(bond: Bond, enabled = true) {
     chainId: enabled ? bond.chainId : undefined,
   })
 
-  const { data: poolData } = useContractReads({
+  const { data: poolData } = useReadContracts({
     allowFailure: false,
     contracts: [
       {
@@ -51,22 +52,22 @@ function useQuoteTokenPriceUSD(bond: Bond, enabled = true) {
         address: bond.quoteToken.address,
       },
     ],
-    enabled: Boolean(enabled && bond.quoteToken.pool),
+    query: {
+      enabled: Boolean(enabled && bond.quoteToken.pool),
+    },
   })
 
-  const { data: vaultData } = useContractReads({
+  const vaultContracts = useMemo(() => {
+    return [
+      getVaultsReservesContracts({ vaultIds: [bond.quoteToken.id] })[0],
+      getTotalSuppliesContracts({ vaultIds: [bond.quoteToken.id] })[0],
+    ] as const
+  }, [bond.quoteToken.id])
+
+  const { data: vaultData } = useReadContracts({
     allowFailure: false,
-    contracts: bond.quoteToken.vault
-      ? [
-          getVaultsReservesContracts({
-            vaultIds: [bond.quoteToken.vault.id],
-          })[0],
-          getTotalSuppliesContracts({
-            vaultIds: [bond.quoteToken.vault.id],
-          })[0],
-        ]
-      : undefined,
-    enabled: Boolean(enabled && bond.quoteToken.vault),
+    contracts: vaultContracts,
+    query: { enabled: Boolean(enabled && bond.quoteToken.vault) },
   })
 
   return useMemo(() => {
@@ -156,12 +157,25 @@ export const useBondMarketDetails = ({
     ] as const
   }, [bond.id, bond.chainId])
 
-  const { data } = useContractReads({
+  const queryClient = useQueryClient()
+  const { data, queryKey } = useReadContracts({
     allowFailure: false,
     contracts,
-    enabled: Boolean(enabled),
-    watch: Boolean(enabled),
+    query: {
+      enabled: Boolean(enabled),
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({
+    chainId: bond.chainId,
+    watch: true,
+  })
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries(queryKey, {}, { cancelRefetch: false })
+    }
+  }, [blockNumber, queryClient, queryKey])
 
   const [marketPrice, remainingCapacityBI, marketInfo, maxAmountAcceptedBI] =
     useMemo(() => data || [], [data])

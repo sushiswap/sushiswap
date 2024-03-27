@@ -439,10 +439,11 @@ export const WETH9 = addressMapToTokenMap(
 
 export const WNATIVE = {
   [ChainId.ETHEREUM]: WETH9[ChainId.ETHEREUM],
-  [ChainId.ROPSTEN]: WETH9[ChainId.ROPSTEN],
-  [ChainId.RINKEBY]: WETH9[ChainId.RINKEBY],
-  [ChainId.GÖRLI]: WETH9[ChainId.GÖRLI],
-  [ChainId.KOVAN]: WETH9[ChainId.KOVAN],
+  [ChainId.SEPOLIA]: WETH9[ChainId.SEPOLIA],
+  // [ChainId.ROPSTEN]: WETH9[ChainId.ROPSTEN],
+  // [ChainId.RINKEBY]: WETH9[ChainId.RINKEBY],
+  // [ChainId.GÖRLI]: WETH9[ChainId.GÖRLI],
+  // [ChainId.KOVAN]: WETH9[ChainId.KOVAN],
   [ChainId.OPTIMISM]: WETH9[ChainId.OPTIMISM],
   [ChainId.FANTOM]: new Token({
     chainId: ChainId.FANTOM,
@@ -517,13 +518,13 @@ export const WNATIVE = {
     symbol: 'WHT',
     name: 'Wrapped HT',
   }),
-  [ChainId.HECO_TESTNET]: new Token({
-    chainId: ChainId.HECO_TESTNET,
-    address: WNATIVE_ADDRESS[ChainId.HECO_TESTNET],
-    decimals: 18,
-    symbol: 'WHT',
-    name: 'Wrapped HT',
-  }),
+  // [ChainId.HECO_TESTNET]: new Token({
+  //   chainId: ChainId.HECO_TESTNET,
+  //   address: WNATIVE_ADDRESS[ChainId.HECO_TESTNET],
+  //   decimals: 18,
+  //   symbol: 'WHT',
+  //   name: 'Wrapped HT',
+  // }),
   [ChainId.HARMONY]: new Token({
     chainId: ChainId.HARMONY,
     address: WNATIVE_ADDRESS[ChainId.HARMONY],
@@ -531,13 +532,13 @@ export const WNATIVE = {
     symbol: 'WONE',
     name: 'Wrapped ONE',
   }),
-  [ChainId.HARMONY_TESTNET]: new Token({
-    chainId: ChainId.HARMONY_TESTNET,
-    address: WNATIVE_ADDRESS[ChainId.HARMONY_TESTNET],
-    decimals: 18,
-    symbol: 'WONE',
-    name: 'Wrapped ONE',
-  }),
+  // [ChainId.HARMONY_TESTNET]: new Token({
+  //   chainId: ChainId.HARMONY_TESTNET,
+  //   address: WNATIVE_ADDRESS[ChainId.HARMONY_TESTNET],
+  //   decimals: 18,
+  //   symbol: 'WONE',
+  //   name: 'Wrapped ONE',
+  // }),
   [ChainId.OKEX]: new Token({
     chainId: ChainId.OKEX,
     address: WNATIVE_ADDRESS[ChainId.OKEX],
@@ -545,13 +546,13 @@ export const WNATIVE = {
     symbol: 'WOKT',
     name: 'Wrapped OKExChain',
   }),
-  [ChainId.OKEX_TESTNET]: new Token({
-    chainId: ChainId.OKEX_TESTNET,
-    address: WNATIVE_ADDRESS[ChainId.OKEX_TESTNET],
-    decimals: 18,
-    symbol: 'WOKT',
-    name: 'Wrapped OKExChain',
-  }),
+  // [ChainId.OKEX_TESTNET]: new Token({
+  //   chainId: ChainId.OKEX_TESTNET,
+  //   address: WNATIVE_ADDRESS[ChainId.OKEX_TESTNET],
+  //   decimals: 18,
+  //   symbol: 'WOKT',
+  //   name: 'Wrapped OKExChain',
+  // }),
   [ChainId.CELO]: new Token({
     chainId: ChainId.CELO,
     address: WNATIVE_ADDRESS[ChainId.CELO],

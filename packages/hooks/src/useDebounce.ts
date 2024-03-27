@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 
 // modified from https://usehooks.com/useDebounce/

@@ -5,7 +5,8 @@ import {
   MASTERCHEF_ADDRESS,
   useAccount,
   useBalancesWeb3,
-  useContractReads,
+  useReadContract,
+  useReadContracts,
 } from '@sushiswap/wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { FC, ReactNode, createContext, useContext, useMemo } from 'react'
@@ -76,7 +77,6 @@ const Context = createContext<VotingPowerContext | undefined>(undefined)
 
 export const VotingPowerProvider: FC<{
   children: ReactNode
-  watch?: boolean
 }> = ({ children }) => {
   const { address, isConnected } = useAccount()
 
@@ -119,55 +119,63 @@ export const VotingPowerProvider: FC<{
     data: contractData,
     isLoading: isContractDataLoading,
     isError: isContractDataError,
-  } = useContractReads({
+  } = useReadContracts({
     contracts: useMemo(
-      () => [
-        // sushi.balanceOf(SUSHI-ETH LP)
-        {
-          chainId: ChainId.ETHEREUM,
-          abi: erc20Abi,
-          address: SUSHI_ADDRESS[ChainId.ETHEREUM],
-          functionName: 'balanceOf',
-          args: [SUSHI_ETH_SLP_ADDRESS],
-        },
-        // sushi.balanceOf(XSUSHI)
-        {
-          chainId: ChainId.ETHEREUM,
-          abi: erc20Abi,
-          address: SUSHI_ADDRESS[ChainId.ETHEREUM],
-          functionName: 'balanceOf',
-          args: [XSUSHI_ADDRESS[ChainId.ETHEREUM]],
-        },
-        // SUSHI-ETH-LP.totalSupply()
-        {
-          chainId: ChainId.ETHEREUM,
-          abi: erc20Abi,
-          address: SUSHI_ETH_SLP_ADDRESS,
-          functionName: 'totalSupply',
-        },
-        // xsushi.totalSupply()
-        {
-          chainId: ChainId.ETHEREUM,
-          abi: erc20Abi,
-          address: XSUSHI_ADDRESS[ChainId.ETHEREUM],
-          functionName: 'totalSupply',
-        },
-        // user's staked SUSHI-ETH LP
-        ...(address
-          ? [
-              {
-                chainId: ChainId.ETHEREUM,
-                abi: masterChefV1Abi,
-                address: MASTERCHEF_ADDRESS[ChainId.ETHEREUM],
-                functionName: 'userInfo',
-                args: [12n, address],
-              },
-            ]
-          : []),
-      ],
-      [address],
+      () =>
+        [
+          // sushi.balanceOf(SUSHI-ETH LP)
+          {
+            chainId: ChainId.ETHEREUM,
+            abi: erc20Abi,
+            address: SUSHI_ADDRESS[ChainId.ETHEREUM],
+            functionName: 'balanceOf',
+            args: [SUSHI_ETH_SLP_ADDRESS],
+          },
+          // sushi.balanceOf(XSUSHI)
+          {
+            chainId: ChainId.ETHEREUM,
+            abi: erc20Abi,
+            address: SUSHI_ADDRESS[ChainId.ETHEREUM],
+            functionName: 'balanceOf',
+            args: [XSUSHI_ADDRESS[ChainId.ETHEREUM]],
+          },
+          // SUSHI-ETH-LP.totalSupply()
+          {
+            chainId: ChainId.ETHEREUM,
+            abi: erc20Abi,
+            address: SUSHI_ETH_SLP_ADDRESS,
+            functionName: 'totalSupply',
+          },
+          // xsushi.totalSupply()
+          {
+            chainId: ChainId.ETHEREUM,
+            abi: erc20Abi,
+            address: XSUSHI_ADDRESS[ChainId.ETHEREUM],
+            functionName: 'totalSupply',
+          },
+        ] as const,
+      [],
     ),
-    staleTime: 300000,
+    query: {
+      staleTime: 300000,
+    },
+  })
+
+  // Users' staked Sushi-ETH SLP
+  const {
+    data: userStakedSLP,
+    isInitialLoading: isUserStakedSLPLoading,
+    isError: isUserStakedSLPError,
+  } = useReadContract({
+    chainId: ChainId.ETHEREUM,
+    abi: masterChefV1Abi,
+    address: MASTERCHEF_ADDRESS[ChainId.ETHEREUM],
+    functionName: 'userInfo',
+    args: [12n, address!],
+    query: {
+      enabled: Boolean(address),
+      staleTime: 30000,
+    },
   })
 
   const weights = useMemo(() => {
@@ -204,13 +212,11 @@ export const VotingPowerProvider: FC<{
   const balances = useMemo(() => {
     if (
       !ethereumBalances ||
-      !votingPowerData?.vp_by_strategy?.length ||
-      !contractData?.[4]?.result
+      !votingPowerData?.vp_by_strategy?.[1] ||
+      !userStakedSLP
     ) {
       return undefined
     }
-
-    const userStakedSLP = contractData[4].result as [bigint, bigint]
 
     return {
       xsushi: ethereumBalances[XSUSHI_ADDRESS[ChainId.ETHEREUM]],
@@ -228,7 +234,7 @@ export const VotingPowerProvider: FC<{
         }),
       ) as Amount<Type>,
     }
-  }, [contractData, ethereumBalances, votingPowerData])
+  }, [ethereumBalances, userStakedSLP, votingPowerData?.vp_by_strategy])
 
   return (
     <Context.Provider
@@ -239,17 +245,26 @@ export const VotingPowerProvider: FC<{
           weights,
           isConnected,
           isLoading:
-            isVotingPowerLoading || isBalancesLoading || isContractDataLoading,
-          isError: isVotingPowerError || isBalancesError || isContractDataError,
+            isVotingPowerLoading ||
+            isBalancesLoading ||
+            isContractDataLoading ||
+            isUserStakedSLPLoading,
+          isError:
+            isVotingPowerError ||
+            isBalancesError ||
+            isContractDataError ||
+            isUserStakedSLPError,
         }),
         [
-          votingPowerData,
+          votingPowerData?.vp,
           balances,
           weights,
           isConnected,
           isVotingPowerLoading,
           isBalancesLoading,
           isContractDataLoading,
+          isUserStakedSLPLoading,
+          isUserStakedSLPError,
           isVotingPowerError,
           isBalancesError,
           isContractDataError,

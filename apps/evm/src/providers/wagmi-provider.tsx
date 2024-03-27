@@ -1,18 +1,17 @@
-import {
-  WagmiConfig as _WagmiConfig,
-  createProductionConfig,
-  createTestConfig,
-} from '@sushiswap/wagmi'
+import { WagmiProvider } from '@sushiswap/wagmi'
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
 import { type FC, type ReactNode, useMemo } from 'react'
+import { createProductionConfig, createTestConfig } from 'src/lib/wagmi'
 
 const isTest = process.env.NEXT_PUBLIC_APP_ENV === 'test'
 
-// const config = !isTest ? createProductionConfig() : createTestConfig()
-
 export const WagmiConfig: FC<{ children: ReactNode }> = ({ children }) => {
-  const config = useMemo(
-    () => (!isTest ? createProductionConfig() : createTestConfig()),
-    [],
-  )
-  return <_WagmiConfig config={config}>{children}</_WagmiConfig>
+  const config = useMemo(() => {
+    if (isTest) {
+      return createTestConfig() as unknown as PublicWagmiConfig
+    }
+    return createProductionConfig()
+  }, [])
+
+  return <WagmiProvider config={config}>{children}</WagmiProvider>
 }

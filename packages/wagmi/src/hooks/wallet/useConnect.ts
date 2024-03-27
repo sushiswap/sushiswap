@@ -1,19 +1,23 @@
 'use client'
 
 import { useLocalStorage } from '@sushiswap/hooks'
+import { useCallback, useState } from 'react'
+import { Address } from 'viem'
 import {
   useConnect as useWagmiConnect,
   useDisconnect as useWagmiDisconnect,
 } from 'wagmi'
 
-export const useConnect: typeof useWagmiConnect = (props) => {
+export const useConnect = (props?: Parameters<typeof useWagmiConnect>[0]) => {
   const [_, setSanctionedAddress] = useLocalStorage('sanctionedAddress', false)
 
-  const { disconnect } = useWagmiDisconnect()
+  const [pending, setPending] = useState(false)
 
-  return useWagmiConnect({
-    ...props,
-    onSuccess: async (data) => {
+  const { disconnect } = useWagmiDisconnect()
+  const { connectAsync, ...rest } = useWagmiConnect(props)
+
+  const onSuccess = useCallback(
+    async (account: Address) => {
       if (process.env.NODE_ENV !== 'production') return
 
       const resp = await fetch(
@@ -24,7 +28,7 @@ export const useConnect: typeof useWagmiConnect = (props) => {
             'Content-Type': 'application/json',
             // Authorization: 'Basic ' + Buffer.from('<username>:<password>').toString('base64')
           },
-          body: JSON.stringify([{ address: data.account }]),
+          body: JSON.stringify([{ address: account }]),
         },
       )
         .then((response) => response.json())
@@ -42,5 +46,29 @@ export const useConnect: typeof useWagmiConnect = (props) => {
         disconnect()
       }
     },
-  })
+    [setSanctionedAddress, disconnect],
+  )
+
+  const _connectAsync = async (...args: Parameters<typeof connectAsync>) => {
+    let result
+
+    try {
+      setPending(true)
+      result = await connectAsync(...args)
+      await onSuccess(result.accounts[0])
+      return result
+    } catch (e) {
+      console.error(e)
+      throw e
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return {
+    ...rest,
+    connect: connectAsync,
+    connectAsync: _connectAsync,
+    pending,
+  }
 }

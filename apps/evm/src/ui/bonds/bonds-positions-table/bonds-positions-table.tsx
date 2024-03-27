@@ -13,7 +13,6 @@ import { useAccount } from '@sushiswap/wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { ColumnDef, PaginationState, SortingState } from '@tanstack/react-table'
 import React, { FC, useMemo, useState } from 'react'
-import { Address } from 'wagmi'
 import {
   CLAIM_COLUMN,
   MATURITY_COLUMN,
@@ -42,21 +41,22 @@ export const BondsPositionsTable: FC<PositionsTableProps> = ({
   const isMounted = useIsMounted()
   const { address } = useAccount()
 
-  const args = useMemo<GetBondsPositionsArgs>(
-    () => ({
-      userAddress: address as Address,
+  const args = useMemo<GetBondsPositionsArgs>(() => {
+    if (!address) return undefined
+
+    return {
+      userAddress: address,
       chainIds,
       onlyUnclaimedBonds,
       payoutTokenId,
-    }),
-    [address, chainIds, onlyUnclaimedBonds, payoutTokenId],
-  )
+    }
+  }, [address, chainIds, onlyUnclaimedBonds, payoutTokenId])
 
   const { data = [], isInitialLoading } = useQuery({
     queryKey: [getBondsPositionsUrl(args)],
     queryFn: () => getBondsPositions(args),
     refetchInterval: 15 * 1000,
-    enabled: Boolean(address),
+    enabled: Boolean(args),
   })
 
   const [sortingState, setSortingState] = useState<SortingState>([

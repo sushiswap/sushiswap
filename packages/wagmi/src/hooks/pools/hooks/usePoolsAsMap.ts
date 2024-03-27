@@ -18,6 +18,7 @@ import {
   computeTridentStablePoolAddress,
 } from 'sushi/pool'
 
+import { useConfig } from 'wagmi'
 import { getAllPools } from '../actions'
 import { PoolType, UsePoolsParams } from '../types'
 
@@ -75,6 +76,8 @@ export const usePoolsAsMap = ({
 }: UsePoolsAsMapParams) => {
   const { chainId, currencyA, currencyB } = variables
 
+  const config = useConfig()
+
   return useQuery({
     queryKey: ['usePoolsAsMap', { chainId, currencyA, currencyB }],
     queryFn: async () => {
@@ -83,6 +86,7 @@ export const usePoolsAsMap = ({
         asMap: true,
         withCombinations: false,
         withBentoPools: false,
+        config,
       })
       const pools = [
         ...(data.sushiSwapV2Pools || []),

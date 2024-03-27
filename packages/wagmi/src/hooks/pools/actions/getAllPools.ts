@@ -35,6 +35,7 @@ const queryFn = async ({
   tradeType = TradeType.EXACT_INPUT,
   withBentoPools = false,
   withCombinations = true,
+  config,
 }: UsePoolsParams) => {
   const [currencyIn, currencyOut] =
     tradeType === TradeType.EXACT_INPUT
@@ -59,25 +60,30 @@ const queryFn = async ({
 
   const _tokensUnique = tokensUnique(pairsUnique(currencyCombinations))
   const totalsMap = isBentoBoxChainId(chainId)
-    ? await getBentoboxTotalsMap(chainId, _tokensUnique)
+    ? await getBentoboxTotalsMap(chainId, _tokensUnique, config)
     : null
 
   const [pairs, constantProductPools, stablePools, bridgeBentoPools, v3Pools] =
     await Promise.all([
       isSushiSwapV2ChainId(chainId)
-        ? getSushiSwapV2Pools(chainId, currencyCombinations)
+        ? getSushiSwapV2Pools(chainId, currencyCombinations, config)
         : Promise.resolve([]),
       isTridentChainId(chainId) && isBentoBoxChainId(chainId)
-        ? getTridentConstantPools(chainId, currencyCombinations)
+        ? getTridentConstantPools(chainId, currencyCombinations, config)
         : Promise.resolve([]),
       isTridentChainId(chainId) && isBentoBoxChainId(chainId) && totalsMap
-        ? getTridentStablePools(chainId, currencyCombinations, totalsMap)
+        ? getTridentStablePools(
+            chainId,
+            currencyCombinations,
+            totalsMap,
+            config,
+          )
         : Promise.resolve([]),
       isBentoBoxChainId(chainId) && withBentoPools && totalsMap
-        ? getBridgeBentoPools(chainId, _tokensUnique, totalsMap)
+        ? getBridgeBentoPools(chainId, _tokensUnique, totalsMap, config)
         : Promise.resolve([]),
       isSushiSwapV3ChainId(chainId)
-        ? getV3Pools(chainId, currencyCombinations)
+        ? getV3Pools(chainId, currencyCombinations, config)
         : Promise.resolve([]),
     ])
   // const filteredCurrencyCombinations = currencyCombinations.filter(([a, b]) =>  a === currencyA || b === currencyA || a === currencyB || b === currencyB)

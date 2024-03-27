@@ -31,17 +31,13 @@ import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import {
   ConcentratedLiquidityPosition,
   getV3NonFungiblePositionManagerContractConfig,
-  useNetwork,
-  usePrepareSendTransaction,
+  useAccount,
+  useCall,
+  usePublicClient,
   useSendTransaction,
   useTransactionDeadline,
-  useWaitForTransaction,
+  useWaitForTransactionReceipt,
 } from '@sushiswap/wagmi'
-import {
-  SendTransactionResult,
-  waitForTransaction,
-} from '@sushiswap/wagmi/actions'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
 import { Checker } from '@sushiswap/wagmi/systems'
 import React, { FC, useCallback, useMemo, useState } from 'react'
 import { unwrapToken } from 'src/lib/functions'
@@ -51,7 +47,7 @@ import { SushiSwapV3ChainId, isSushiSwapV3ChainId } from 'sushi/config'
 import { Amount, Type } from 'sushi/currency'
 import { Percent, ZERO } from 'sushi/math'
 import { NonfungiblePositionManager, Position } from 'sushi/pool'
-import { Hex, UserRejectedRequestError } from 'viem'
+import { Hex, SendTransactionReturnType, UserRejectedRequestError } from 'viem'
 import { useTokenAmountDollarValues } from '../../lib/hooks'
 
 interface ConcentratedLiquidityRemoveWidget {
@@ -75,7 +71,8 @@ export const ConcentratedLiquidityRemoveWidget: FC<
   position,
   positionDetails,
 }) => {
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
+  const client = usePublicClient()
   const [value, setValue] = useState<string>('0')
   const [slippageTolerance] = useSlippageTolerance('removeLiquidity')
   const { data: deadline } = useTransactionDeadline({ chainId })
@@ -91,20 +88,19 @@ export const ConcentratedLiquidityRemoveWidget: FC<
     [onChange],
   )
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, error: Error | null) => {
-      if (error instanceof UserRejectedRequestError) {
-        createErrorToast(error?.message, true)
-      }
-      if (!data || !position) return
+  const onSuccess = useCallback(
+    (hash: SendTransactionReturnType) => {
+      setValue('0')
+
+      if (!position) return
 
       const ts = new Date().getTime()
       void createToast({
         account,
         type: 'burn',
         chainId,
-        txHash: data.hash,
-        promise: waitForTransaction({ hash: data.hash }),
+        txHash: hash,
+        promise: client.waitForTransactionReceipt({ hash }),
         summary: {
           pending: `Removing liquidity from the ${position.amount0.currency.symbol}/${position.amount1.currency.symbol} pair`,
           completed: `Successfully removed liquidity from the ${position.amount0.currency.symbol}/${position.amount1.currency.symbol} pair`,
@@ -114,8 +110,14 @@ export const ConcentratedLiquidityRemoveWidget: FC<
         groupTimestamp: ts,
       })
     },
-    [position, account, chainId],
+    [client, position, account, chainId],
   )
+
+  const onError = useCallback((e: Error) => {
+    if (e instanceof UserRejectedRequestError) {
+      createErrorToast(e.message, true)
+    }
+  }, [])
 
   const [feeValue0, feeValue1] = useMemo(() => {
     if (positionDetails && token0 && token1) {
@@ -132,7 +134,7 @@ export const ConcentratedLiquidityRemoveWidget: FC<
     return [undefined, undefined]
   }, [positionDetails, token0, token1])
 
-  const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
+  const prepare = useMemo(() => {
     const liquidityPercentage = new Percent(debouncedValue, 100)
     const discountedAmount0 = position
       ? liquidityPercentage.multiply(position.amount0.quotient).quotient
@@ -211,27 +213,40 @@ export const ConcentratedLiquidityRemoveWidget: FC<
     debouncedValue,
   ])
 
-  const { config, isError } = usePrepareSendTransaction({
+  const { isError: isSimulationError } = useCall({
     ...prepare,
     chainId,
-    enabled: +value > 0 && chainId === chain?.id,
+    query: {
+      enabled: +value > 0 && chainId === chain?.id,
+    },
   })
 
   const {
     sendTransactionAsync,
     isLoading: isWritePending,
-    data,
+    data: hash,
   } = useSendTransaction({
-    ...config,
-    onSettled,
-    onSuccess: () => {
-      setValue('0')
+    mutation: {
+      onSuccess,
+      onError,
     },
   })
 
-  const { status } = useWaitForTransaction({
+  const send = useMemo(() => {
+    if (!prepare || isSimulationError) return undefined
+
+    return async (confirm: () => void) => {
+      try {
+        await sendTransactionAsync(prepare)
+
+        confirm()
+      } catch {}
+    }
+  }, [isSimulationError, prepare, sendTransactionAsync])
+
+  const { status } = useWaitForTransactionReceipt({
     chainId: chainId,
-    hash: data?.hash,
+    hash: hash,
   })
 
   const positionClosed = !position || position.liquidity === 0n
@@ -487,13 +502,13 @@ export const ConcentratedLiquidityRemoveWidget: FC<
                 <Button
                   size="xl"
                   fullWidth
-                  loading={!sendTransactionAsync || isWritePending}
-                  onClick={() => sendTransactionAsync?.().then(() => confirm())}
-                  disabled={isError}
+                  loading={!send || isWritePending}
+                  onClick={() => send?.(confirm)}
+                  disabled={isSimulationError}
                   testId="confirm-remove-liquidity"
                   type="button"
                 >
-                  {isError ? (
+                  {isSimulationError ? (
                     'Shoot! Something went wrong :('
                   ) : isWritePending ? (
                     <Dots>Confirm Remove</Dots>
@@ -511,7 +526,7 @@ export const ConcentratedLiquidityRemoveWidget: FC<
         status={status}
         testId="make-another-swap"
         buttonText="Make another swap"
-        txHash={data?.hash}
+        txHash={hash}
         successMessage={`You successfully removed liquidity from your ${position?.amount0.currency.symbol}/${position?.amount1.currency.symbol} position`}
       />
     </DialogProvider>

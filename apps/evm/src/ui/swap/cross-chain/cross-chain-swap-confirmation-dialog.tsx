@@ -1,11 +1,15 @@
-import { Button } from '@sushiswap/ui'
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/20/solid'
+import { Button, SquidIcon, classNames } from '@sushiswap/ui'
 import { Currency } from '@sushiswap/ui/components/currency'
 import { Dots } from '@sushiswap/ui/components/dots'
 import { CheckMarkIcon } from '@sushiswap/ui/components/icons/CheckmarkIcon'
 import { FailedMarkIcon } from '@sushiswap/ui/components/icons/FailedMarkIcon'
 import { Loader } from '@sushiswap/ui/components/loader'
 import { FC, ReactNode } from 'react'
-import { TransactionType } from 'src/lib/swap/useCrossChainTrade/SushiXSwap2'
+import {
+  SushiXSwap2Adapter,
+  TransactionType,
+} from 'src/lib/swap/useCrossChainTrade/SushiXSwap2'
 import { Chain } from 'sushi/chain'
 import { STARGATE_TOKEN } from 'sushi/config'
 import { shortenAddress } from 'sushi/format'
@@ -17,13 +21,15 @@ import {
 interface ConfirmationDialogContent {
   txHash?: string
   dstTxHash?: string
-  lzUrl?: string
+  bridgeUrl?: string
+  adapter?: SushiXSwap2Adapter
   dialogState: { source: StepState; bridge: StepState; dest: StepState }
 }
 
 export const ConfirmationDialogContent: FC<ConfirmationDialogContent> = ({
   txHash,
-  lzUrl,
+  bridgeUrl,
+  adapter,
   dstTxHash,
   dialogState,
 }) => {
@@ -80,17 +86,37 @@ export const ConfirmationDialogContent: FC<ConfirmationDialogContent> = ({
           <a
             target="_blank"
             rel="noreferrer noopener noreferer"
-            href={lzUrl || ''}
+            href={bridgeUrl}
+            className={classNames(
+              !bridgeUrl ? 'cursor-wait' : '',
+              'flex items-center gap-1',
+            )}
           >
             <Dots>to the destination chain</Dots>
+            <ArrowTopRightOnSquareIcon width={16} height={16} />
           </a>
         </Button>{' '}
         <span className="flex items-center gap-1">
           powered by{' '}
-          <div className="min-h-4 min-w-4">
-            <Currency.Icon currency={STARGATE_TOKEN} width={16} height={16} />
-          </div>{' '}
-          Stargate
+          {adapter === SushiXSwap2Adapter.Stargate ? (
+            <>
+              <div className="min-h-4 min-w-4">
+                <Currency.Icon
+                  currency={STARGATE_TOKEN}
+                  width={16}
+                  height={16}
+                />
+              </div>{' '}
+              Stargate
+            </>
+          ) : (
+            <>
+              <div className="min-h-4 min-w-4">
+                <SquidIcon width={16} height={16} />
+              </div>{' '}
+              Squid
+            </>
+          )}
         </span>
       </>
     )

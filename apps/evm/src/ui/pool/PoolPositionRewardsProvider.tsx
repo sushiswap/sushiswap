@@ -95,7 +95,7 @@ export const _PoolPositionRewardsProvider: FC<
     isLoading,
     isError,
   } = useRewarder({
-    chainId: pool.chainId,
+    chainId: pool.chainId as ChainId,
     account,
     rewardTokens,
     farmId,
@@ -106,7 +106,7 @@ export const _PoolPositionRewardsProvider: FC<
   })
 
   const { harvest } = useMasterChef({
-    chainId: pool.chainId,
+    chainId: pool.chainId as ChainId,
     chef: chefType,
     pid: farmId,
     token: liquidityToken,

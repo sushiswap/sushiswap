@@ -1,10 +1,15 @@
 import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
-import { SendTransactionResult, waitForTransaction } from '@wagmi/core'
-import { useCallback } from 'react'
+import { SendTransactionReturnType } from '@wagmi/core'
+import { useCallback, useMemo } from 'react'
 import { SushiSwapV3FeeAmount } from 'sushi/config'
 import { Amount, Token, Type } from 'sushi/currency'
-import { UserRejectedRequestError, encodeFunctionData } from 'viem'
-import { Address, useContractWrite, usePrepareContractWrite } from 'wagmi'
+import { Address, UserRejectedRequestError, encodeFunctionData } from 'viem'
+import {
+  UseSimulateContractParameters,
+  usePublicClient,
+  useSimulateContract,
+  useWriteContract,
+} from 'wagmi'
 
 import { V3Migrator } from '../abis/V3Migrator'
 import { V3MigrateAddress } from '../constants'
@@ -44,154 +49,172 @@ export const useV3Migrate = ({
   chainId,
   enabled = true,
 }: UseV3Migrate) => {
-  const prepare = usePrepareContractWrite(
-    args.noLiquidity
-      ? {
-          ...V3MigrateContractConfig(chainId),
-          chainId,
-          functionName: 'multicall',
-          args:
-            typeof args.tickLower === 'number' &&
-            typeof args.tickUpper === 'number' &&
-            args.liquidityToMigrate &&
-            args.amount0Min &&
-            args.amount1Min &&
-            args.recipient &&
-            args.token0 &&
-            args.token1 &&
-            args.deadline &&
-            args.sqrtPrice
-              ? ([
-                  [
-                    encodeFunctionData({
-                      abi: V3Migrator,
-                      functionName: 'createAndInitializePoolIfNecessary',
-                      args: [
-                        args.token0.address as Address,
-                        args.token1.address as Address,
-                        args.fee,
-                        args.sqrtPrice,
-                      ],
-                    }),
-                    encodeFunctionData({
-                      abi: V3Migrator,
-                      functionName: 'migrate',
-                      args: [
-                        {
-                          pair: args.pair,
-                          liquidityToMigrate: args.liquidityToMigrate.quotient,
-                          percentageToMigrate: args.percentageToMigrate,
-                          token0: args.token0.address as Address,
-                          token1: args.token1.address as Address,
-                          fee: args.fee,
-                          tickLower: args.tickLower,
-                          tickUpper: args.tickUpper,
-                          amount0Min: args.amount0Min,
-                          amount1Min: args.amount1Min,
-                          recipient: args.recipient,
-                          deadline: args.deadline,
-                          refundAsETH: args.refundAsETH,
-                        },
-                      ],
-                    }),
+  const client = usePublicClient()
+
+  const { multicall: multicallContract, migrate: migrateContract } =
+    useMemo(() => {
+      if (
+        typeof args.tickLower !== 'number' ||
+        typeof args.tickUpper !== 'number' ||
+        !args.liquidityToMigrate ||
+        !args.amount0Min ||
+        !args.amount1Min ||
+        !args.recipient ||
+        !args.token0 ||
+        !args.token1 ||
+        !args.deadline ||
+        !args.sqrtPrice
+      ) {
+        return { multicall: null, migrate: null }
+      }
+
+      if (args.noLiquidity) {
+        return {
+          migrate: null,
+          multicall: {
+            ...V3MigrateContractConfig(chainId),
+            chainId,
+            functionName: 'multicall',
+            args: [
+              [
+                encodeFunctionData({
+                  abi: V3Migrator,
+                  functionName: 'createAndInitializePoolIfNecessary',
+                  args: [
+                    args.token0.address as Address,
+                    args.token1.address as Address,
+                    args.fee,
+                    args.sqrtPrice,
                   ],
-                ] as readonly [readonly `0x${string}`[]])
-              : undefined,
-          enabled: Boolean(
-            chainId &&
-              enabled &&
-              args.liquidityToMigrate &&
-              args.amount1Min &&
-              args.amount0Min &&
-              args.token0 &&
-              args.token1 &&
-              typeof args.tickLower === 'number' &&
-              typeof args.tickUpper === 'number' &&
-              args.deadline,
-          ),
+                }),
+                encodeFunctionData({
+                  abi: V3Migrator,
+                  functionName: 'migrate',
+                  args: [
+                    {
+                      pair: args.pair,
+                      liquidityToMigrate: args.liquidityToMigrate.quotient,
+                      percentageToMigrate: args.percentageToMigrate,
+                      token0: args.token0.address,
+                      token1: args.token1.address,
+                      fee: args.fee,
+                      tickLower: args.tickLower,
+                      tickUpper: args.tickUpper,
+                      amount0Min: args.amount0Min,
+                      amount1Min: args.amount1Min,
+                      recipient: args.recipient,
+                      deadline: args.deadline,
+                      refundAsETH: args.refundAsETH,
+                    },
+                  ],
+                }),
+              ],
+            ] as readonly [readonly `0x${string}`[]],
+          } as const,
         }
-      : {
+      }
+
+      return {
+        multicall: null,
+        migrate: {
           ...V3MigrateContractConfig(chainId),
           chainId,
           functionName: 'migrate',
-          args:
-            typeof args.tickLower === 'number' &&
-            typeof args.tickUpper === 'number' &&
-            args.liquidityToMigrate &&
-            args.amount0Min &&
-            args.amount1Min &&
-            args.recipient &&
-            args.token0 &&
-            args.token1 &&
-            args.deadline &&
-            args.sqrtPrice
-              ? [
-                  {
-                    pair: args.pair,
-                    liquidityToMigrate: args.liquidityToMigrate.quotient,
-                    percentageToMigrate: args.percentageToMigrate,
-                    token0: args.token0.address as Address,
-                    token1: args.token1.address as Address,
-                    fee: args.fee,
-                    tickLower: args.tickLower,
-                    tickUpper: args.tickUpper,
-                    amount0Min: args.amount0Min,
-                    amount1Min: args.amount1Min,
-                    recipient: args.recipient,
-                    deadline: args.deadline,
-                    refundAsETH: args.refundAsETH,
-                  },
-                ]
-              : undefined,
-          enabled: Boolean(
-            chainId &&
-              enabled &&
-              args.liquidityToMigrate &&
-              args.amount1Min &&
-              args.amount0Min &&
-              args.token0 &&
-              args.token1 &&
-              typeof args.tickLower === 'number' &&
-              typeof args.tickUpper === 'number' &&
-              args.deadline,
-          ),
+          args: [
+            {
+              pair: args.pair,
+              liquidityToMigrate: args.liquidityToMigrate.quotient,
+              percentageToMigrate: args.percentageToMigrate,
+              token0: args.token0.address,
+              token1: args.token1.address,
+              fee: args.fee,
+              tickLower: args.tickLower,
+              tickUpper: args.tickUpper,
+              amount0Min: args.amount0Min,
+              amount1Min: args.amount1Min,
+              recipient: args.recipient,
+              deadline: args.deadline,
+              refundAsETH: args.refundAsETH,
+            },
+          ],
+        } as const satisfies UseSimulateContractParameters,
+      }
+    }, [args, chainId])
+
+  const { data: migrateSimulation, isError: isMigrateError } =
+    useSimulateContract({
+      ...migrateContract,
+      query: {
+        enabled: Boolean(enabled && migrateContract),
+      },
+    })
+
+  const { data: multicallSimulation, isError: isMulticallError } =
+    useSimulateContract({
+      ...multicallContract,
+      query: {
+        enabled: Boolean(enabled && multicallContract),
+      },
+    })
+
+  const simulation = migrateSimulation || multicallSimulation
+  const isError = isMigrateError || isMulticallError
+
+  const onSuccess = useCallback(
+    (data: SendTransactionReturnType) => {
+      if (!account) return
+
+      const ts = new Date().getTime()
+      void createToast({
+        account,
+        type: 'swap',
+        chainId: chainId,
+        txHash: data,
+        promise: client.waitForTransactionReceipt({ hash: data }),
+        summary: {
+          pending: 'Migrating your liquidity',
+          completed: 'Successfully migrated your liquidity',
+          failed: 'Failed to migrate liquidity',
         },
-  )
-
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, e: Error | null) => {
-      if (e instanceof Error) {
-        if (!(e instanceof UserRejectedRequestError)) {
-          createErrorToast(e.message, true)
-        }
-      }
-
-      if (account && data) {
-        const ts = new Date().getTime()
-        void createToast({
-          account,
-          type: 'swap',
-          chainId: chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
-          summary: {
-            pending: 'Migrating your liquidity',
-            completed: 'Successfully migrated your liquidity',
-            failed: 'Failed to migrate liquidity',
-          },
-          timestamp: ts,
-          groupTimestamp: ts,
-        })
-      }
+        timestamp: ts,
+        groupTimestamp: ts,
+      })
     },
-    [account, chainId],
+    [account, chainId, client],
   )
+
+  const onError = useCallback((e: Error) => {
+    if (e instanceof Error) {
+      if (!(e instanceof UserRejectedRequestError)) {
+        createErrorToast(e.message, true)
+      }
+    }
+  }, [])
+
+  const {
+    writeContractAsync,
+    writeContract: _,
+    ...rest
+  } = useWriteContract({
+    mutation: {
+      onSuccess,
+      onError,
+    },
+  })
+
+  const write = useMemo(() => {
+    if (!simulation) return undefined
+
+    return async () => {
+      try {
+        await writeContractAsync(simulation.request)
+      } catch {}
+    }
+  }, [simulation, writeContractAsync])
 
   return {
-    prepare,
-    write: useContractWrite({
-      ...prepare.config,
-      onSettled,
-    }),
+    ...rest,
+    write,
+    isError,
   }
 }

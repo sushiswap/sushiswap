@@ -1,5 +1,10 @@
-import { Address, useContractRead, useContractReads } from '@sushiswap/wagmi'
-import { useMemo } from 'react'
+import {
+  useBlockNumber,
+  useReadContract,
+  useReadContracts,
+} from '@sushiswap/wagmi'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
 import { stargateFeeLibraryV03Abi, stargatePoolAbi } from 'sushi/abi'
 import {
   STARGATE_ADAPTER_ADDRESS,
@@ -11,24 +16,26 @@ import {
   StargateChainId,
 } from 'sushi/config'
 import { Amount, Currency } from 'sushi/currency'
-import { zeroAddress } from 'viem'
+import { Address, zeroAddress } from 'viem'
 
-export const useStargateBridgeFees = ({
-  amount,
-  srcChainId,
-  srcBridgeToken,
-  dstChainId,
-  dstBridgeToken,
-  enabled = false,
-}: {
+interface UseStargateBridgeFees {
   amount?: Amount<Currency>
   srcChainId: StargateAdapterChainId
   srcBridgeToken?: Currency
   dstChainId: StargateAdapterChainId
   dstBridgeToken?: Currency
   enabled: boolean
-}) => {
-  const { data: stargatePoolResults } = useContractReads({
+}
+
+const useStargatePool = ({
+  srcChainId,
+  srcBridgeToken,
+  dstChainId,
+  dstBridgeToken,
+  enabled = false,
+}: UseStargateBridgeFees) => {
+  const queryClient = useQueryClient()
+  const query = useReadContracts({
     contracts: useMemo(
       () =>
         !srcBridgeToken || !dstBridgeToken
@@ -85,8 +92,41 @@ export const useStargateBridgeFees = ({
             ] as const),
       [srcChainId, srcBridgeToken, dstChainId, dstBridgeToken],
     ),
-    enabled: Boolean(enabled && srcBridgeToken && dstBridgeToken),
-    watch: Boolean(enabled && srcBridgeToken && dstBridgeToken),
+    query: { enabled: Boolean(enabled && srcBridgeToken && dstBridgeToken) },
+  })
+
+  const { data: blockNumber } = useBlockNumber({
+    chainId: srcChainId,
+    watch: true,
+  })
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries(
+        query.queryKey,
+        {},
+        { cancelRefetch: false },
+      )
+    }
+  }, [blockNumber, query.queryKey, queryClient])
+
+  return query
+}
+
+export const useStargateBridgeFees = ({
+  amount,
+  srcChainId,
+  srcBridgeToken,
+  dstChainId,
+  dstBridgeToken,
+  enabled = false,
+}: UseStargateBridgeFees) => {
+  const { data: stargatePoolResults } = useStargatePool({
+    srcChainId,
+    srcBridgeToken,
+    dstChainId,
+    dstBridgeToken,
+    enabled,
   })
 
   const adjusted = useMemo(() => {
@@ -99,7 +139,8 @@ export const useStargateBridgeFees = ({
       : amount.asFraction.multiply(10n ** (sharedDecimals - localDecimals))
   }, [amount, stargatePoolResults])
 
-  return useContractRead({
+  const queryClient = useQueryClient()
+  const query = useReadContract({
     address: stargatePoolResults?.[1]?.result ?? zeroAddress,
     functionName: 'getFees',
     args: useMemo(
@@ -133,72 +174,84 @@ export const useStargateBridgeFees = ({
     ) as [bigint, bigint, number, `0x${string}`, bigint] | undefined,
     abi: stargateFeeLibraryV03Abi,
     chainId: srcChainId,
-    enabled: Boolean(
-      enabled &&
-        adjusted &&
-        srcBridgeToken &&
-        dstBridgeToken &&
-        stargatePoolResults?.[1]?.result &&
-        stargatePoolResults?.[2]?.result,
-    ),
-    watch: Boolean(
-      enabled &&
-        adjusted &&
-        srcBridgeToken &&
-        dstBridgeToken &&
-        stargatePoolResults?.[1]?.result &&
-        stargatePoolResults?.[2]?.result,
-    ),
-    select(getFeesResults) {
-      if (
-        !amount ||
-        !getFeesResults ||
-        !stargatePoolResults?.[2]?.result ||
-        !srcBridgeToken ||
-        !dstBridgeToken
-      ) {
-        return undefined
-      }
+    query: {
+      enabled: Boolean(
+        enabled &&
+          adjusted &&
+          srcBridgeToken &&
+          dstBridgeToken &&
+          stargatePoolResults?.[1]?.result &&
+          stargatePoolResults?.[2]?.result,
+      ),
+      select(getFeesResults) {
+        if (
+          !amount ||
+          !getFeesResults ||
+          !stargatePoolResults?.[1]?.result ||
+          !stargatePoolResults?.[2]?.result ||
+          !srcBridgeToken ||
+          !dstBridgeToken
+        ) {
+          return undefined
+        }
 
-      const localDecimals = BigInt(amount.currency.decimals)
-      const sharedDecimals = stargatePoolResults[2].result
+        const localDecimals = BigInt(amount.currency.decimals)
+        const sharedDecimals = stargatePoolResults[2].result
 
-      const { eqFee, eqReward, lpFee, protocolFee } = getFeesResults
+        const { eqFee, eqReward, lpFee, protocolFee } = getFeesResults
 
-      if (localDecimals === sharedDecimals)
+        if (localDecimals === sharedDecimals)
+          return [
+            Amount.fromRawAmount(srcBridgeToken, eqFee),
+            Amount.fromRawAmount(srcBridgeToken, eqReward),
+            Amount.fromRawAmount(srcBridgeToken, lpFee),
+            Amount.fromRawAmount(srcBridgeToken, protocolFee),
+          ]
+
+        const _eqFee =
+          localDecimals > sharedDecimals
+            ? eqFee * 10n ** (localDecimals - sharedDecimals)
+            : eqFee / 10n ** (sharedDecimals - localDecimals)
+
+        const _eqReward =
+          localDecimals > sharedDecimals
+            ? eqReward * 10n ** (localDecimals - sharedDecimals)
+            : eqReward / 10n ** (sharedDecimals - localDecimals)
+
+        const _lpFee =
+          localDecimals > sharedDecimals
+            ? lpFee * 10n ** (localDecimals - sharedDecimals)
+            : lpFee / 10n ** (sharedDecimals - localDecimals)
+
+        const _protocolFee =
+          localDecimals > sharedDecimals
+            ? protocolFee * 10n ** (localDecimals - sharedDecimals)
+            : protocolFee / 10n ** (sharedDecimals - localDecimals)
+
         return [
-          Amount.fromRawAmount(srcBridgeToken, eqFee),
-          Amount.fromRawAmount(srcBridgeToken, eqReward),
-          Amount.fromRawAmount(srcBridgeToken, lpFee),
-          Amount.fromRawAmount(srcBridgeToken, protocolFee),
+          Amount.fromRawAmount(srcBridgeToken, _eqFee),
+          Amount.fromRawAmount(srcBridgeToken, _eqReward),
+          Amount.fromRawAmount(srcBridgeToken, _lpFee),
+          Amount.fromRawAmount(srcBridgeToken, _protocolFee),
         ]
-
-      const _eqFee =
-        localDecimals > sharedDecimals
-          ? eqFee * 10n ** (localDecimals - sharedDecimals)
-          : eqFee / 10n ** (sharedDecimals - localDecimals)
-
-      const _eqReward =
-        localDecimals > sharedDecimals
-          ? eqReward * 10n ** (localDecimals - sharedDecimals)
-          : eqReward / 10n ** (sharedDecimals - localDecimals)
-
-      const _lpFee =
-        localDecimals > sharedDecimals
-          ? lpFee * 10n ** (localDecimals - sharedDecimals)
-          : lpFee / 10n ** (sharedDecimals - localDecimals)
-
-      const _protocolFee =
-        localDecimals > sharedDecimals
-          ? protocolFee * 10n ** (localDecimals - sharedDecimals)
-          : protocolFee / 10n ** (sharedDecimals - localDecimals)
-
-      return [
-        Amount.fromRawAmount(srcBridgeToken, _eqFee),
-        Amount.fromRawAmount(srcBridgeToken, _eqReward),
-        Amount.fromRawAmount(srcBridgeToken, _lpFee),
-        Amount.fromRawAmount(srcBridgeToken, _protocolFee),
-      ]
+      },
     },
   })
+
+  const { data: blockNumber } = useBlockNumber({
+    chainId: srcChainId,
+    watch: true,
+  })
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries(
+        query.queryKey,
+        {},
+        { cancelRefetch: false },
+      )
+    }
+  }, [blockNumber, queryClient, query.queryKey])
+
+  return query
 }

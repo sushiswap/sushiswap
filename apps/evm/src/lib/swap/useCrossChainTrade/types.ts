@@ -1,3 +1,4 @@
+import { UseTradeReturn } from '@sushiswap/react-query'
 import { SushiXSwap2ChainId } from 'sushi/config'
 import { Amount, Type } from 'sushi/currency'
 import { Percent } from 'sushi/math'
@@ -31,4 +32,6 @@ export interface UseCrossChainTradeReturn {
   transactionType: TransactionType | undefined
   srcBridgeToken: Type | undefined
   dstBridgeToken: Type | undefined
+  srcTrade: UseTradeReturn | undefined
+  dstTrade: UseTradeReturn | undefined
 }

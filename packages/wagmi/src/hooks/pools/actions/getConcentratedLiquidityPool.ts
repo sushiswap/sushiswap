@@ -1,13 +1,16 @@
 import { SushiSwapV3ChainId, SushiSwapV3FeeAmount } from 'sushi/config'
 import { Token, Type } from 'sushi/currency'
 import { SushiSwapV3Pool, computeSushiSwapV3PoolAddress } from 'sushi/pool'
-import { Address, readContracts } from 'wagmi'
 
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
+import { readContracts } from '@wagmi/core/actions'
+import { Address } from 'viem'
 import { getV3FactoryContractConfig } from '../../contracts/useV3FactoryContract'
 
 export const getConcentratedLiquidityPools = async ({
   chainId,
   poolKeys,
+  config,
 }: {
   chainId: SushiSwapV3ChainId
   poolKeys: [
@@ -15,6 +18,7 @@ export const getConcentratedLiquidityPools = async ({
     Type | undefined,
     SushiSwapV3FeeAmount | undefined,
   ][]
+  config: PublicWagmiConfig
 }): Promise<(SushiSwapV3Pool | null)[]> => {
   let poolTokens: ([Token, Token, SushiSwapV3FeeAmount] | undefined)[]
   if (!chainId) {
@@ -45,7 +49,7 @@ export const getConcentratedLiquidityPools = async ({
       }),
   )
 
-  const slot0s = await readContracts({
+  const slot0s = await readContracts(config, {
     contracts: poolAddresses.map(
       (el) =>
         ({
@@ -89,7 +93,7 @@ export const getConcentratedLiquidityPools = async ({
     ),
   })
 
-  const liquidities = await readContracts({
+  const liquidities = await readContracts(config, {
     contracts: poolAddresses.map(
       (el) =>
         ({
@@ -144,16 +148,18 @@ export const getConcentratedLiquidityPool = async ({
   token0,
   token1,
   feeAmount,
+  config,
 }: {
   chainId: SushiSwapV3ChainId
   token0: Type | undefined
   token1: Type | undefined
   feeAmount: SushiSwapV3FeeAmount | undefined
+  config: PublicWagmiConfig
 }): Promise<SushiSwapV3Pool | null> => {
   const poolKeys: [
     Type | undefined,
     Type | undefined,
     SushiSwapV3FeeAmount | undefined,
   ][] = [[token0, token1, feeAmount]]
-  return (await getConcentratedLiquidityPools({ poolKeys, chainId }))[0]
+  return (await getConcentratedLiquidityPools({ poolKeys, chainId, config }))[0]
 }

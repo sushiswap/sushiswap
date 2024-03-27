@@ -6,9 +6,9 @@ import { ColumnDef, PaginationState } from '@tanstack/react-table'
 import { Row } from '@tanstack/react-table'
 import React, { FC, ReactNode, useCallback, useState } from 'react'
 import { ChainId } from 'sushi/chain'
-import { Address } from 'wagmi'
 
 import { Card, CardHeader, CardTitle } from '@sushiswap/ui'
+import { Address } from 'viem'
 import {
   STEER_NAME_COLUMN,
   STEER_POSITION_SIZE_COLUMN,

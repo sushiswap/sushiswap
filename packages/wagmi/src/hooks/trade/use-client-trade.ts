@@ -22,7 +22,7 @@ import { Amount, Native, Price, WNATIVE_ADDRESS } from 'sushi/currency'
 import { Percent } from 'sushi/math'
 import { Router } from 'sushi/router'
 import { Address, Hex } from 'viem'
-import { useFeeData } from 'wagmi'
+import { useGasPrice } from 'wagmi'
 import { usePoolsCodeMap } from '../pools'
 
 export const useClientTrade = (variables: UseTradeParams) => {
@@ -38,7 +38,8 @@ export const useClientTrade = (variables: UseTradeParams) => {
     source,
   } = variables
 
-  const { data: feeData } = useFeeData({ chainId, enabled })
+  const { data: gasPrice } = useGasPrice({ chainId, query: { enabled } })
+
   const { data: price } = usePrice({
     chainId,
     address: WNATIVE_ADDRESS[chainId],
@@ -78,7 +79,7 @@ export const useClientTrade = (variables: UseTradeParams) => {
         !fromToken ||
         !amount ||
         !toToken ||
-        !feeData?.gasPrice
+        !gasPrice
       )
         return {
           abi: undefined,
@@ -101,7 +102,7 @@ export const useClientTrade = (variables: UseTradeParams) => {
         fromToken,
         amount.quotient,
         toToken,
-        Number(feeData.gasPrice),
+        Number(gasPrice),
         1, // 5% impact before dex aggregation
       )
 
@@ -258,10 +259,10 @@ ${logPools}
                         )[0],
                       ),
                 gasSpent:
-                  price && feeData.gasPrice
+                  price && gasPrice
                     ? Amount.fromRawAmount(
                         Native.onChain(chainId),
-                        feeData.gasPrice * BigInt(route.gasSpent * 1.2),
+                        gasPrice * BigInt(route.gasSpent * 1.2),
                       ).toSignificant(4)
                     : undefined,
                 // gasSpentUsd:
@@ -287,7 +288,7 @@ ${logPools}
     },
     refetchInterval: 10000,
     enabled: Boolean(
-      enabled && poolsCodeMap && feeData && fromToken && toToken && chainId,
+      enabled && poolsCodeMap && gasPrice && fromToken && toToken && chainId,
     ),
   })
 }

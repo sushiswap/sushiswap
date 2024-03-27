@@ -1,3 +1,4 @@
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
 import { SushiSwapV2Pool, TridentConstantPool, TridentStablePool } from 'sushi'
 import { ChainId } from 'sushi/chain'
 import { Type } from 'sushi/currency'
@@ -18,6 +19,7 @@ export interface UsePoolsParams {
   enabled?: boolean
   withBentoPools?: boolean
   withCombinations?: boolean
+  config: PublicWagmiConfig
 }
 
 export type UsePoolsReturn = {

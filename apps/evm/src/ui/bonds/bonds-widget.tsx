@@ -22,8 +22,8 @@ import {
 import {
   Checker,
   Web3Input,
+  useAccount,
   useBondMarketDetails,
-  useNetwork,
 } from '@sushiswap/wagmi'
 import { CheckerProvider } from '@sushiswap/wagmi/systems/Checker/Provider'
 import format from 'date-fns/format'
@@ -90,7 +90,7 @@ export const BondsWidget = ({ bond: staleBond }: { bond: Bond }) => {
     return [new Token(staleBond.quoteToken), new Token(staleBond.payoutToken)]
   }, [staleBond.quoteToken, staleBond.payoutToken])
 
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
 
   const { maxAmountAccepted, availableCapacity, marketPrice, discount } =
     useBondMarketDetails({

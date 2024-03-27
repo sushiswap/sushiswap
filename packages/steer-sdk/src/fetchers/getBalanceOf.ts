@@ -34,14 +34,24 @@ export async function getBalanceOfs({
   vaultIds,
 }: GetBalanceOfs) {
   const result = await client.multicall({
-    allowFailure: false,
+    allowFailure: true,
     contracts: getBalanceOfsContracts({ account, vaultIds }),
   })
 
-  return result.map((r, i) => ({
-    vaultId: vaultIds[i]!,
-    balanceOf: r,
-  }))
+  return result.flatMap((res, i) => {
+    if (typeof res.result === 'undefined') return []
+    return getBalanceOfsSelect(vaultIds[i]!, res.result)
+  })
+}
+
+export function getBalanceOfsSelect(
+  vaultId: string,
+  result: bigint,
+): { vaultId: string; balance: bigint } {
+  return {
+    vaultId,
+    balance: result,
+  }
 }
 
 interface GetBalanceOf {
@@ -51,6 +61,11 @@ interface GetBalanceOf {
 }
 
 export async function getBalanceOf({ client, account, vaultId }: GetBalanceOf) {
-  const result = await getBalanceOfs({ client, account, vaultIds: [vaultId] })
-  return result[0]!.balanceOf
+  const results = await getBalanceOfs({ client, account, vaultIds: [vaultId] })
+
+  if (!results[0]) {
+    throw new Error(`Failed to fetch balance of for vault ${vaultId}`)
+  }
+
+  return results[0]!.balance
 }

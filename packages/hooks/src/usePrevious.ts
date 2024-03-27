@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useRef } from 'react'
 
 // modified from https://usehooks.com/usePrevious/

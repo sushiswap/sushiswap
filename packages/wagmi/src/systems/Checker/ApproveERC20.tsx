@@ -21,8 +21,8 @@ import {
 } from '@sushiswap/ui/components/select'
 import { FC, useState } from 'react'
 import { Amount, Type } from 'sushi/currency'
-import { Address } from 'wagmi'
 
+import { Address } from 'viem'
 import { ApprovalState, useTokenApproval } from '../../hooks'
 
 interface ApproveERC20Props extends ButtonProps {

@@ -1,6 +1,7 @@
 import { defaultAbiCoder } from '@ethersproject/abi'
 import { getCreate2Address } from '@ethersproject/address'
 import { keccak256 } from '@ethersproject/solidity'
+import { Address } from 'viem'
 import {
   SUSHISWAP_V3_INIT_CODE_HASH,
   SushiSwapV3ChainId,
@@ -29,7 +30,7 @@ export function computeSushiSwapV3PoolAddress({
   tokenB: Token | string
   fee: SushiSwapV3FeeAmount
   initCodeHashManualOverride?: string | undefined
-}): string {
+}): Address {
   if (typeof tokenA !== 'string' && typeof tokenB !== 'string') {
     const [token0, token1] = tokenA.sortsBefore(tokenB)
       ? [tokenA, tokenB]
@@ -47,7 +48,7 @@ export function computeSushiSwapV3PoolAddress({
       ),
       initCodeHashManualOverride ??
         SUSHISWAP_V3_INIT_CODE_HASH[token0.chainId as SushiSwapV3ChainId],
-    )
+    ) as Address
   }
 
   // FIXME: We shouldn't even allow sending strings into here, this means we have to assume init code hash is always the same for every chain
@@ -64,5 +65,5 @@ export function computeSushiSwapV3PoolAddress({
     ),
     initCodeHashManualOverride ??
       '0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54',
-  )
+  ) as Address
 }

@@ -30,7 +30,6 @@ import {
 } from '@sushiswap/ui'
 import { Button } from '@sushiswap/ui/components/button'
 import {
-  Address,
   V3MigrateChainId,
   V3MigrateContractConfig,
   getMasterChefContractConfig,
@@ -40,7 +39,7 @@ import {
   useTotalSupply,
   useTransactionDeadline,
   useV3Migrate,
-  useWaitForTransaction,
+  useWaitForTransactionReceipt,
 } from '@sushiswap/wagmi'
 import { Checker } from '@sushiswap/wagmi/systems'
 import {
@@ -72,6 +71,7 @@ import {
   TickMath,
   priceToClosestTick,
 } from 'sushi/pool'
+import { Address } from 'viem'
 import { useConcentratedDerivedMintInfo } from './ConcentratedLiquidityProvider'
 import { usePoolPosition } from './PoolPositionProvider'
 import { usePoolPositionStaked } from './PoolPositionStakedProvider'
@@ -136,18 +136,19 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
     isLoading: isStakedLoading,
   } = usePoolPositionStaked()
 
-  const { sendTransaction, isLoading: isWritePending } = useMasterChefWithdraw({
-    chainId: pool.chainId,
-    amount: stakedBalance,
-    pid: pool.incentives?.[0]?.pid,
-    chef: pool.incentives?.[0]?.chefType,
-    enabled: Boolean(
-      approved &&
-        stakedBalance?.greaterThan(ZERO) &&
-        pool.incentives?.[0]?.pid &&
-        pool.incentives?.[0]?.chefType,
-    ),
-  })
+  const { write: writeWithdraw, isLoading: isWritePending } =
+    useMasterChefWithdraw({
+      chainId: pool.chainId as ChainId,
+      amount: stakedBalance,
+      pid: pool.incentives?.[0]?.pid,
+      chef: pool.incentives?.[0]?.chefType,
+      enabled: Boolean(
+        approved &&
+          stakedBalance?.greaterThan(ZERO) &&
+          pool.incentives?.[0]?.pid &&
+          pool.incentives?.[0]?.chefType,
+      ),
+    })
 
   // this is just getLiquidityValue with the fee off, but for the passed pair
   const token0Value = useMemo(
@@ -375,8 +376,10 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
   })
 
   const {
-    write: { writeAsync, isLoading: isMigrateLoading, data },
-    prepare: { isError },
+    write: writeMigrate,
+    isError,
+    isLoading: isMigrateLoading,
+    data: hash,
   } = useV3Migrate({
     account: address,
     args: {
@@ -400,9 +403,9 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
     enabled: approvedMigrate,
   })
 
-  const { status } = useWaitForTransaction({
+  const { status } = useWaitForTransactionReceipt({
     chainId: pool.chainId as SushiSwapV3ChainId,
-    hash: data?.hash,
+    hash,
   })
 
   return (
@@ -443,7 +446,7 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
               <Checker.Network
                 fullWidth={false}
                 size="default"
-                chainId={pool.chainId}
+                chainId={pool.chainId as ChainId}
               >
                 <Checker.ApproveERC20
                   fullWidth={false}
@@ -452,13 +455,13 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
                   amount={stakedBalance}
                   contract={
                     getMasterChefContractConfig(
-                      pool.chainId,
+                      pool.chainId as ChainId,
                       pool.incentives[0]?.chefType,
                     )?.address
                   }
                   enabled={Boolean(
                     getMasterChefContractConfig(
-                      pool.chainId,
+                      pool.chainId as ChainId,
                       pool.incentives[0]?.chefType,
                     )?.address,
                   )}
@@ -467,7 +470,7 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
                     <Button
                       fullWidth={false}
                       size="default"
-                      onClick={() => sendTransaction?.()}
+                      onClick={writeMigrate}
                       disabled={!approved || isWritePending}
                       testId="unstake-liquidity"
                     >
@@ -657,7 +660,7 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
                   <Checker.Network
                     fullWidth
                     size="default"
-                    chainId={pool.chainId}
+                    chainId={pool.chainId as ChainId}
                   >
                     <Checker.Guard
                       size="default"
@@ -914,9 +917,7 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
                                         fullWidth
                                         size="xl"
                                         loading={isLoading && !isError}
-                                        onClick={() =>
-                                          writeAsync?.().then(() => confirm())
-                                        }
+                                        onClick={() => writeWithdraw?.(confirm)}
                                         disabled={isMigrateLoading || isError}
                                         color={isError ? 'red' : 'blue'}
                                         testId="migrate-confirm"
@@ -953,7 +954,7 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
           successMessage={`Successfully migrated your ${token0.symbol}/${token1.symbol} position`}
           buttonText="Go to pool"
           buttonLink={`/pools/${pool.chainId}:${v3Address}?activeTab=myPositions`}
-          txHash={data?.hash}
+          txHash={hash}
         />
       ) : null}
     </DialogProvider>

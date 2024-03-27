@@ -12,7 +12,7 @@ import {
 import React, { FC, useState } from 'react'
 import { ChainId } from 'sushi/chain'
 import { shortenAddress } from 'sushi/format'
-import { useAccount, useEnsAvatar, useEnsName, useNetwork } from 'wagmi'
+import { useAccount, useEnsAvatar, useEnsName } from 'wagmi'
 import { ConnectButton } from '../connect-button'
 import { ConnectView } from './ConnectView'
 import { DefaultView } from './DefaultView'
@@ -28,8 +28,7 @@ export const UserProfile: FC<ProfileProps> = () => {
   const isMounted = useIsMounted()
   const { isSm } = useBreakpoint('sm')
   const [view, setView] = useState<ProfileView>(ProfileView.Default)
-  const { chain } = useNetwork()
-  const { address, isConnected } = useAccount()
+  const { address, chain, isConnected } = useAccount()
 
   const { data: name } = useEnsName({
     chainId: ChainId.ETHEREUM,
@@ -37,7 +36,7 @@ export const UserProfile: FC<ProfileProps> = () => {
   })
 
   const { data: avatar } = useEnsAvatar({
-    name,
+    name: name || undefined,
     chainId: ChainId.ETHEREUM,
   })
 

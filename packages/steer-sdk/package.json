@@ -62,14 +62,14 @@
     "@whatwg-node/fetch": "0.8.4",
     "sushi": "workspace:*",
     "tslib": "latest",
-    "viem": "1.21.4"
+    "viem": "2.8.13"
   },
   "devDependencies": {
     "@sushiswap/jest-config": "workspace:*",
     "@tsconfig/esm": "1.0.4",
     "@tsconfig/strictest": "2.0.2",
     "@types/node": "20",
-    "@wagmi/core": "1.4.13",
+    "@wagmi/core": "2.6.9",
     "eslint": "8.43.0",
     "next": "14.1.0",
     "react": "18.2.0",
@@ -78,10 +78,10 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "@wagmi/core": "1.4.13",
+    "@wagmi/core": "2.6.9",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "wagmi": "1.4.13"
+    "wagmi": "2.5.11"
   },
   "peerDependenciesMeta": {
     "react": {

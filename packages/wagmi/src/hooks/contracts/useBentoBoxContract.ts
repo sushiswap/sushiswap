@@ -1,8 +1,9 @@
 'use client'
 
+import { useMemo } from 'react'
 import { bentoBoxV1Abi } from 'sushi/abi'
 import { BENTOBOX_ADDRESS, BentoBoxChainId } from 'sushi/config'
-import { getContract } from 'viem'
+import { PublicClient, getContract } from 'viem'
 import { usePublicClient } from 'wagmi'
 
 export const getBentoBoxContractConfig = (chainId: BentoBoxChainId) => ({
@@ -11,9 +12,16 @@ export const getBentoBoxContractConfig = (chainId: BentoBoxChainId) => ({
 })
 
 export function useBentoBoxContract(chainId: BentoBoxChainId | undefined) {
-  const publicClient = usePublicClient({ chainId })
+  const client = usePublicClient({ chainId }) as PublicClient
 
-  if (!chainId) return null
-  return getContract({ ...getBentoBoxContractConfig(chainId), publicClient })
+  return useMemo(() => {
+    if (!chainId) return null
+
+    return getContract({
+      client,
+      ...getBentoBoxContractConfig(chainId),
+    })
+  }, [client, chainId])
 }
+
 export type BentoBox = NonNullable<ReturnType<typeof useBentoBoxContract>>

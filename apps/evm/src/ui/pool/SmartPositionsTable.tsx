@@ -12,7 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@sushiswap/ui'
-import { useAccount, useSteerAccountPositionsFormatted } from '@sushiswap/wagmi'
+import { useAccount, useSteerAccountPositionsExtended } from '@sushiswap/wagmi'
 import { formatPercent } from 'sushi'
 import { APRHoverCard } from './APRHoverCard'
 import {
@@ -83,7 +83,7 @@ export const SmartPositionsTable = () => {
     pageSize: 10,
   })
 
-  const { data: positions, isLoading } = useSteerAccountPositionsFormatted({
+  const { data: positions, isLoading } = useSteerAccountPositionsExtended({
     account: address,
     chainIds: chainIds ? chainIds : [...STEER_ENABLED_NETWORKS],
   })

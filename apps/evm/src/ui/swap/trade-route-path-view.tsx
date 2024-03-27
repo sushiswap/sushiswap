@@ -38,7 +38,7 @@ const tokenFromRToken = (token: TradeLegType['tokenFrom']) => {
 
 // Can render a tines multi route
 export const TradeRoutePathView: FC<{
-  trade: UseTradeReturn | undefined
+  trade: Pick<UseTradeReturn, 'route'> | undefined
   children: ReactNode
 }> = ({ children, trade }) => {
   return (
@@ -88,7 +88,7 @@ interface ComplexRoutePathProps {
   title: string
 }
 
-const ComplexRoutePath: FC<ComplexRoutePathProps> = ({
+export const ComplexRoutePath: FC<ComplexRoutePathProps> = ({
   fromToken,
   toToken,
   portion,

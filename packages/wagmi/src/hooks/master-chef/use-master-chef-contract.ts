@@ -1,18 +1,19 @@
 'use client'
 
 import { ChefType } from '@sushiswap/client'
+import { useMemo } from 'react'
 import { masterChefV1Abi, masterChefV2Abi, miniChefAbi } from 'sushi/abi'
 import { ChainId } from 'sushi/chain'
-import { getContract } from 'viem'
-import { Address, usePublicClient } from 'wagmi'
+import { Address, getContract } from 'viem'
+import { usePublicClient } from 'wagmi'
 
 // TODO move to package
 export const MASTERCHEF_ADDRESS = {
   [ChainId.ETHEREUM]: '0xc2EdaD668740f1aA35E4D8f227fB8E17dcA888Cd',
-  [ChainId.ROPSTEN]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
-  [ChainId.RINKEBY]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
-  [ChainId.GÖRLI]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
-  [ChainId.KOVAN]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
+  // [ChainId.ROPSTEN]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
+  // [ChainId.RINKEBY]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
+  // [ChainId.GÖRLI]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
+  // [ChainId.KOVAN]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
 } as const
 
 export const MASTERCHEF_V2_ADDRESS = {
@@ -68,8 +69,8 @@ export const getMiniChefContractConfig = (
 }
 
 export const getMasterChefContractConfig = (
-  chainId: number,
-  chef: ChefType,
+  chainId: ChainId,
+  chef: Omit<ChefType, 'Merkl'>,
 ) => {
   if (chef === ChefType.MasterChefV1)
     return _getMasterChefContractConfig(
@@ -81,14 +82,23 @@ export const getMasterChefContractConfig = (
     )
   if (chef === ChefType.MiniChef)
     return getMiniChefContractConfig(chainId as keyof typeof MINICHEF_ADDRESS)
+
+  throw new Error('Invalid chef type')
 }
 
-export function useMasterChefContract(chainId: number, chef: ChefType) {
-  const publicClient = usePublicClient({ chainId })
+export function useMasterChefContract(
+  chainId: ChainId,
+  chef: Omit<ChefType, 'Merkl'>,
+) {
+  const client = usePublicClient({ chainId }) as any
 
-  // @ts-ignore - Workaround for TS#4058
-  return getContract({
-    ...getMasterChefContractConfig(chainId, chef),
-    publicClient,
-  })
+  return useMemo(() => {
+    if (!chainId) return null
+
+    // @ts-ignore
+    return getContract({
+      ...getMasterChefContractConfig(chainId, chef),
+      client,
+    })
+  }, [chainId, client, chef])
 }

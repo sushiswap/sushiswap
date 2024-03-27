@@ -1,7 +1,5 @@
 import { Interface } from '@ethersproject/abi'
-import IPeripheryPaymentsWithFee from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IPeripheryPaymentsWithFee.sol/IPeripheryPaymentsWithFee.json' assert {
-  type: 'json',
-}
+import IPeripheryPaymentsWithFee from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IPeripheryPaymentsWithFee.sol/IPeripheryPaymentsWithFee.json'
 import { toHex } from '../../../convert/index.js'
 import { Token } from '../../../currency/index.js'
 import { Percent } from '../../../math/index.js'

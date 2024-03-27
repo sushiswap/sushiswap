@@ -6,18 +6,17 @@ import {
   createToast,
 } from '@sushiswap/ui/components/toast'
 import { useQuery } from '@tanstack/react-query'
-import { readContract } from '@wagmi/core'
 import { useCallback, useMemo, useState } from 'react'
 import { BENTOBOX_ADDRESS, BentoBoxChainId } from 'sushi/config'
-import { UserRejectedRequestError, hexToSignature } from 'viem'
+import { Address, UserRejectedRequestError, hexToSignature } from 'viem'
 import {
-  Address,
   useAccount,
-  useContractWrite,
-  usePrepareContractWrite,
+  usePublicClient,
   useSignTypedData,
+  useSimulateContract,
+  useWriteContract,
 } from 'wagmi'
-import { SendTransactionResult, waitForTransaction } from 'wagmi/actions'
+import { SendTransactionReturnType } from 'wagmi/actions'
 
 import { getBentoBoxContractConfig } from '../..'
 import {
@@ -38,29 +37,45 @@ export const useBentoBoxApproval = ({
   chainId,
   masterContract,
   tag,
-}: UseBentoboxApprovalParams): [ApprovalState, undefined | (() => void)] => {
+}: UseBentoboxApprovalParams): [
+  ApprovalState,
+  undefined | (() => Promise<void>),
+] => {
   const { address } = useAccount()
   const [fallback, setFallback] = useState(false)
   const [pending, setPending] = useState(false)
   const { signature } = useSignature(tag)
   const { setSignature } = useApprovedActions(tag)
   const { signTypedDataAsync } = useSignTypedData()
+  const client = usePublicClient({ chainId })
 
-  const { data, refetch, isLoading } = useQuery({
+  const onError = useCallback((e: Error, msg: string) => {
+    console.error(msg, e)
+
+    if (e instanceof Error) {
+      if (!(e instanceof UserRejectedRequestError)) {
+        createErrorToast(e.message, true)
+      }
+    }
+  }, [])
+
+  const {
+    data: approvalData,
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ['masterContractApproval', { chainId, masterContract, address }],
     queryFn: async () => {
       if (masterContract && address) {
-        const isApproved = await readContract({
+        const isApproved = await client.readContract({
           ...getBentoBoxContractConfig(chainId),
-          chainId,
           functionName: 'masterContractApproved',
           args: [masterContract, address],
         })
 
         if (!isApproved) {
-          const nonces = await readContract({
+          const nonces = await client.readContract({
             ...getBentoBoxContractConfig(chainId),
-            chainId,
             functionName: 'nonces',
             args: [address],
           })
@@ -72,13 +87,12 @@ export const useBentoBoxApproval = ({
 
       return null
     },
-    onError: (error) => {
-      console.error('error fetching master contract approval', error)
-    },
+    onError: (e: Error) =>
+      onError(e, 'error fetching master contract approval'),
     enabled,
   })
 
-  const { config } = usePrepareContractWrite({
+  const { data: simulation } = useSimulateContract({
     ...getBentoBoxContractConfig(chainId),
     chainId,
     functionName: 'setMasterContractApproval',
@@ -93,32 +107,30 @@ export const useBentoBoxApproval = ({
             '0x0000000000000000000000000000000000000000000000000000000000000000',
           ]
         : undefined,
-    onError: (error) => {
-      console.error('error preparing master contract approval', error)
+    query: {
+      enabled: Boolean(
+        enabled && masterContract && address && chainId && fallback,
+      ),
+      onError: (e) => onError(e, 'error preparing master contract approval'),
     },
-    enabled: Boolean(
-      enabled && masterContract && address && chainId && fallback,
-    ),
   })
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, e: Error | null) => {
-      if (e instanceof Error) {
-        if (!(e instanceof UserRejectedRequestError)) {
-          createErrorToast(e.message, true)
-        }
-      }
+  const onSuccess = useCallback(
+    async (data: SendTransactionReturnType) => {
+      setPending(true)
 
-      if (data) {
-        setPending(true)
-
+      try {
         const ts = new Date().getTime()
+        const receiptPromise = client.waitForTransactionReceipt({
+          hash: data,
+        })
+
         void createToast({
           account: address,
           type: 'approval',
           chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
+          txHash: data,
+          promise: receiptPromise,
           summary: {
             pending: 'Approving BentoBox Master Contract',
             completed: 'Successfully approved the master contract',
@@ -127,32 +139,41 @@ export const useBentoBoxApproval = ({
           groupTimestamp: ts,
           timestamp: ts,
         })
+
+        await receiptPromise
+        await refetch()
+      } finally {
+        setPending(false)
       }
     },
-    [address, chainId],
+    [address, chainId, client, refetch],
   )
 
-  const execute = useContractWrite({
-    ...config,
-    onSettled,
-    onSuccess: (data) => {
-      waitForTransaction({ hash: data.hash })
-        .then(() => {
-          refetch().then(() => {
-            setPending(false)
-          })
-        })
-        .catch(() => setPending(false))
-    },
-    onError: (error) => {
-      console.error('error executing master contract approval', error)
+  const { writeContractAsync } = useWriteContract({
+    ...simulation?.request,
+    mutation: {
+      onSuccess,
+      onError: (e) => onError(e, 'error executing master contract approval'),
     },
   })
 
-  const _execute = useCallback(() => {
-    console.log('execute', address, data)
-    if (address && typeof data?.nonces === 'bigint') {
-      signTypedDataAsync({
+  const executeTransaction = useMemo(() => {
+    if (!simulation) return undefined
+
+    return async () => {
+      try {
+        await writeContractAsync(simulation.request)
+      } catch {}
+    }
+  }, [simulation, writeContractAsync])
+
+  const executeSignature = useCallback(async () => {
+    // console.log('execute', address, approvalData)
+
+    if (!address || typeof approvalData?.nonces !== 'bigint') return
+
+    try {
+      const signedData = await signTypedDataAsync({
         primaryType: 'SetMasterContractApproval',
         domain: {
           name: 'BentoBox V1',
@@ -173,39 +194,51 @@ export const useBentoBoxApproval = ({
           user: address,
           masterContract: masterContract as Address,
           approved: true,
-          nonce: data.nonces,
+          nonce: approvalData.nonces,
         },
       })
-        .then((data) => {
-          const signature = hexToSignature(data)
-          console.log('signature', signature)
-          setSignature(signature)
-        })
-        .catch((error) => {
-          console.error('error signing master contract approval', error)
-          const ts = new Date().getTime()
-          void createFailedToast({
-            account: address,
-            type: 'approval',
-            chainId,
-            summary:
-              'Failed to approve using a permit, please try again using a regular approval.',
-            groupTimestamp: ts,
-            timestamp: ts,
-          })
 
-          setFallback(true)
-        })
+      const signature = hexToSignature(signedData)
+      console.log('signature', signature)
+      setSignature(signature)
+    } catch (error) {
+      console.error('error signing master contract approval', error)
+      const ts = new Date().getTime()
+      void createFailedToast({
+        account: address,
+        type: 'approval',
+        chainId,
+        summary:
+          'Failed to approve using a permit, please try again using a regular approval.',
+        groupTimestamp: ts,
+        timestamp: ts,
+      })
+      setFallback(true)
     }
-  }, [address, chainId, data, masterContract, setSignature, signTypedDataAsync])
+  }, [
+    address,
+    chainId,
+    approvalData,
+    masterContract,
+    setSignature,
+    signTypedDataAsync,
+  ])
 
   return useMemo(() => {
     let state = ApprovalState.UNKNOWN
     if (signature) state = ApprovalState.APPROVED
-    else if (data?.isApproved) state = ApprovalState.APPROVED
+    else if (approvalData?.isApproved) state = ApprovalState.APPROVED
     else if (pending) state = ApprovalState.PENDING
     else if (isLoading) state = ApprovalState.LOADING
 
-    return [state, fallback ? execute.write : _execute]
-  }, [_execute, data, execute.write, fallback, isLoading, pending, signature])
+    return [state, fallback ? void executeTransaction : executeSignature]
+  }, [
+    executeTransaction,
+    approvalData,
+    executeSignature,
+    fallback,
+    isLoading,
+    pending,
+    signature,
+  ])
 }

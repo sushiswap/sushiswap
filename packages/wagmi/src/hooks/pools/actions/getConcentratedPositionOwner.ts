@@ -1,20 +1,23 @@
 import { SushiSwapV3ChainId } from 'sushi/config'
-import { Address, readContracts } from 'wagmi'
 
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
+import { readContracts } from 'wagmi/actions'
 import { getV3NonFungiblePositionManagerContractConfig } from '../../contracts/useV3NonFungiblePositionManager'
 
 export const getConcentratedPositionOwners = async ({
   tokenIds,
+  config,
 }: {
   tokenIds: { chainId: SushiSwapV3ChainId; tokenId: bigint }[]
+  config: PublicWagmiConfig
 }) => {
-  return readContracts({
+  return readContracts(config, {
     contracts: tokenIds.map(
       ({ tokenId, chainId }) =>
         ({
           chainId,
-          address: getV3NonFungiblePositionManagerContractConfig(chainId)
-            .address as Address,
+          address:
+            getV3NonFungiblePositionManagerContractConfig(chainId).address,
           abi: [
             {
               inputs: [

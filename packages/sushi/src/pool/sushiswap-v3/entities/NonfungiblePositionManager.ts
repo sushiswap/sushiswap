@@ -1,7 +1,5 @@
 import { Interface } from '@ethersproject/abi'
-import INonfungiblePositionManager from '@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json' assert {
-  type: 'json',
-}
+import INonfungiblePositionManager from '@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json'
 import invariant from 'tiny-invariant'
 import { zeroAddress } from 'viem'
 import { toHex } from '../../../convert/index.js'

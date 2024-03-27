@@ -1,7 +1,6 @@
 'use client'
 
-// Export config
-export * from './config'
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
 
 // Export actions
 export * from './actions'
@@ -15,11 +14,14 @@ export * from './systems'
 // Export components
 export * from './components'
 
-// Export test
-export * from './test'
-
 // Re-export wagmi
 export * from 'wagmi'
 
 // Re-export useConnect to avoid ambiguity
 export { useConnect } from './hooks'
+
+declare module 'wagmi' {
+  interface Register {
+    config: PublicWagmiConfig
+  }
+}

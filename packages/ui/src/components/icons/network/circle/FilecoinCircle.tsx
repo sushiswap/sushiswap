@@ -9,7 +9,7 @@ export const FilecoinCircle: IconComponent = (props) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_1169_2)">
+    <g clipPath="url(#clip0_1169_2)">
       <mask
         id="mask0_1169_2"
         type="alpha"
@@ -20,8 +20,8 @@ export const FilecoinCircle: IconComponent = (props) => (
         height="128"
       >
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M0.265137 0H128.265V128H0.265137V0Z"
           fill="white"
         />
@@ -29,7 +29,7 @@ export const FilecoinCircle: IconComponent = (props) => (
       <g mask="url(#mask0_1169_2)">
         <path
           fillRule="evenodd"
-          clip-rule="evenodd"
+          clipRule="evenodd"
           d="M64.2651 128.001C29.0651 128.001 0.265137 99.2006 0.265137 63.6806C0.585137 28.4806 29.0651 -0.319434 64.5851 0.000565948C99.7851 0.320566 128.265 28.8006 128.265 64.6406C127.945 99.5206 99.4651 128.001 64.2651 128.001Z"
           fill="#0090FF"
         />

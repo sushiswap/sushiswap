@@ -6,25 +6,20 @@ import { Button } from '@sushiswap/ui/components/button'
 import { Dots } from '@sushiswap/ui/components/dots'
 import { createToast } from '@sushiswap/ui/components/toast'
 import {
-  Address,
   TridentConstantPoolState,
   TridentStablePoolState,
+  UseCallParameters,
   getTridentRouterContractConfig,
   useAccount,
   useBentoBoxTotals,
-  useNetwork,
-  usePrepareSendTransaction,
+  useCall,
+  usePublicClient,
   useSendTransaction,
   useTotalSupply,
   useTridentConstantPool,
   useTridentRouterContract,
   useTridentStablePool,
 } from '@sushiswap/wagmi'
-import {
-  SendTransactionResult,
-  waitForTransaction,
-} from '@sushiswap/wagmi/actions'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
 import { Checker } from '@sushiswap/wagmi/systems'
 import {
   useApproved,
@@ -49,10 +44,11 @@ import {
 } from 'src/lib/pool/trident/actions'
 import { slippageAmount } from 'sushi/calculate'
 import { ChainId } from 'sushi/chain'
-import { BentoBoxChainId } from 'sushi/config'
+import { BentoBoxChainId, TridentChainId } from 'sushi/config'
 import { Amount, Native } from 'sushi/currency'
 import { Percent } from 'sushi/math'
 
+import { SendTransactionReturnType } from 'viem'
 import { usePoolPosition } from './PoolPositionProvider'
 import { RemoveSectionWidget } from './RemoveSectionWidget'
 
@@ -63,14 +59,14 @@ interface RemoveSectionTridentProps {
 export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
   withCheckerRoot(({ pool: _pool }) => {
     const chainId = _pool.chainId as BentoBoxChainId
-    const { address } = useAccount()
-    const { chain } = useNetwork()
+    const client = usePublicClient()
+    const { address, chain } = useAccount()
     const { token0, token1, liquidityToken } = useTokensFromPool(_pool)
     const isMounted = useIsMounted()
     const { approved } = useApproved(APPROVE_TAG_REMOVE_TRIDENT)
     const { signature } = useSignature(APPROVE_TAG_REMOVE_TRIDENT)
     const { setSignature } = useApprovedActions(APPROVE_TAG_REMOVE_TRIDENT)
-    const contract = useTridentRouterContract(_pool.chainId)
+    const contract = useTridentRouterContract(_pool.chainId as TridentChainId)
     const [slippageTolerance] = useSlippageTolerance('removeLiquidity')
 
     const [percentage, setPercentage] = useState<string>('0')
@@ -92,7 +88,7 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
     // TODO: Standardize fee format
     const [tridentConstantPoolState, tridentConstantPool] =
       useTridentConstantPool(
-        _pool.chainId,
+        _pool.chainId as TridentChainId,
         token0,
         token1,
         _pool.swapFee * 10000,
@@ -100,7 +96,7 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
       )
 
     const [tridentStablePoolState, tridentStablePool] = useTridentStablePool(
-      _pool.chainId,
+      _pool.chainId as TridentChainId,
       token0,
       token1,
       _pool.swapFee * 10000,
@@ -176,17 +172,20 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
       ]
     }, [slippageTolerance, currencyAToRemove, currencyBToRemove])
 
-    const onSettled = useCallback(
-      (data: SendTransactionResult | undefined) => {
-        if (!data || !chain?.id) return
+    const onSuccess = useCallback(
+      (hash: SendTransactionReturnType) => {
+        setPercentage('0')
+        setSignature(undefined)
+
+        if (!chain?.id) return
 
         const ts = new Date().getTime()
         void createToast({
           account: address,
           type: 'burn',
           chainId: chain.id,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
+          txHash: hash,
+          promise: client.waitForTransactionReceipt({ hash }),
           summary: {
             pending: `Removing liquidity from the ${token0.symbol}/${token1.symbol} pair`,
             completed: `Successfully removed liquidity from the ${token0.symbol}/${token1.symbol} pair`,
@@ -196,10 +195,10 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
           groupTimestamp: ts,
         })
       },
-      [address, chain, token0.symbol, token1.symbol],
+      [client, address, chain, token0.symbol, token1.symbol, setSignature],
     )
 
-    const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
+    const prepare = useMemo(() => {
       try {
         if (
           !chain?.id ||
@@ -217,16 +216,16 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
           !rebases?.[token1.wrapped.address] ||
           !slpAmountToRemove
         )
-          return {}
+          return undefined
 
         const liquidityOutput: LiquidityOutput[] = [
           {
-            token: minAmount0.wrapped.currency.address as Address,
+            token: minAmount0.wrapped.currency.address,
             amount: minAmount0.toShare(rebases?.[token0.wrapped.address])
               .quotient,
           },
           {
-            token: minAmount1.wrapped.currency.address as Address,
+            token: minAmount1.wrapped.currency.address,
             amount: minAmount1.toShare(rebases?.[token1.wrapped.address])
               .quotient,
           },
@@ -247,7 +246,7 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
         const actions = [
           approveMasterContractAction({ signature }),
           burnLiquidityAction({
-            address: pool.liquidityToken.address as Address,
+            address: pool.liquidityToken.address,
             amount: slpAmountToRemove.quotient,
             recipient: indexOfWETH >= 0 ? contract.address : address,
             liquidityOutput,
@@ -269,14 +268,15 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
         }
 
         return {
-          from: address,
+          account: address,
           to: contract.address,
+          chainId: _pool.chainId as ChainId,
           data: batchAction({
             actions,
           }),
-        }
+        } satisfies UseCallParameters
       } catch (_e: unknown) {
-        return {}
+        return undefined
       }
     }, [
       chain?.id,
@@ -293,20 +293,29 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
       signature,
     ])
 
-    const { config } = usePrepareSendTransaction({
+    const { isError: isSimulationError } = useCall({
       ...prepare,
-      chainId: _pool.chainId,
-      enabled: Boolean(approved && Number(percentage) > 0),
-    })
-
-    const { sendTransaction, isLoading: isWritePending } = useSendTransaction({
-      ...config,
-      onSettled,
-      onSuccess: () => {
-        setPercentage('0')
-        setSignature(undefined)
+      query: {
+        enabled: Boolean(approved && Number(percentage) > 0),
       },
     })
+
+    const { sendTransactionAsync, isLoading: isWritePending } =
+      useSendTransaction({
+        mutation: {
+          onSuccess,
+        },
+      })
+
+    const send = useMemo(() => {
+      if (!prepare || isSimulationError) return undefined
+
+      return async () => {
+        try {
+          await sendTransactionAsync(prepare)
+        } catch {}
+      }
+    }, [sendTransactionAsync, isSimulationError, prepare])
 
     return (
       <div>
@@ -340,7 +349,7 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
                 size="default"
                 variant="outline"
                 fullWidth
-                chainId={_pool.chainId}
+                chainId={_pool.chainId as ChainId}
               >
                 <Checker.Guard
                   size="default"
@@ -356,7 +365,9 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
                     chainId={chainId}
                     id="remove-liquidity-trident-approve-bentobox"
                     masterContract={
-                      getTridentRouterContractConfig(_pool.chainId).address
+                      getTridentRouterContractConfig(
+                        _pool.chainId as TridentChainId,
+                      ).address
                     }
                   >
                     <Checker.ApproveERC20
@@ -366,17 +377,17 @@ export const RemoveSectionTrident: FC<RemoveSectionTridentProps> =
                       id="approve-remove-liquidity-slp"
                       amount={slpAmountToRemove}
                       contract={
-                        getTridentRouterContractConfig(_pool.chainId).address
+                        getTridentRouterContractConfig(
+                          _pool.chainId as TridentChainId,
+                        ).address
                       }
                     >
                       <Checker.Success tag={APPROVE_TAG_REMOVE_TRIDENT}>
                         <Button
                           size="default"
-                          onClick={() => sendTransaction?.()}
+                          onClick={send}
                           fullWidth
-                          disabled={
-                            !approved || isWritePending || !sendTransaction
-                          }
+                          disabled={!approved || isWritePending || !send}
                           testId="remove-liquidity"
                         >
                           {isWritePending ? (

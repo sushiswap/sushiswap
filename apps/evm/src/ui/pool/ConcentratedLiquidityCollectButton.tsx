@@ -3,23 +3,20 @@
 import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import {
   ConcentratedLiquidityPosition,
+  UseCallParameters,
   getV3NonFungiblePositionManagerContractConfig,
-  useNetwork,
-  usePrepareSendTransaction,
+  useAccount,
+  useCall,
+  usePublicClient,
   useSendTransaction,
 } from '@sushiswap/wagmi'
-import {
-  SendTransactionResult,
-  waitForTransaction,
-} from '@sushiswap/wagmi/actions'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
 import { FC, ReactElement, useCallback, useMemo } from 'react'
 import { unwrapToken } from 'src/lib/functions'
 import { ChainId } from 'sushi/chain'
 import { isSushiSwapV3ChainId } from 'sushi/config'
 import { Amount, Type } from 'sushi/currency'
 import { NonfungiblePositionManager, Position } from 'sushi/pool'
-import { Hex, UserRejectedRequestError } from 'viem'
+import { Hex, SendTransactionReturnType, UserRejectedRequestError } from 'viem'
 
 interface ConcentratedLiquidityCollectButton {
   positionDetails: ConcentratedLiquidityPosition | undefined
@@ -28,7 +25,12 @@ interface ConcentratedLiquidityCollectButton {
   token1: Type | undefined
   account: `0x${string}` | undefined
   chainId: ChainId
-  children(params: ReturnType<typeof useSendTransaction>): ReactElement
+  children(
+    params: Omit<
+      ReturnType<typeof useSendTransaction>,
+      'sendTransaction' | 'sendTransactionAsync'
+    > & { send: (() => Promise<void>) | undefined },
+  ): ReactElement
 }
 
 export const ConcentratedLiquidityCollectButton: FC<
@@ -42,9 +44,10 @@ export const ConcentratedLiquidityCollectButton: FC<
   token0,
   token1,
 }) => {
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
+  const client = usePublicClient()
 
-  const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
+  const prepare = useMemo(() => {
     if (
       token0 &&
       token1 &&
@@ -72,29 +75,26 @@ export const ConcentratedLiquidityCollectButton: FC<
 
       return {
         to: getV3NonFungiblePositionManagerContractConfig(chainId).address,
+        chainId,
         data: calldata as Hex,
         value: BigInt(value),
-      }
+      } satisfies UseCallParameters
     }
 
-    return {}
+    return undefined
   }, [account, chainId, position, positionDetails, token0, token1])
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, error: Error | null) => {
-      if (error instanceof UserRejectedRequestError) {
-        createErrorToast(error?.message, true)
-      }
-
-      if (!data || !position) return
+  const onSuccess = useCallback(
+    (hash: SendTransactionReturnType) => {
+      if (!position) return
 
       const ts = new Date().getTime()
       void createToast({
         account,
         type: 'claimRewards',
         chainId,
-        txHash: data.hash,
-        promise: waitForTransaction({ hash: data.hash }),
+        txHash: hash,
+        promise: client.waitForTransactionReceipt({ hash }),
         summary: {
           pending: `Collecting fees from your ${position.amount0.currency.symbol}/${position.amount1.currency.symbol} position`,
           completed: `Collected fees from your ${position.amount0.currency.symbol}/${position.amount1.currency.symbol} position`,
@@ -104,26 +104,49 @@ export const ConcentratedLiquidityCollectButton: FC<
         groupTimestamp: ts,
       })
     },
-    [account, chainId, position],
+    [account, chainId, client, position],
   )
 
-  const { config } = usePrepareSendTransaction({
+  const onError = useCallback((e: Error) => {
+    if (e instanceof UserRejectedRequestError) {
+      createErrorToast(e?.message, true)
+    }
+  }, [])
+
+  const { isError: isSimulationError } = useCall({
     ...prepare,
-    chainId,
-    enabled: Boolean(
-      token0 &&
-        token1 &&
-        account &&
-        position &&
-        positionDetails &&
-        chainId === chain?.id,
-    ),
+    query: {
+      enabled: Boolean(
+        token0 &&
+          token1 &&
+          account &&
+          position &&
+          positionDetails &&
+          chainId === chain?.id,
+      ),
+    },
   })
 
-  const data = useSendTransaction({
-    ...config,
-    onSettled,
+  const {
+    sendTransactionAsync,
+    sendTransaction: _,
+    ...rest
+  } = useSendTransaction({
+    mutation: {
+      onSuccess,
+      onError,
+    },
   })
 
-  return children(data)
+  const send = useMemo(() => {
+    if (isSimulationError || !prepare) return
+
+    return async () => {
+      try {
+        await sendTransactionAsync(prepare)
+      } catch {}
+    }
+  }, [isSimulationError, prepare, sendTransactionAsync])
+
+  return children({ ...rest, send })
 }

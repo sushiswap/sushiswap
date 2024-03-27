@@ -36,15 +36,25 @@ export async function getVaultsReserves({
   vaultIds,
 }: GetVaultsReserves) {
   const result = await client.multicall({
-    allowFailure: false,
+    allowFailure: true,
     contracts: getVaultsReservesContracts({ vaultIds }),
   })
 
-  return result.map((r, i) => ({
-    vaultId: vaultIds[i]!,
-    reserve0: r.amountToken0,
-    reserve1: r.amountToken1,
-  }))
+  return result.map((res, i) => {
+    if (typeof res.result === 'undefined') return null
+    return getVaultsReservesSelect(vaultIds[i]!, res.result)
+  })
+}
+
+export function getVaultsReservesSelect(
+  vaultId: string,
+  result: { amountToken0: bigint; amountToken1: bigint },
+) {
+  return {
+    vaultId,
+    reserve0: result.amountToken0,
+    reserve1: result.amountToken1,
+  }
 }
 
 interface GetVaultReserves {
@@ -53,6 +63,11 @@ interface GetVaultReserves {
 }
 
 export async function getVaultReserves({ client, vaultId }: GetVaultReserves) {
-  const result = await getVaultsReserves({ client, vaultIds: [vaultId] })
-  return result[0]!
+  const results = await getVaultsReserves({ client, vaultIds: [vaultId] })
+
+  if (!results[0]) {
+    throw new Error(`Failed to fetch reserves for vaultId: ${vaultId}`)
+  }
+
+  return results[0]!
 }

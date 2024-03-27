@@ -22,6 +22,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ESNext",
+    "skipLibCheck": true,
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true

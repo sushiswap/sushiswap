@@ -1,18 +1,35 @@
 'use client'
 
-import { useContractRead } from 'wagmi'
-
-import { getMulticall3ContractConfig } from '../contracts'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { useBlockNumber, useReadContract } from 'wagmi'
+import { Multicall3ChainId, getMulticall3ContractConfig } from '../contracts'
 
 // TODO: Readd direct export, not sure why it's not working
 export const useCurrentBlockTimestamp = (
-  chainId: number | undefined,
+  chainId: Multicall3ChainId,
   enabled = true,
 ) => {
-  return useContractRead({
+  const queryClient = useQueryClient()
+  const query = useReadContract({
     ...getMulticall3ContractConfig(chainId),
     functionName: 'getCurrentBlockTimestamp',
-    enabled,
-    watch: true,
+    query: {
+      enabled,
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({ chainId, watch: true })
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries(
+        query.queryKey,
+        {},
+        { cancelRefetch: false },
+      )
+    }
+  }, [blockNumber, queryClient, query.queryKey])
+
+  return query
 }

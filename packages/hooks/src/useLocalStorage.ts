@@ -1,4 +1,5 @@
-// Hook
+'use client'
+
 import {
   type Dispatch,
   type SetStateAction,

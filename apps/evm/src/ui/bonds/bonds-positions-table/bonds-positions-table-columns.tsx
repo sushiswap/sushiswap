@@ -16,21 +16,25 @@ import {
 } from '@sushiswap/ui'
 import {
   Checker,
-  SendTransactionResult,
+  UseSimulateContractParameters,
   useAccount,
-  useNetwork,
-  usePrepareSendTransaction,
-  useSendTransaction,
-  waitForTransaction,
+  useEstimateGas,
+  usePublicClient,
+  useSimulateContract,
+  useWriteContract,
 } from '@sushiswap/wagmi'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
 import { ColumnDef } from '@tanstack/react-table'
 import format from 'date-fns/format'
 import formatDistance from 'date-fns/formatDistance'
 import { useCallback, useMemo, useState } from 'react'
+import { gasMargin } from 'sushi'
 import { Amount, Token } from 'sushi/currency'
 import { formatUSD } from 'sushi/format'
-import { UserRejectedRequestError, encodeFunctionData } from 'viem'
+import {
+  Address,
+  SendTransactionReturnType,
+  UserRejectedRequestError,
+} from 'viem'
 
 export const PAYOUT_ASSET_COLUMN: ColumnDef<BondPosition, unknown> = {
   id: 'payout-asset',
@@ -143,24 +147,20 @@ const CLAIM_CELL = ({ position }: { position: BondPosition }) => {
   const token = new Token(position.payoutToken)
   const balance = Amount.fromRawAmount(token, position.balance)
 
-  const { chain } = useNetwork()
+  const { address, chain } = useAccount()
+  const client = usePublicClient()
 
-  const { address } = useAccount()
-
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, error: Error | null) => {
-      if (error instanceof UserRejectedRequestError) {
-        createErrorToast(error?.message, true)
-      }
-      if (!data) return
+  const onSuccess = useCallback(
+    (hash: SendTransactionReturnType) => {
+      setClaimed(true)
 
       const ts = new Date().getTime()
       void createToast({
         account: address,
         type: 'mint',
         chainId: position.chainId,
-        txHash: data.hash,
-        promise: waitForTransaction({ hash: data.hash }),
+        txHash: hash,
+        promise: client.waitForTransactionReceipt({ hash }),
         summary: {
           pending: `Claiming bond (${balance.toSignificant(6)} ${
             balance.currency.symbol
@@ -176,20 +176,25 @@ const CLAIM_CELL = ({ position }: { position: BondPosition }) => {
         groupTimestamp: ts,
       })
     },
-    [address, balance, position.chainId],
+    [client, address, balance, position.chainId],
   )
 
-  const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
+  const onError = useCallback((e: Error) => {
+    if (e instanceof UserRejectedRequestError) {
+      createErrorToast(e.message, true)
+    }
+  }, [])
+
+  const prepare = useMemo(() => {
     if (!address || chain?.id !== position.chainId || !claimable) return {}
 
     return {
-      to: position.tellerAddress,
-      data: encodeFunctionData({
-        abi: bondFixedTermTellerAbi,
-        functionName: 'redeem',
-        args: [BigInt(position.bondTokenId), BigInt(position.balance)],
-      }),
-    }
+      address: position.tellerAddress as Address,
+      abi: bondFixedTermTellerAbi,
+      chainId: position.chainId,
+      functionName: 'redeem',
+      args: [BigInt(position.bondTokenId), BigInt(position.balance)],
+    } as const satisfies UseSimulateContractParameters
   }, [
     address,
     chain?.id,
@@ -200,20 +205,43 @@ const CLAIM_CELL = ({ position }: { position: BondPosition }) => {
     claimable,
   ])
 
-  const { config, isError } = usePrepareSendTransaction({
+  const { data: estimatedGas } = useEstimateGas({
     ...prepare,
-    chainId: position.chainId,
-    enabled: Boolean(address && chain?.id === position.chainId && claimable),
+    query: {
+      enabled: Boolean(address && chain?.id === position.chainId && claimable),
+    },
   })
 
-  const { sendTransactionAsync, isLoading: isWritePending } =
-    useSendTransaction({
-      ...config,
-      gas: config?.gas ? (config.gas * 105n) / 100n : undefined,
-      chainId: position.chainId,
-      onSettled,
-      onSuccess: () => setClaimed(true),
-    })
+  const adjustedGas = estimatedGas ? gasMargin(estimatedGas) : undefined
+
+  const { data: simulation, isError } = useSimulateContract({
+    ...prepare,
+    query: {
+      enabled: Boolean(address && chain?.id === position.chainId && claimable),
+    },
+  })
+
+  const { writeContractAsync, isLoading: isWritePending } = useWriteContract({
+    mutation: {
+      onSuccess,
+      onError,
+    },
+  })
+
+  const write = useMemo(() => {
+    if (!simulation || !adjustedGas) return undefined
+
+    return async (confirm: () => void) => {
+      try {
+        await writeContractAsync({
+          ...simulation.request,
+          gas: adjustedGas,
+        })
+
+        confirm()
+      } catch {}
+    }
+  }, [simulation, writeContractAsync, adjustedGas])
 
   return (
     <div className="w-full flex justify-center">
@@ -243,8 +271,8 @@ const CLAIM_CELL = ({ position }: { position: BondPosition }) => {
                 variant="secondary"
                 className="text-xs"
                 fullWidth
-                loading={!sendTransactionAsync || isWritePending || !claimable}
-                onClick={() => sendTransactionAsync?.().then(() => confirm())}
+                loading={!write || isWritePending || !claimable}
+                onClick={() => write?.(confirm)}
               >
                 {isError ? (
                   'Shoot! Something went wrong :('

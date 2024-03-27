@@ -12,6 +12,7 @@ interface BridgeParams {
 
 export enum SushiXSwap2Adapter {
   Stargate = 0,
+  Squid = 1,
 }
 
 export enum TransactionType {

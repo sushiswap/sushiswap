@@ -9,7 +9,7 @@ import { createErrorToast } from '@sushiswap/ui/components/toast'
 import React, { FC, Suspense, useCallback } from 'react'
 import { Chain, ChainId } from 'sushi/chain'
 import { ProviderRpcError, UserRejectedRequestError } from 'viem'
-import { useNetwork, useSwitchNetwork } from 'wagmi'
+import { useAccount, useSwitchChain } from 'wagmi'
 
 export const HeaderNetworkSelector: FC<{
   networks: ChainId[]
@@ -17,15 +17,15 @@ export const HeaderNetworkSelector: FC<{
   onChange?(chainId: ChainId): void
 }> = ({ networks, selectedNetwork, onChange }) => {
   const isMounted = useIsMounted()
-  const { switchNetworkAsync } = useSwitchNetwork()
-  const { chain } = useNetwork()
+  const { switchChainAsync } = useSwitchChain()
+  const { chain } = useAccount()
 
   const onSwitchNetwork = useCallback<NetworkSelectorOnSelectCallback>(
     async (el, close) => {
       console.debug('onSwitchNetwork', el)
       try {
-        if (switchNetworkAsync && chain?.id !== el) {
-          await switchNetworkAsync(el)
+        if (switchChainAsync && chain?.id !== el) {
+          await switchChainAsync({ chainId: el })
         }
 
         if (selectedNetwork !== el && onChange) {
@@ -41,7 +41,7 @@ export const HeaderNetworkSelector: FC<{
         }
       }
     },
-    [chain?.id, onChange, selectedNetwork, switchNetworkAsync],
+    [chain?.id, onChange, selectedNetwork, switchChainAsync],
   )
 
   const selected = isMounted

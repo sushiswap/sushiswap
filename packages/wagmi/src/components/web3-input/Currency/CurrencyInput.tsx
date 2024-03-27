@@ -120,8 +120,6 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
 
   const _onChange = useCallback(
     (value: string) => {
-      console.log('change!')
-
       setLocalValue(value)
       startTransition(() => {
         onChange?.(value)

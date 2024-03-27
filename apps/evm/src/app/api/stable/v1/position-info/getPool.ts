@@ -7,7 +7,7 @@ import {
 } from 'sushi/config'
 import { Token } from 'sushi/currency'
 import { Address, createClient } from 'viem'
-import { multicall } from 'viem/contract'
+import { multicall } from 'viem/actions'
 
 const abiShard = [
   {

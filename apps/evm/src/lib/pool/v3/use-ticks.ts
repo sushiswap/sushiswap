@@ -1,6 +1,6 @@
 'use client'
 
-import { Address, useContractReads } from '@sushiswap/wagmi'
+import { useReadContracts } from '@sushiswap/wagmi'
 import {
   getV3FactoryContractConfig,
   getV3TickLensContractConfig,
@@ -14,6 +14,7 @@ import {
 } from 'sushi/config'
 import { Type } from 'sushi/currency'
 import { computeSushiSwapV3PoolAddress, nearestUsableTick } from 'sushi/pool'
+import { Address } from 'viem'
 import { Writeable } from 'zod'
 
 interface useTicksProps {
@@ -105,10 +106,12 @@ export function useTicks({
     return reads
   }, [chainId, maxIndex, minIndex, poolAddress])
 
-  const reads = useContractReads({
+  const reads = useReadContracts({
     contracts: contractReads,
-    enabled: true,
     allowFailure: false,
+    query: {
+      enabled: true,
+    },
   })
 
   return useMemo(() => {

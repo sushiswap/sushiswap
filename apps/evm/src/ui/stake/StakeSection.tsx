@@ -22,7 +22,7 @@ const _StakeSection = () => {
     return tryParseAmount(input, SUSHI[ChainId.ETHEREUM])
   }, [input])
 
-  const { writeAsync, isLoading: isWritePending } = useBarDeposit({
+  const { write, isLoading: isWritePending } = useBarDeposit({
     amount: parsedInput,
     enabled: Boolean(approved && parsedInput?.greaterThan(ZERO)),
   })
@@ -62,9 +62,9 @@ const _StakeSection = () => {
               <Checker.Success tag={APPROVE_TAG_STAKE}>
                 <Button
                   size="xl"
-                  onClick={() => writeAsync?.().then(() => setInput(''))}
+                  onClick={() => write?.().then(() => setInput(''))}
                   fullWidth
-                  disabled={isWritePending || !approved || !writeAsync}
+                  disabled={isWritePending || !approved || !write}
                   testId="stake-sushi"
                 >
                   {isWritePending ? <Dots>Confirm transaction</Dots> : 'Stake'}

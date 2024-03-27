@@ -3,12 +3,13 @@ import { Button } from '@sushiswap/ui/components/button'
 import { Currency } from '@sushiswap/ui/components/currency'
 import { LinkInternal } from '@sushiswap/ui/components/link'
 import { List } from '@sushiswap/ui/components/list'
-import { useNetwork, useSwitchNetwork } from '@sushiswap/wagmi'
+import { useAccount, useSwitchChain } from '@sushiswap/wagmi'
 import React, { FC, useCallback } from 'react'
 import { PositionWithPool } from 'src/types'
 import { formatPercent, formatUSD } from 'sushi/format'
 import { ZERO } from 'sushi/math'
 
+import { ChainId } from 'sushi/chain'
 import { PoolPositionProvider, usePoolPosition } from './PoolPositionProvider'
 import {
   PoolPositionRewardsProvider,
@@ -40,8 +41,8 @@ export const PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
 const _PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
   row,
 }) => {
-  const { switchNetwork } = useSwitchNetwork()
-  const { chain } = useNetwork()
+  const { switchChain } = useSwitchChain()
+  const { chain } = useAccount()
   const { underlying0, underlying1, value1, value0 } = usePoolPosition()
   const {
     underlying1: stakedUnderlying1,
@@ -55,11 +56,11 @@ const _PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
 
   const _harvest = useCallback(() => {
     if (row.pool.chainId !== chain?.id) {
-      switchNetwork?.(row.pool.chainId)
+      switchChain?.({ chainId: row.pool.chainId as ChainId })
     } else if (harvest) {
       harvest()
     }
-  }, [chain?.id, harvest, row.pool.chainId, switchNetwork])
+  }, [chain?.id, harvest, row.pool.chainId, switchChain])
 
   return (
     <div className="flex flex-col gap-3 p-2">

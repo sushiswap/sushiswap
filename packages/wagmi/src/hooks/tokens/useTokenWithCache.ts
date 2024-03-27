@@ -1,12 +1,13 @@
 import { getToken, saveTokens } from '@sushiswap/dexie'
 import { useCustomTokens } from '@sushiswap/hooks'
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
 import { useQuery } from '@tanstack/react-query'
+import { getToken as getTokenWeb3 } from '@wagmi/core/actions'
 import { useCallback } from 'react'
 import { ChainId } from 'sushi/chain'
 import { Token } from 'sushi/currency'
-import { isAddress } from 'viem'
-import { Address } from 'wagmi'
-import { fetchToken } from 'wagmi/actions'
+import { Address, isAddress } from 'viem'
+import { useConfig } from 'wagmi'
 
 interface UseTokenParams<T extends boolean> {
   chainId: ChainId | undefined
@@ -62,6 +63,7 @@ interface GetTokenWithQueryCacheFn {
   address: string | undefined | null
   customTokens: Record<string, Token>
   hasToken: (cur: string | Token) => boolean
+  config: PublicWagmiConfig
 }
 
 export const getTokenWithCacheQueryFn = async ({
@@ -69,6 +71,7 @@ export const getTokenWithCacheQueryFn = async ({
   address,
   customTokens,
   hasToken,
+  config,
 }: GetTokenWithQueryCacheFn) => {
   // Try fetching from localStorage
   if (chainId && hasToken(`${chainId}:${address}`)) {
@@ -119,22 +122,27 @@ export const getTokenWithCacheQueryFn = async ({
 
     // Try fetching from wagmi
   } else if (chainId) {
-    const resp = await fetchToken({ address: address as Address, chainId })
+    const resp = await getTokenWeb3(config, {
+      address: address as Address,
+      chainId,
+    })
     const { decimals, address: tokenAddress, symbol, name } = resp
 
-    await saveTokens({
-      tokens: [
-        {
-          address: tokenAddress,
-          chainId: Number(chainId),
-          name,
-          symbol,
-          decimals,
-          status: 'UNKNOWN',
-          id: `${chainId}:${tokenAddress}`,
-        },
-      ],
-    })
+    if (name && symbol) {
+      await saveTokens({
+        tokens: [
+          {
+            address: tokenAddress,
+            chainId: Number(chainId),
+            name,
+            symbol,
+            decimals,
+            status: 'UNKNOWN',
+            id: `${chainId}:${tokenAddress}`,
+          },
+        ],
+      })
+    }
 
     return {
       address: tokenAddress,
@@ -162,10 +170,18 @@ export const useTokenWithCache = <T extends boolean = false>({
     [chainId, withStatus],
   )
 
+  const config = useConfig()
+
   return useQuery({
     queryKey: ['token', { chainId, address }],
     queryFn: async () =>
-      getTokenWithCacheQueryFn({ chainId, address, customTokens, hasToken }),
+      getTokenWithCacheQueryFn({
+        chainId,
+        address,
+        customTokens,
+        hasToken,
+        config,
+      }),
     enabled: Boolean(enabled && chainId && address && isAddress(address)),
     select,
     keepPreviousData,

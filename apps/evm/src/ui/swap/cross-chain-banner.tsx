@@ -54,7 +54,7 @@ export const CrossChainBanner: FC = () => {
                 </motion.div>
               </CardTitle>
               <CardDescription>
-                Swap tokens natively across 7 chains including Ethereum,
+                Swap tokens natively across 13 chains including Ethereum,
                 Arbitrum, Optimism, Polygon, Base and more!{' '}
                 <a
                   target="_blank"

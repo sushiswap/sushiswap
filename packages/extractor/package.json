@@ -36,7 +36,7 @@
     "@uniswap/v3-core": "1.0.1",
     "abitype": "0.9.8",
     "sushi": "workspace:*",
-    "viem": "1.21.4"
+    "viem": "2.8.13"
   },
   "devDependencies": {
     "@sushiswap/jest-config": "workspace:*",

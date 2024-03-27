@@ -2,8 +2,8 @@
   "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/node18/tsconfig"],
   "include": ["src"],
   "exclude": [
-    "node_modules", 
-    "dist", 
+    "node_modules",
+    "dist",
     ".turbo",
     "src/**/*.test.ts",
     "src/**/*.test-d.ts",
@@ -12,10 +12,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "lib": ["ESNext"],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "target": "ESNext",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

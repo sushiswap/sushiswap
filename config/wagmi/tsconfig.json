@@ -1,14 +1,7 @@
 {
-  "extends": [
-    "@tsconfig/strictest/tsconfig",
-    "@tsconfig/esm/tsconfig"
-  ],
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
+  "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/esm/tsconfig"],
+  "include": ["src"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",

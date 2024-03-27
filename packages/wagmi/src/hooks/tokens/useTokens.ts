@@ -1,34 +1,45 @@
 'use client'
 
-import { QueryFunction } from '@tanstack/react-query'
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
+import { QueryFunction, useQuery } from '@tanstack/react-query'
+import {
+  GetTokenParameters,
+  GetTokenReturnType,
+  getToken,
+} from '@wagmi/core/actions'
 import { useMemo } from 'react'
-import { Address, useQuery } from 'wagmi'
-import { FetchTokenArgs, FetchTokenResult, fetchToken } from 'wagmi/actions'
+import { ChainId } from 'sushi'
+import { Address } from 'viem'
+import { useConfig } from 'wagmi'
 
-type QueryKeyArgs = { tokens: Partial<FetchTokenArgs>[] }
+type QueryKeyArgs = {
+  tokens: Partial<GetTokenParameters>[]
+  config: PublicWagmiConfig
+}
 // type QueryKeyConfig = {}
 
-export type FetchTokensArgs = { tokens: FetchTokenArgs[] }
-export type FetchTokensResult = FetchTokenResult[]
+export type FetchTokensArgs = { tokens: GetTokenParameters[] }
+export type FetchTokensResult = GetTokenReturnType[]
 export type UseTokensArgs = Partial<FetchTokensArgs>
 export type UseTokensConfig = Partial<Parameters<typeof useQuery>['2']>
 
-function queryKey({ tokens }: QueryKeyArgs) {
-  return [{ entity: 'tokens', tokens: tokens || [] }] as const
+function queryKey({ tokens, config }: QueryKeyArgs) {
+  return [{ entity: 'tokens', tokens: tokens || [], config }] as const
 }
 
 const queryFn: QueryFunction<
   FetchTokensResult,
   ReturnType<typeof queryKey>
-> = ({ queryKey: [{ tokens }] }) => {
+> = ({ queryKey: [{ tokens, config }] }) => {
   if (!tokens) throw new Error('tokens is required')
   if (tokens.filter((el) => !el.address).length > 0)
     throw new Error('address is required')
+
   return Promise.all(
     tokens.map((token) => {
-      return fetchToken({
+      return getToken(config, {
         address: token.address as Address,
-        chainId: token.chainId,
+        chainId: token.chainId as ChainId,
         formatUnits: token.formatUnits,
       })
     }),
@@ -45,6 +56,8 @@ export function useTokens({
   onSettled,
   onSuccess,
 }: UseTokensArgs & UseTokensConfig) {
+  const config = useConfig()
+
   const _enabled = useMemo(() => {
     return Boolean(
       tokens &&
@@ -59,7 +72,7 @@ export function useTokens({
     unknown,
     FetchTokensResult,
     ReturnType<typeof queryKey>
-  >(queryKey({ tokens }), queryFn, {
+  >(queryKey({ tokens, config }), queryFn, {
     cacheTime,
     enabled: _enabled,
     staleTime,

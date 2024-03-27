@@ -1,14 +1,14 @@
 'use client'
 
 import { Collapsible, Explainer, SkeletonBox, classNames } from '@sushiswap/ui'
-import { Address, useAccount } from '@sushiswap/wagmi'
+import { useAccount } from '@sushiswap/wagmi'
 import { AddressToEnsResolver } from '@sushiswap/wagmi/components/account/AddressToEnsResolver'
 import React, { FC } from 'react'
 import { Chain } from 'sushi/chain'
 import { Native } from 'sushi/currency'
 import { shortenAddress } from 'sushi/format'
 import { ZERO } from 'sushi/math'
-import { isAddress } from 'viem'
+import { Address, isAddress } from 'viem'
 import {
   warningSeverity,
   warningSeverityClassName,

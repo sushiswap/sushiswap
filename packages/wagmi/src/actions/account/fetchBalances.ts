@@ -1,10 +1,12 @@
-import { Address, erc20ABI, readContracts } from '@wagmi/core'
+import { Config, readContracts } from '@wagmi/core'
 import { ChainId } from 'sushi/chain'
+import { Address, erc20Abi } from 'viem'
 
 export async function fetchBalances(
   args: { token: string; user: string; chainId: ChainId }[],
+  config: Config,
 ): Promise<Record<string, string>> {
-  const balances = await readContracts({
+  const balances = await readContracts(config, {
     allowFailure: true,
     contracts: args.map(
       ({ token, user, chainId }) =>
@@ -13,7 +15,7 @@ export async function fetchBalances(
           functionName: 'balanceOf',
           args: [user as Address],
           chainId,
-          abi: erc20ABI,
+          abi: erc20Abi,
         }) as const,
     ),
   }).then((values) =>

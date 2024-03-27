@@ -1,18 +1,8 @@
-import { allChains, allProviders } from '@sushiswap/wagmi-config'
-import {
-  Address,
-  configureChains,
-  createConfig,
-  erc20ABI,
-  readContract,
-} from '@wagmi/core'
+import { createConfig, readContract } from '@wagmi/core'
 import { isPromiseFulfilled } from 'sushi/validate'
+import { publicWagmiConfig } from '@sushiswap/wagmi-config'
 
-const { publicClient } = configureChains(allChains, allProviders)
-createConfig({
-  autoConnect: true,
-  publicClient,
-})
+const config = createConfig(publicWagmiConfig)
 
 export async function fetchBalances(
   args: { token: string; user: string; chainId: number }[],
@@ -33,12 +23,31 @@ export async function fetchBalances(
 
   const balances = await Promise.allSettled(
     args.map(({ token, user, chainId }) =>
-      readContract({
-        address: token as Address,
+      readContract(config, {
+        address: token as `0x${string}`,
         functionName: 'balanceOf',
-        args: [user as Address],
-        chainId,
-        abi: erc20ABI,
+        args: [user as `0x${string}`],
+        chainId: chainId as any,
+        abi: [
+          {
+            inputs: [
+              {
+                name: '_owner',
+                type: 'address',
+              },
+            ],
+            name: 'balanceOf',
+            outputs: [
+              {
+                name: 'balance',
+                type: 'uint256',
+              },
+            ],
+            payable: false,
+            stateMutability: 'view',
+            type: 'function',
+          },
+        ] as const,
       } as const),
     ),
   ).then((promiseSettledResults) => {

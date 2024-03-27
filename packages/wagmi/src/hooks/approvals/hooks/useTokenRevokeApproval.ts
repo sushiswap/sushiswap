@@ -1,15 +1,11 @@
 'use client'
 
-import { createToast } from '@sushiswap/ui/components/toast'
-import { SendTransactionResult, waitForTransaction } from '@wagmi/core'
+import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import { useCallback, useMemo, useState } from 'react'
 import { Token } from 'sushi/currency'
-import {
-  Address,
-  erc20ABI,
-  useContractWrite,
-  usePrepareContractWrite,
-} from 'wagmi'
+import { Address, UserRejectedRequestError, erc20Abi } from 'viem'
+import { usePublicClient, useSimulateContract, useWriteContract } from 'wagmi'
+import { SendTransactionReturnType } from 'wagmi/actions'
 
 interface UseTokenRevokeApproval {
   account: Address | undefined
@@ -22,26 +18,34 @@ export const useTokenRevokeApproval = ({
   spender,
   token,
 }: UseTokenRevokeApproval) => {
-  const [isPending, setIsPending] = useState(false)
-  const { config } = usePrepareContractWrite({
+  const [isPending, setPending] = useState(false)
+  const client = usePublicClient()
+  const { data: simulation } = useSimulateContract({
     address: token?.wrapped.address as Address,
-    abi: erc20ABI,
+    abi: erc20Abi,
     chainId: token?.chainId,
     functionName: 'approve',
     args: [spender, 0n],
-    enabled: Boolean(token),
+    query: { enabled: Boolean(token) },
   })
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined) => {
-      if (account && data && token) {
+  const onSuccess = useCallback(
+    async (data: SendTransactionReturnType) => {
+      if (!token) return
+
+      setPending(true)
+      try {
         const ts = new Date().getTime()
+        const receiptPromise = client.waitForTransactionReceipt({
+          hash: data,
+        })
+
         void createToast({
           account,
           type: 'swap',
           chainId: token.chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
+          txHash: data,
+          promise: receiptPromise,
           summary: {
             pending: `Revoking approval for ${token.symbol}`,
             completed: `Successfully revoked approval for ${token.symbol}`,
@@ -51,24 +55,42 @@ export const useTokenRevokeApproval = ({
           groupTimestamp: ts,
         })
 
-        waitForTransaction({ hash: data.hash }).finally(() => {
-          setIsPending(false)
-        })
+        await receiptPromise
+      } finally {
+        setPending(false)
       }
     },
-    [account, token],
+    [token, account, client],
   )
 
-  const write = useContractWrite({
-    ...config,
-    onSettled,
-    onSuccess: () => setIsPending(true),
+  const onError = useCallback((e: Error) => {
+    if (e instanceof Error) {
+      if (!(e instanceof UserRejectedRequestError)) {
+        createErrorToast(e.message, true)
+      }
+    }
+  }, [])
+
+  const { writeContractAsync, ...rest } = useWriteContract({
+    mutation: {
+      onError,
+      onSuccess,
+    },
   })
 
-  return useMemo(() => {
-    return {
-      ...write,
-      isPending,
+  const write = useMemo(() => {
+    if (!simulation) return undefined
+
+    return async () => {
+      try {
+        await writeContractAsync(simulation.request)
+      } catch {}
     }
-  }, [isPending, write])
+  }, [simulation, writeContractAsync])
+
+  return {
+    ...rest,
+    write,
+    isPending: isPending || rest.isLoading,
+  }
 }

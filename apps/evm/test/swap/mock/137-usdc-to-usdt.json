@@ -1,0 +1,47 @@
+{
+  "status": "Success",
+  "tokens": [
+    {
+      "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "symbol": "USDC",
+      "name": "USD Coin (PoS)",
+      "decimals": 6
+    },
+    {
+      "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+      "symbol": "USDT",
+      "name": "(PoS) Tether USD",
+      "decimals": 6
+    }
+  ],
+  "tokenFrom": 0,
+  "tokenTo": 1,
+  "primaryPrice": 1.0005808849077433,
+  "swapPrice": 0.99985774,
+  "priceImpact": 0.000722725087647369,
+  "amountIn": "100000000",
+  "assumedAmountOut": "99985774",
+  "gasSpent": 110000,
+  "route": [
+    {
+      "poolAddress": "0x8CFaab34f5159abf9C35587AC40d09a05dC94765",
+      "poolType": "Concentrated",
+      "poolName": "SushiSwapV3 0.01%",
+      "poolFee": 0.0001,
+      "tokenFrom": 0,
+      "tokenTo": 1,
+      "share": 1,
+      "assumedAmountIn": "100000000",
+      "assumedAmountOut": "99985774"
+    }
+  ],
+  "routeProcessorAddr": "0x46B3fDF7b5CDe91Ac049936bF0bDb12c5d22202e",
+  "routeProcessorArgs": {
+    "tokenIn": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    "amountIn": "100000000",
+    "tokenOut": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    "amountOutMin": "99485845",
+    "to": "0xc86498822EF633F6e1E971484C56e3a087ECC333",
+    "routeCode": "0x022791Bca1f2de4661ED88A30C99A7a9449Aa8417401ffff018CFaab34f5159abf9C35587AC40d09a05dC9476501c86498822EF633F6e1E971484C56e3a087ECC333"
+  }
+}

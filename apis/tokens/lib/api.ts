@@ -1,15 +1,12 @@
 import { createClient } from '@sushiswap/database'
-import { allChains, allProviders } from '@sushiswap/wagmi-config'
-import type { Address } from '@wagmi/core'
-import { configureChains, createConfig, fetchToken } from '@wagmi/core'
+import { publicWagmiConfig } from '@sushiswap/wagmi-config'
+import { createConfig, getToken as getTokenFromContract } from '@wagmi/core'
+import { ChainId } from 'sushi'
+import { type Address } from 'viem'
+
+const config = createConfig(publicWagmiConfig)
 
 // import * as defaultTokenList from '@sushiswap/default-token-list' assert { type: 'json' }
-
-const { publicClient } = configureChains(allChains, allProviders)
-createConfig({
-  autoConnect: true,
-  publicClient,
-})
 
 export async function getToken(chainId: number, address: string) {
   // TODO: example to include default list token
@@ -47,8 +44,8 @@ export async function getToken(chainId: number, address: string) {
     return token
   } catch {
     await client.$disconnect()
-    const tokenFromContract = await fetchToken({
-      chainId,
+    const tokenFromContract = await getTokenFromContract(config, {
+      chainId: chainId as ChainId,
       address: address as Address,
     }).catch(() => {
       return undefined

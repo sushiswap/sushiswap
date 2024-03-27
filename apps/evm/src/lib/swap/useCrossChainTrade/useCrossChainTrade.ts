@@ -1,5 +1,5 @@
 import { useTrade as useApiTrade } from '@sushiswap/react-query'
-import { readContract, useFeeData } from '@sushiswap/wagmi'
+import { useGasPrice, usePublicClient } from '@sushiswap/wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { log } from 'next-axiom'
 import { useMemo } from 'react'
@@ -41,8 +41,16 @@ export const useCrossChainTrade = ({
   enabled,
   tradeId,
 }: UseCrossChainTradeParams) => {
-  const { data: feeData0 } = useFeeData({ chainId: network0, enabled })
-  const { data: feeData1 } = useFeeData({ chainId: network1, enabled })
+  const client = usePublicClient({ chainId: network0 })
+
+  const { data: gasPrice0 } = useGasPrice({
+    chainId: network0,
+    query: { enabled },
+  })
+  const { data: gasPrice1 } = useGasPrice({
+    chainId: network1,
+    query: { enabled },
+  })
 
   const bridgePath = useMemo(
     () =>
@@ -69,7 +77,7 @@ export const useCrossChainTrade = ({
     toToken: bridgePath?.srcBridgeToken,
     amount,
     slippagePercentage,
-    gasPrice: feeData0?.gasPrice,
+    gasPrice: gasPrice0,
     recipient: STARGATE_ADAPTER_ADDRESS[network0],
     enabled: Boolean(isSrcSwap && enabled && amount),
     carbonOffset: false,
@@ -159,7 +167,7 @@ export const useCrossChainTrade = ({
     fromToken: bridgePath?.dstBridgeToken,
     toToken: token1,
     slippagePercentage,
-    gasPrice: feeData1?.gasPrice,
+    gasPrice: gasPrice1,
     recipient,
     enabled: Boolean(isDstSwap && enabled && dstAmountIn),
     carbonOffset: false,
@@ -183,6 +191,7 @@ export const useCrossChainTrade = ({
         recipient,
         srcTrade,
         dstTrade,
+        client,
       },
     ],
     queryFn: async (): Promise<UseCrossChainTradeReturn> => {
@@ -195,8 +204,8 @@ export const useCrossChainTrade = ({
           bridgeFees &&
           bridgeImpact &&
           dstAmountIn &&
-          feeData0?.gasPrice &&
-          feeData1?.gasPrice
+          gasPrice0 &&
+          gasPrice1
         )
       ) {
         throw new Error('useCrossChainTrade should not be enabled')
@@ -368,7 +377,7 @@ export const useCrossChainTrade = ({
         throw new Error('Crosschain swap not found.')
       }
 
-      let [fee] = (await readContract({
+      let [fee] = await client.readContract({
         address: STARGATE_ADAPTER_ADDRESS[network0],
         abi: stargateAdapterAbi,
         functionName: 'getFee',
@@ -377,11 +386,10 @@ export const useCrossChainTrade = ({
           1, // functionType
           isDstSwap ? STARGATE_ADAPTER_ADDRESS[network1] : recipient, // receiver
           dstGasEst, // gasAmount
-          0, // dustAmount
-          isDstSwap ? dstPayload : '0x', // payload
+          0n, // dustAmount
+          isDstSwap ? dstPayload! : '0x', // payload
         ],
-        chainId: network0,
-      })) as [bigint]
+      })
 
       // Add 20% buffer to STG fee
       fee = (fee * 5n) / 4n
@@ -395,7 +403,7 @@ export const useCrossChainTrade = ({
 
       const srcGasFee = Amount.fromRawAmount(
         Native.onChain(network0),
-        srcGasEst * feeData0.gasPrice,
+        srcGasEst * gasPrice0,
       )
 
       const bridgeFee = Amount.fromRawAmount(Native.onChain(network0), fee)
@@ -435,8 +443,8 @@ export const useCrossChainTrade = ({
           amount &&
           bridgeFees &&
           bridgePath &&
-          feeData0 &&
-          feeData1,
+          gasPrice0 &&
+          gasPrice1,
       ) &&
       (isSrcSwap ? Boolean(srcTrade) : Boolean(srcAmountOut)) &&
       (isDstSwap ? Boolean(dstTrade) : Boolean(dstAmountIn)),

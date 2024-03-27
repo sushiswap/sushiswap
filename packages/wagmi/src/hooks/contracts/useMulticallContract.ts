@@ -1,17 +1,18 @@
 'use client'
 
 import { ChainId } from 'sushi/chain'
-import { getContract } from 'viem'
-import { Address, usePublicClient } from 'wagmi'
+import { PublicClient, getContract } from 'viem'
+import { usePublicClient } from 'wagmi'
 
+import { useMemo } from 'react'
 import { multicallAbi } from 'sushi/abi'
 
-export const MULTICALL_ADDRESS: Record<number, string> = {
+export const MULTICALL_ADDRESS = {
   [ChainId.ETHEREUM]: '0x1F98415757620B543A52E61c46B32eB19261F984',
-  [ChainId.ROPSTEN]: '0x1F98415757620B543A52E61c46B32eB19261F984',
-  [ChainId.RINKEBY]: '0x1F98415757620B543A52E61c46B32eB19261F984',
-  [ChainId.GÖRLI]: '0x1F98415757620B543A52E61c46B32eB19261F984',
-  [ChainId.KOVAN]: '0x1F98415757620B543A52E61c46B32eB19261F984',
+  // [ChainId.ROPSTEN]: '0x1F98415757620B543A52E61c46B32eB19261F984',
+  // [ChainId.RINKEBY]: '0x1F98415757620B543A52E61c46B32eB19261F984',
+  // [ChainId.GÖRLI]: '0x1F98415757620B543A52E61c46B32eB19261F984',
+  // [ChainId.KOVAN]: '0x1F98415757620B543A52E61c46B32eB19261F984',
   [ChainId.POLYGON]: '0x1F98415757620B543A52E61c46B32eB19261F984',
   [ChainId.ARBITRUM]: '0xadF885960B47eA2CD9B55E6DAc6B42b7Cb2806dB',
   [ChainId.MOONBEAM]: '0x34c471ddceb20018bbb73f6d13709936fc870acc',
@@ -32,20 +33,24 @@ export const MULTICALL_ADDRESS: Record<number, string> = {
   [ChainId.BOBA]: '0x4864984234195A1a97fBA52038e3ad61A1dd16E4',
   [ChainId.KAVA]: '0x25836011Bbc0d5B6db96b20361A474CbC5245b45',
   [ChainId.METIS]: '0x25F80Cd6a1822046126Ad2AbCeCe969D0EeD4529',
-}
+} as const satisfies Record<number, string>
 
-export const getMulticallContractConfig = (chainId: number | undefined) => ({
-  address: (chainId && chainId in MULTICALL_ADDRESS
-    ? MULTICALL_ADDRESS[chainId]
-    : '') as Address,
+type MulticallChainId = keyof typeof MULTICALL_ADDRESS
+
+export const getMulticallContractConfig = (chainId: MulticallChainId) => ({
+  address: MULTICALL_ADDRESS[chainId],
   abi: multicallAbi,
 })
 
-export function useMulticallContract(chainId: number) {
-  const publicClient = usePublicClient({ chainId })
+export function useMulticallContract(chainId: MulticallChainId | undefined) {
+  const client = usePublicClient({ chainId }) as PublicClient
 
-  return getContract({
-    ...getMulticallContractConfig(chainId),
-    publicClient,
-  })
+  return useMemo(() => {
+    if (!chainId) return null
+
+    return getContract({
+      ...getMulticallContractConfig(chainId),
+      client,
+    })
+  }, [client, chainId])
 }

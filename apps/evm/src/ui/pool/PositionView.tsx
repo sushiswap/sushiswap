@@ -317,7 +317,7 @@ const Component: FC<{ id: string }> = ({ id }) => {
                       account={address}
                       chainId={chainId}
                     >
-                      {({ sendTransaction, isLoading }) => (
+                      {({ send, isLoading }) => (
                         <Checker.Connect
                           variant="outline"
                           fullWidth
@@ -332,7 +332,7 @@ const Component: FC<{ id: string }> = ({ id }) => {
                             <Button
                               fullWidth
                               disabled={isLoading}
-                              onClick={() => sendTransaction?.()}
+                              onClick={send}
                               size="default"
                             >
                               Collect

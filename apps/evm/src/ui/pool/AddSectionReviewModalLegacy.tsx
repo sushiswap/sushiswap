@@ -13,37 +13,257 @@ import { Button } from '@sushiswap/ui/components/button'
 import { Dots } from '@sushiswap/ui/components/dots'
 import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import {
-  Address,
   SushiSwapV2PoolState,
+  UseSimulateContractParameters,
+  getSushiSwapRouterContractConfig,
   useAccount,
-  useNetwork,
-  usePrepareSendTransaction,
-  useSendTransaction,
-  useSushiSwapRouterContract,
-  useWaitForTransaction,
+  usePublicClient,
+  useSimulateContract,
+  useTransactionDeadline,
+  useWaitForTransactionReceipt,
+  useWriteContract,
 } from '@sushiswap/wagmi'
-import {
-  SendTransactionResult,
-  waitForTransaction,
-} from '@sushiswap/wagmi/actions'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
+import { SendTransactionReturnType } from '@sushiswap/wagmi/actions'
 import { useApproved } from '@sushiswap/wagmi/systems/Checker/Provider'
-import { FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { FC, ReactNode, useCallback, useMemo } from 'react'
 import { APPROVE_TAG_ADD_LEGACY } from 'src/lib/constants'
-import { useTransactionDeadline } from 'src/lib/hooks'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'
 import { gasMargin, slippageAmount } from 'sushi/calculate'
 import { SushiSwapV2ChainId } from 'sushi/config'
 import { BentoBoxChainId } from 'sushi/config'
 import { Amount, Type } from 'sushi/currency'
 import { ZERO } from 'sushi/math'
-import { UserRejectedRequestError, encodeFunctionData } from 'viem'
+import { Address, UserRejectedRequestError } from 'viem'
 
 import { AddSectionReviewModal } from './AddSectionReviewModal'
 
+interface UseAddSushiSwapV2 {
+  token0: Type | undefined
+  token1: Type | undefined
+  chainId: SushiSwapV2ChainId
+  input0: Amount<Type> | undefined
+  input1: Amount<Type> | undefined
+  address: Address | undefined
+  minAmount0: Amount<Type> | undefined
+  minAmount1: Amount<Type> | undefined
+  deadline: bigint | undefined
+  mutation: {
+    onSuccess: (data: SendTransactionReturnType) => void
+    onError: (e: Error) => void
+  }
+}
+
+function useWriteWithNative({
+  token0,
+  token1,
+  chainId,
+  input0,
+  input1,
+  address,
+  minAmount0,
+  minAmount1,
+  deadline,
+  mutation,
+}: UseAddSushiSwapV2) {
+  const prepare = useMemo(() => {
+    if (
+      !token0 ||
+      !token1 ||
+      !input0 ||
+      !input1 ||
+      !address ||
+      !minAmount0 ||
+      !minAmount1 ||
+      !deadline
+    ) {
+      return undefined
+    }
+
+    if (minAmount0.equalTo(ZERO) || minAmount1.equalTo(ZERO)) {
+      return undefined
+    }
+
+    // With native
+    if (!token0.isNative && !token1.isNative) {
+      return undefined
+    }
+
+    const value = BigInt(
+      (token1.isNative ? input1 : input0).quotient.toString(),
+    )
+    const args = [
+      (token1.isNative ? token0 : token1).wrapped.address,
+      (token1.isNative ? input0 : input1).quotient,
+      (token1.isNative ? minAmount0 : minAmount1).quotient,
+      (token1.isNative ? minAmount1 : minAmount0).quotient,
+      address,
+      deadline,
+    ] as const
+
+    const contract = getSushiSwapRouterContractConfig(chainId)
+
+    return {
+      account: address,
+      address: contract.address,
+      chainId,
+      abi: contract.abi,
+      functionName: 'addLiquidityETH',
+      args,
+      value,
+    } as const satisfies UseSimulateContractParameters
+  }, [
+    address,
+    chainId,
+    deadline,
+    input0,
+    input1,
+    minAmount0,
+    minAmount1,
+    token0,
+    token1,
+  ])
+
+  const { data: simulation } = useSimulateContract({
+    ...(prepare as NonNullable<typeof prepare>),
+    query: {
+      enabled: Boolean(prepare),
+    },
+  })
+
+  const {
+    writeContractAsync,
+    writeContract: _,
+    ...rest
+  } = useWriteContract({
+    mutation,
+  })
+
+  const write = useMemo(() => {
+    if (!writeContractAsync || !simulation) return undefined
+
+    return async (confirm: () => void) => {
+      try {
+        await writeContractAsync({
+          ...simulation.request,
+          gas: simulation.request.gas
+            ? gasMargin(simulation.request.gas)
+            : undefined,
+        })
+
+        confirm()
+      } catch {}
+    }
+  }, [writeContractAsync, simulation])
+
+  return { ...rest, write }
+}
+
+function useWriteWithoutNative({
+  token0,
+  token1,
+  chainId,
+  input0,
+  input1,
+  address,
+  minAmount0,
+  minAmount1,
+  deadline,
+  mutation,
+}: UseAddSushiSwapV2) {
+  const prepare = useMemo(() => {
+    if (
+      !token0 ||
+      !token1 ||
+      !input0 ||
+      !input1 ||
+      !address ||
+      !minAmount0 ||
+      !minAmount1 ||
+      !deadline
+    ) {
+      return undefined
+    }
+
+    if (minAmount0.equalTo(ZERO) || minAmount1.equalTo(ZERO)) {
+      return undefined
+    }
+
+    // No native
+    if (token0.isNative || token1.isNative) {
+      return undefined
+    }
+
+    const args = [
+      token0.wrapped.address,
+      token1.wrapped.address,
+      input0.quotient,
+      input1.quotient,
+      minAmount0.quotient,
+      minAmount1.quotient,
+      address,
+      deadline,
+    ] as const
+
+    const contract = getSushiSwapRouterContractConfig(chainId)
+
+    return {
+      account: address,
+      address: contract.address,
+      chainId: chainId,
+      abi: contract.abi,
+      functionName: 'addLiquidity',
+      args,
+    } as const
+  }, [
+    address,
+    chainId,
+    deadline,
+    input0,
+    input1,
+    minAmount0,
+    minAmount1,
+    token0,
+    token1,
+  ])
+
+  const { data: simulation } = useSimulateContract({
+    ...(prepare as NonNullable<typeof prepare>),
+    query: {
+      enabled: Boolean(prepare),
+    },
+  })
+
+  const {
+    writeContractAsync,
+    writeContract: _,
+    ...rest
+  } = useWriteContract({
+    mutation,
+  })
+
+  const write = useMemo(() => {
+    if (!writeContractAsync || !simulation) return undefined
+
+    return async (confirm: () => void) => {
+      try {
+        await writeContractAsync({
+          ...simulation.request,
+          gas: simulation.request.gas
+            ? gasMargin(simulation.request.gas)
+            : undefined,
+        })
+
+        confirm()
+      } catch {}
+    }
+  }, [writeContractAsync, simulation])
+
+  return { ...rest, write }
+}
+
 interface AddSectionReviewModalLegacyProps {
   poolState: SushiSwapV2PoolState
-  poolAddress: string | undefined
+  poolAddress: Address | undefined
   chainId: SushiSwapV2ChainId
   token0: Type | undefined
   token1: Type | undefined
@@ -63,29 +283,27 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
     input0,
     input1,
     children,
-    onSuccess,
+    onSuccess: _onSuccess,
   }) => {
-    const deadline = useTransactionDeadline(chainId)
-    const contract = useSushiSwapRouterContract(chainId)
+    const { data: deadline } = useTransactionDeadline({ chainId })
     const { address } = useAccount()
-    const { chain } = useNetwork()
     const { approved } = useApproved(APPROVE_TAG_ADD_LEGACY)
     const [slippageTolerance] = useSlippageTolerance('addLiquidity')
+    const client = usePublicClient()
 
-    const onSettled = useCallback(
-      (data: SendTransactionResult | undefined, error: Error | null) => {
-        if (error instanceof UserRejectedRequestError) {
-          createErrorToast(error?.message, true)
-        }
-        if (!data || !token0 || !token1) return
+    const onSuccess = useCallback(
+      (hash: SendTransactionReturnType) => {
+        _onSuccess()
+
+        if (!token0 || !token1) return
 
         const ts = new Date().getTime()
         void createToast({
           account: address,
           type: 'mint',
           chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
+          txHash: hash,
+          promise: client.waitForTransactionReceipt({ hash }),
           summary: {
             pending: `Adding liquidity to the ${token0.symbol}/${token1.symbol} pair`,
             completed: `Successfully added liquidity to the ${token0.symbol}/${token1.symbol} pair`,
@@ -95,8 +313,14 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
           groupTimestamp: ts,
         })
       },
-      [chainId, token0, token1, address],
+      [client, chainId, token0, token1, address, _onSuccess],
     )
+
+    const onError = useCallback((e: Error) => {
+      if (e instanceof UserRejectedRequestError) {
+        createErrorToast(e?.message, true)
+      }
+    }, [])
 
     const [minAmount0, minAmount1] = useMemo(() => {
       return [
@@ -119,121 +343,45 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
       ]
     }, [poolState, input0, input1, slippageTolerance])
 
-    const [prepare, setPrepare] = useState<UsePrepareSendTransactionConfig>({})
-
-    useEffect(() => {
-      async function prep(): Promise<UsePrepareSendTransactionConfig> {
-        try {
-          if (
-            !token0 ||
-            !token1 ||
-            !chain?.id ||
-            !contract ||
-            !input0 ||
-            !input1 ||
-            !address ||
-            !minAmount0 ||
-            !minAmount1 ||
-            !deadline
-          )
-            return {}
-          const withNative = token0.isNative || token1.isNative
-
-          if (withNative) {
-            const value = BigInt(
-              (token1.isNative ? input1 : input0).quotient.toString(),
-            )
-            const args = [
-              (token1.isNative ? token0 : token1).wrapped.address as Address,
-              (token1.isNative ? input0 : input1).quotient,
-              (token1.isNative ? minAmount0 : minAmount1).quotient,
-              (token1.isNative ? minAmount1 : minAmount0).quotient,
-              address,
-              deadline,
-            ] as const
-
-            const gasLimit = await contract.estimateGas.addLiquidityETH(args, {
-              account: address,
-              value,
-            })
-
-            return {
-              account: address,
-              to: contract.address,
-              data: encodeFunctionData({
-                ...contract,
-                functionName: 'addLiquidityETH',
-                args,
-              }),
-              value,
-              gas: gasMargin(gasLimit),
-            }
-          } else {
-            const args = [
-              token0.wrapped.address as Address,
-              token1.wrapped.address as Address,
-              input0.quotient,
-              input1.quotient,
-              minAmount0.quotient,
-              minAmount1.quotient,
-              address,
-              deadline,
-            ] as const
-
-            const gasLimit = await contract.estimateGas.addLiquidity(args, {
-              account: address,
-            })
-            return {
-              account: address,
-              to: contract.address,
-              data: encodeFunctionData({
-                ...contract,
-                functionName: 'addLiquidity',
-                args,
-              }),
-              gas: gasMargin(gasLimit),
-            }
-          }
-        } catch (_e: unknown) {
-          //
-        }
-      }
-
-      prep().then((data) => setPrepare(data))
-    }, [
+    const writeWithNative = useWriteWithNative({
       token0,
       token1,
-      chain?.id,
-      contract,
+      chainId,
       input0,
       input1,
       address,
       minAmount0,
       minAmount1,
       deadline,
-    ])
+      mutation: {
+        onSuccess,
+        onError,
+      },
+    })
 
-    const { config } = usePrepareSendTransaction({
-      ...prepare,
+    const writeWithoutNative = useWriteWithoutNative({
+      token0,
+      token1,
       chainId,
-      enabled: Boolean(
-        approved &&
-          minAmount0?.greaterThan(ZERO) &&
-          minAmount1?.greaterThan(ZERO),
-      ),
+      input0,
+      input1,
+      address,
+      minAmount0,
+      minAmount1,
+      deadline,
+      mutation: {
+        onSuccess,
+        onError,
+      },
     })
 
-    const {
-      sendTransactionAsync,
-      isLoading: isWritePending,
-      data,
-    } = useSendTransaction({
-      ...config,
-      onSettled,
-      onSuccess,
-    })
+    // check shouldn't be necessary
+    const write = writeWithNative.write || writeWithoutNative.write
+    const data = writeWithNative.data || writeWithoutNative.data
+    const isWritePending =
+      writeWithNative.isLoading || writeWithoutNative.isLoading
 
-    const { status } = useWaitForTransaction({ chainId, hash: data?.hash })
+    const { status } = useWaitForTransactionReceipt({ chainId, hash: data })
 
     return (
       <DialogProvider>
@@ -256,14 +404,10 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
                 <DialogFooter>
                   <Button
                     size="xl"
-                    disabled={
-                      isWritePending || !approved || !sendTransactionAsync
-                    }
-                    loading={Boolean(!sendTransactionAsync)}
+                    disabled={isWritePending || !approved || !write}
+                    loading={Boolean(!write)}
                     fullWidth
-                    onClick={() =>
-                      sendTransactionAsync?.().then(() => confirm())
-                    }
+                    onClick={() => write?.(confirm)}
                     testId="confirm-add-v2-liquidity"
                   >
                     {isWritePending ? <Dots>Confirm transaction</Dots> : 'Add'}
@@ -280,7 +424,7 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
           successMessage="Successfully added liquidity"
           buttonText="Go to pool"
           buttonLink={`/pools/${chainId}:${poolAddress}`}
-          txHash={data?.hash}
+          txHash={data}
         />
       </DialogProvider>
     )

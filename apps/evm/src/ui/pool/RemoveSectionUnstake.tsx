@@ -62,14 +62,13 @@ export const _RemoveSectionUnstake: FC<AddSectionStakeProps> = withCheckerRoot(
       return balance?.multiply(value).divide(100)
     }, [balance, value])
 
-    const { sendTransaction, isLoading: isWritePending } =
-      useMasterChefWithdraw({
-        chainId,
-        amount,
-        pid: farmId,
-        chef: chefType,
-        enabled: Boolean(chainId && amount?.greaterThan(ZERO)),
-      })
+    const { write, isLoading: isWritePending } = useMasterChefWithdraw({
+      chainId,
+      amount,
+      pid: farmId,
+      chef: chefType,
+      enabled: Boolean(chainId && amount?.greaterThan(ZERO)),
+    })
 
     return (
       <Widget id="stakeLiquidity" variant="empty">
@@ -161,7 +160,7 @@ export const _RemoveSectionUnstake: FC<AddSectionStakeProps> = withCheckerRoot(
                 size="default"
                 variant="outline"
                 fullWidth
-                chainId={pool.chainId}
+                chainId={pool.chainId as ChainId}
               >
                 <Checker.Guard
                   size="default"
@@ -178,10 +177,10 @@ export const _RemoveSectionUnstake: FC<AddSectionStakeProps> = withCheckerRoot(
                     guardText="Insufficient balance"
                   >
                     <Button
-                      onClick={() => sendTransaction?.()}
+                      onClick={() => write?.()}
                       fullWidth
                       size="default"
-                      disabled={isWritePending || !sendTransaction}
+                      disabled={isWritePending || !write}
                       testId="unstake-liquidity"
                     >
                       {isWritePending ? (

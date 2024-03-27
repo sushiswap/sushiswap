@@ -4,8 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import { SushiSwapV3ChainId } from 'sushi/config'
 import { Amount, Token } from 'sushi/currency'
 import { Position, SushiSwapV3Pool } from 'sushi/pool'
-import { Address } from 'wagmi'
 
+import { Address } from 'viem'
+import { useConfig } from 'wagmi'
 import { getConcentratedLiquidityPool } from '../../pools'
 import {
   getTokenWithCacheQueryFn,
@@ -38,6 +39,8 @@ export const useConcentratedLiquidityPositions = ({
   const { data: customTokens, hasToken } = useCustomTokens()
   const { data: prices, isError: isPriceError } = useAllPrices()
 
+  const config = useConfig()
+
   return useQuery({
     queryKey: [
       'useConcentratedLiquidityPositions',
@@ -47,6 +50,7 @@ export const useConcentratedLiquidityPositions = ({
       const data = await getConcentratedLiquidityPositions({
         account: account,
         chainIds,
+        config,
       })
 
       if (data && (prices || isPriceError)) {
@@ -58,12 +62,14 @@ export const useConcentratedLiquidityPositions = ({
                 hasToken,
                 customTokens,
                 address: el.token0,
+                config,
               }),
               getTokenWithCacheQueryFn({
                 chainId: el.chainId,
                 hasToken,
                 customTokens,
                 address: el.token1,
+                config,
               }),
             ])
 
@@ -83,6 +89,7 @@ export const useConcentratedLiquidityPositions = ({
               token0,
               token1,
               feeAmount: el.fee,
+              config,
             })) as SushiSwapV3Pool
 
             const position = new Position({

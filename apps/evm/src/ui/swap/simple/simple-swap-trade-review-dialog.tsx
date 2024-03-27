@@ -20,26 +20,29 @@ import {
   createToast,
 } from '@sushiswap/ui'
 import {
+  SendTransactionReturnType,
   useAccount,
   useBalanceWeb3Refetch,
-  useContractWrite,
-  useNetwork,
-  usePrepareContractWrite,
-  useWaitForTransaction,
+  usePublicClient,
+  useSimulateContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
 } from '@sushiswap/wagmi'
-import {
-  SendTransactionResult,
-  waitForTransaction,
-} from '@sushiswap/wagmi/actions'
 import { useApproved } from '@sushiswap/wagmi/systems/Checker/Provider'
 import { log } from 'next-axiom'
-import React, { FC, ReactNode, useCallback, useRef } from 'react'
+import React, {
+  FC,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react'
 import {
   routeProcessor3Abi,
   routeProcessor4Abi,
   routeProcessorAbi,
 } from 'sushi/abi'
-import { gasMargin } from 'sushi/calculate'
 import { Chain } from 'sushi/chain'
 import {
   ROUTE_PROCESSOR_3_1_ADDRESS,
@@ -57,7 +60,7 @@ import { Native } from 'sushi/currency'
 import { shortenAddress } from 'sushi/format'
 import { ZERO } from 'sushi/math'
 import { Bridge, LiquidityProviders } from 'sushi/router'
-import { stringify } from 'viem'
+import { UserRejectedRequestError, stringify } from 'viem'
 import { APPROVE_TAG_SWAP } from '../../../lib/constants'
 import {
   warningSeverity,
@@ -83,9 +86,9 @@ export const SimpleSwapTradeReviewDialog: FC<{
   const { approved } = useApproved(APPROVE_TAG_SWAP)
   const [slippageTolerance] = useSlippageTolerance()
   const { data: trade, isFetching } = useSimpleSwapTrade()
-  const { address } = useAccount()
-  const { chain } = useNetwork()
+  const { address, chain } = useAccount()
   const tradeRef = useRef<UseTradeReturn | null>(null)
+  const client = usePublicClient()
 
   const refetchBalances = useBalanceWeb3Refetch()
 
@@ -98,12 +101,12 @@ export const SimpleSwapTradeReviewDialog: FC<{
   const isSwap = !isWrap && !isUnwrap
 
   const {
-    config,
+    data: simulation,
     isError,
     error,
     isFetching: isPrepareFetching,
     isSuccess: isPrepareSuccess,
-  } = usePrepareContractWrite({
+  } = useSimulateContract({
     chainId: chainId,
     address: isRouteProcessor4ChainId(chainId)
       ? ROUTE_PROCESSOR_4_ADDRESS[chainId]
@@ -127,106 +130,89 @@ export const SimpleSwapTradeReviewDialog: FC<{
           : undefined) as any,
     functionName: trade?.functionName,
     args: trade?.writeArgs as any,
-    enabled: Boolean(
-      trade?.writeArgs &&
-        (isRouteProcessorChainId(chainId) ||
-          isRouteProcessor3ChainId(chainId) ||
-          isRouteProcessor3_1ChainId(chainId) ||
-          isRouteProcessor3_2ChainId(chainId) ||
-          isRouteProcessor4ChainId(chainId)) &&
-        approved &&
-        trade?.route?.status !== 'NoWay' &&
-        chain?.id === chainId &&
-        token1?.chainId === chainId,
-    ),
     value: trade?.value || 0n,
-    onError: (error) => {
-      console.error('swap prepare error', error)
-      const message = error.message.toLowerCase()
-      if (
-        message.includes('user rejected') ||
-        message.includes('user cancelled')
-      ) {
-        return
-      }
-
-      log.error('swap prepare error', {
-        route: stringify(trade?.route),
-        slippageTolerance,
-        error: stringify(error),
-      })
+    query: {
+      enabled: Boolean(
+        trade?.writeArgs &&
+          (isRouteProcessorChainId(chainId) ||
+            isRouteProcessor3ChainId(chainId) ||
+            isRouteProcessor3_1ChainId(chainId) ||
+            isRouteProcessor3_2ChainId(chainId) ||
+            isRouteProcessor4ChainId(chainId)) &&
+          approved &&
+          trade?.route?.status !== 'NoWay' &&
+          chain?.id === chainId &&
+          token1?.chainId === chainId,
+      ),
     },
   })
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined) => {
-      if (!trade || !chainId || !data) return
+  useEffect(() => {
+    if (!error) return
 
-      const ts = new Date().getTime()
-      void createToast({
-        account: address,
-        type: 'swap',
-        chainId: chainId,
-        txHash: data.hash,
-        promise: waitForTransaction({ hash: data.hash }),
-        summary: {
-          pending: `${
-            isWrap ? 'Wrapping' : isUnwrap ? 'Unwrapping' : 'Swapping'
-          } ${trade.amountIn?.toSignificant(6)} ${
-            trade.amountIn?.currency.symbol
-          } ${
-            isWrap ? 'to' : isUnwrap ? 'to' : 'for'
-          } ${trade.amountOut?.toSignificant(6)} ${
-            trade.amountOut?.currency.symbol
-          }`,
-          completed: `${
-            isWrap ? 'Wrap' : isUnwrap ? 'Unwrap' : 'Swap'
-          } ${trade.amountIn?.toSignificant(6)} ${
-            trade.amountIn?.currency.symbol
-          } ${
-            isWrap ? 'to' : isUnwrap ? 'to' : 'for'
-          } ${trade.amountOut?.toSignificant(6)} ${
-            trade.amountOut?.currency.symbol
-          }`,
-          failed: `Something went wrong when trying to ${
-            isWrap ? 'wrap' : isUnwrap ? 'unwrap' : 'swap'
-          } ${trade.amountIn?.currency.symbol} ${
-            isWrap ? 'to' : isUnwrap ? 'to' : 'for'
-          } ${trade.amountOut?.currency.symbol}`,
-        },
-        timestamp: ts,
-        groupTimestamp: ts,
-      })
-    },
-    [trade, chainId, address, isWrap, isUnwrap],
-  )
+    console.error('swap prepare error', error)
+    const message = error.message.toLowerCase()
+    if (
+      message.includes('user rejected') ||
+      message.includes('user cancelled')
+    ) {
+      return
+    }
 
-  const {
-    writeAsync,
-    isLoading: isWritePending,
-    data,
-  } = useContractWrite({
-    ...config,
-    request: config?.request
-      ? {
-          ...config.request,
-          gas:
-            typeof config.request.gas === 'bigint'
-              ? gasMargin(config.request.gas)
-              : undefined,
-        }
-      : undefined,
-    onMutate: () => {
-      // Set reference of current trade
-      if (tradeRef && trade) {
-        tradeRef.current = trade
-      }
-    },
-    onSuccess: async (data) => {
+    log.error('swap prepare error', {
+      route: stringify(trade?.route),
+      slippageTolerance,
+      error: stringify(error),
+    })
+  }, [error, slippageTolerance, trade?.route])
+
+  const onSwapSuccess = useCallback(
+    async (hash: SendTransactionReturnType) => {
       setSwapAmount('')
 
-      waitForTransaction({ hash: data.hash })
-        .then((receipt) => {
+      if (!trade || !chainId) return
+
+      try {
+        const ts = new Date().getTime()
+        const receiptPromise = client.waitForTransactionReceipt({ hash })
+
+        void createToast({
+          account: address,
+          type: 'swap',
+          chainId: chainId,
+          txHash: hash,
+          promise: receiptPromise,
+          summary: {
+            pending: `${
+              isWrap ? 'Wrapping' : isUnwrap ? 'Unwrapping' : 'Swapping'
+            } ${trade.amountIn?.toSignificant(6)} ${
+              trade.amountIn?.currency.symbol
+            } ${
+              isWrap ? 'to' : isUnwrap ? 'to' : 'for'
+            } ${trade.amountOut?.toSignificant(6)} ${
+              trade.amountOut?.currency.symbol
+            }`,
+            completed: `${
+              isWrap ? 'Wrap' : isUnwrap ? 'Unwrap' : 'Swap'
+            } ${trade.amountIn?.toSignificant(6)} ${
+              trade.amountIn?.currency.symbol
+            } ${
+              isWrap ? 'to' : isUnwrap ? 'to' : 'for'
+            } ${trade.amountOut?.toSignificant(6)} ${
+              trade.amountOut?.currency.symbol
+            }`,
+            failed: `Something went wrong when trying to ${
+              isWrap ? 'wrap' : isUnwrap ? 'unwrap' : 'swap'
+            } ${trade.amountIn?.currency.symbol} ${
+              isWrap ? 'to' : isUnwrap ? 'to' : 'for'
+            } ${trade.amountOut?.currency.symbol}`,
+          },
+          timestamp: ts,
+          groupTimestamp: ts,
+        })
+
+        const receipt = await receiptPromise
+        {
           const trade = tradeRef.current
           if (receipt.status === 'success') {
             if (
@@ -241,8 +227,8 @@ export const SimpleSwapTradeReviewDialog: FC<{
             ) {
               log.info('internal route', {
                 chainId: chainId,
-                txHash: data.hash,
-                exporerLink: Chain.txUrl(chainId, data.hash),
+                txHash: hash,
+                exporerLink: Chain.txUrl(chainId, hash),
                 route: stringify(trade?.route),
               })
             } else if (
@@ -265,8 +251,8 @@ export const SimpleSwapTradeReviewDialog: FC<{
             ) {
               log.info('mix route', {
                 chainId: chainId,
-                txHash: data.hash,
-                exporerLink: Chain.txUrl(chainId, data.hash),
+                txHash: hash,
+                exporerLink: Chain.txUrl(chainId, hash),
                 route: stringify(trade?.route),
               })
             } else if (
@@ -281,15 +267,15 @@ export const SimpleSwapTradeReviewDialog: FC<{
             ) {
               log.info('external route', {
                 chainId: chainId,
-                txHash: data.hash,
-                exporerLink: Chain.txUrl(chainId, data.hash),
+                txHash: hash,
+                exporerLink: Chain.txUrl(chainId, hash),
                 route: stringify(trade?.route),
               })
             } else {
               log.info('unknown', {
                 chainId: chainId,
-                txHash: data.hash,
-                exporerLink: Chain.txUrl(chainId, data.hash),
+                txHash: hash,
+                exporerLink: Chain.txUrl(chainId, hash),
                 route: stringify(trade?.route),
                 args: stringify(trade?.writeArgs),
               })
@@ -307,7 +293,7 @@ export const SimpleSwapTradeReviewDialog: FC<{
             ) {
               log.error('internal route', {
                 chainId: chainId,
-                txHash: data.hash,
+                txHash: hash,
                 route: stringify(trade?.route),
               })
             } else if (
@@ -330,7 +316,7 @@ export const SimpleSwapTradeReviewDialog: FC<{
             ) {
               log.error('mix route', {
                 chainId: chainId,
-                txHash: data.hash,
+                txHash: hash,
                 route: stringify(trade?.route),
               })
             } else if (
@@ -345,38 +331,82 @@ export const SimpleSwapTradeReviewDialog: FC<{
             ) {
               log.error('external route', {
                 chainId: chainId,
-                txHash: data.hash,
+                txHash: hash,
                 route: stringify(trade?.route),
               })
             } else {
               log.error('unknown', {
                 chainId: chainId,
-                txHash: data.hash,
+                txHash: hash,
                 route: stringify(trade?.route),
                 args: stringify(trade?.writeArgs),
               })
             }
           }
-        })
-        .finally(async () => {
-          await refetchBalances()
-        })
+        }
+      } finally {
+        await refetchBalances()
+      }
     },
-    onSettled,
-    onError: (error) => {
-      if (error.message.startsWith('user rejected transaction')) return
+    [
+      setSwapAmount,
+      trade,
+      chainId,
+      client,
+      address,
+      isWrap,
+      isUnwrap,
+      refetchBalances,
+    ],
+  )
+
+  const onSwapError = useCallback(
+    (e: Error) => {
+      if (e instanceof UserRejectedRequestError) {
+        return
+      }
+
       log.error('swap error', {
         route: stringify(trade?.route),
         args: stringify(trade?.writeArgs),
-        error: stringify(error),
+        error: stringify(e),
       })
-      createErrorToast(error.message, false)
+      createErrorToast(e.message, false)
+    },
+    [trade?.route, trade?.writeArgs],
+  )
+
+  const {
+    writeContractAsync,
+    isLoading: isWritePending,
+    data,
+  } = useWriteContract({
+    mutation: {
+      onMutate: () => {
+        // Set reference of current trade
+        if (tradeRef && trade) {
+          tradeRef.current = trade
+        }
+      },
+      onSuccess: onSwapSuccess,
+      onError: onSwapError,
     },
   })
 
-  const { status } = useWaitForTransaction({
+  const write = useMemo(() => {
+    if (!writeContractAsync || !simulation) return undefined
+
+    return async (confirm: () => void) => {
+      try {
+        await writeContractAsync(simulation.request)
+        confirm()
+      } catch {}
+    }
+  }, [simulation, writeContractAsync])
+
+  const { status } = useWaitForTransactionReceipt({
     chainId: chainId,
-    hash: data?.hash,
+    hash: data,
   })
 
   return (
@@ -511,12 +541,14 @@ export const SimpleSwapTradeReviewDialog: FC<{
                   <Button
                     fullWidth
                     size="xl"
-                    loading={!writeAsync && !isError}
-                    onClick={() => writeAsync?.().then(() => confirm())}
+                    loading={!write && !isError}
+                    onClick={() => write?.(confirm)}
                     disabled={Boolean(
                       !!error ||
                         isWritePending ||
-                        Boolean(!writeAsync && swapAmount?.greaterThan(ZERO)) ||
+                        Boolean(
+                          !writeContractAsync && swapAmount?.greaterThan(ZERO),
+                        ) ||
                         isError,
                     )}
                     color={
@@ -547,7 +579,7 @@ export const SimpleSwapTradeReviewDialog: FC<{
         status={status}
         testId="make-another-swap"
         buttonText="Make another swap"
-        txHash={data?.hash}
+        txHash={data}
         successMessage={`You ${
           isWrap ? 'wrapped' : isUnwrap ? 'unwrapped' : 'sold'
         } ${tradeRef.current?.amountIn?.toSignificant(6)} ${token0?.symbol} ${

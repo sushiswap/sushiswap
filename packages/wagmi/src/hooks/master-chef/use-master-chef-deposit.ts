@@ -5,52 +5,56 @@ import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import { useCallback, useMemo } from 'react'
 import { masterChefV1Abi, masterChefV2Abi } from 'sushi/abi'
 import { Amount, Token } from 'sushi/currency'
-import { UserRejectedRequestError, encodeFunctionData } from 'viem'
+import { UserRejectedRequestError } from 'viem'
 import {
+  UseSimulateContractParameters,
   useAccount,
-  usePrepareSendTransaction,
-  useSendTransaction,
+  usePublicClient,
+  useSimulateContract,
+  useWriteContract,
 } from 'wagmi'
-import { SendTransactionResult, waitForTransaction } from 'wagmi/actions'
+import { SendTransactionReturnType } from 'wagmi/actions'
 
-import { UsePrepareSendTransactionConfig } from '../useSendTransaction'
+import { ChainId } from 'sushi'
 import { useMasterChefContract } from './use-master-chef-contract'
 
 interface UseMasterChefDepositParams {
-  chainId: number
+  chainId: ChainId
   chef: ChefType
   pid: number
   amount?: Amount<Token>
   enabled?: boolean
 }
 
-type UseMasterChefDeposit = (
-  params: UseMasterChefDepositParams,
-) => ReturnType<typeof useSendTransaction>
-
-export const useMasterChefDeposit: UseMasterChefDeposit = ({
+export const useMasterChefDeposit = ({
   chainId,
   amount,
   chef,
   pid,
   enabled = true,
-}) => {
+}: UseMasterChefDepositParams) => {
   const { address } = useAccount()
+  const client = usePublicClient()
   const contract = useMasterChefContract(chainId, chef)
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, error: Error | null) => {
-      if (error instanceof UserRejectedRequestError) {
-        createErrorToast(error?.message, true)
-      }
-      if (data && amount) {
+  const onError = useCallback((e: Error) => {
+    if (e instanceof UserRejectedRequestError) {
+      createErrorToast(e?.message, true)
+    }
+  }, [])
+
+  const onSuccess = useCallback(
+    (data: SendTransactionReturnType) => {
+      if (!amount) return
+
+      try {
         const ts = new Date().getTime()
-        createToast({
+        void createToast({
           account: address,
           type: 'mint',
           chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
+          txHash: data,
+          promise: client.waitForTransactionReceipt({ hash: data }),
           summary: {
             pending: `Staking ${amount.toSignificant(6)} ${
               amount.currency.symbol
@@ -63,44 +67,65 @@ export const useMasterChefDeposit: UseMasterChefDeposit = ({
           groupTimestamp: ts,
           timestamp: ts,
         })
-      }
+      } catch {}
     },
-    [amount, chainId, address],
+    [address, chainId, client, amount],
   )
 
-  const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
-    if (!address || !chainId || !amount || !contract) return
+  const prepare = useMemo(() => {
+    if (!address || !chainId || !amount || !contract) return {}
 
     let data
     if (chef === ChefType.MasterChefV1) {
-      data = encodeFunctionData({
+      data = {
         abi: masterChefV1Abi,
         functionName: 'deposit',
         args: [BigInt(pid), BigInt(amount.quotient.toString())],
-      })
+      }
     } else {
-      data = encodeFunctionData({
+      data = {
         abi: masterChefV2Abi,
         functionName: 'deposit',
         args: [BigInt(pid), BigInt(amount.quotient.toString()), address],
-      })
+      }
     }
 
     return {
       account: address,
-      to: contract.address,
-      data,
-    }
+      address: contract.address,
+      ...data,
+    } satisfies UseSimulateContractParameters
   }, [address, amount, chainId, chef, contract, pid])
 
-  const { config } = usePrepareSendTransaction({
+  const { data: simulation } = useSimulateContract({
     ...prepare,
     chainId,
-    enabled,
+    query: { enabled },
   })
 
-  return useSendTransaction({
-    ...config,
-    onSettled,
+  const {
+    writeContractAsync,
+    writeContract: _,
+    ...rest
+  } = useWriteContract({
+    mutation: {
+      onSuccess,
+      onError,
+    },
   })
+
+  const write = useMemo(() => {
+    if (!simulation) return undefined
+
+    return async () => {
+      try {
+        await writeContractAsync(simulation.request)
+      } catch {}
+    }
+  }, [simulation, writeContractAsync])
+
+  return {
+    ...rest,
+    write,
+  }
 }

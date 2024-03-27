@@ -1,6 +1,6 @@
 'use client'
 
-import { useNetwork } from '@sushiswap/wagmi'
+import { useAccount } from '@sushiswap/wagmi'
 import { useTokenWithCache } from '@sushiswap/wagmi'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React, {
@@ -122,7 +122,7 @@ export const ConcentratedLiquidityURLStateProvider: FC<
     feeAmount: searchParams.get('feeAmount'),
     tokenId: searchParams.get('tokenId'),
   })
-  const { chain } = useNetwork()
+  const { chain } = useAccount()
   const [chainId] = useState(chain?.id)
 
   const tmp = getChainIdFromUrl(chainIdFromUrl, chainId as ChainId)

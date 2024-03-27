@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
+import { isChainId } from 'sushi/chain'
 import { getToken } from '../../../lib/api.js'
 import { TokenApiSchema } from '../../../lib/schemas/chainId/address.js'
 
@@ -15,6 +16,10 @@ const handler = async (request: VercelRequest, response: VercelResponse) => {
   }
 
   const { chainId, address } = result.data
+
+  if (!isChainId(chainId)) {
+    return response.status(400).send('Invalid chainId')
+  }
 
   try {
     const token = await getToken(chainId, address)

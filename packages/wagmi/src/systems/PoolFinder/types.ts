@@ -1,5 +1,5 @@
 import { ReactElement } from 'react'
-import { BentoBoxChainId, SushiSwapV2ChainId } from 'sushi/config'
+import { SushiSwapV2ChainId, TridentChainId } from 'sushi/config'
 import { Type } from 'sushi/currency'
 import { Fee } from 'sushi/dex'
 import {
@@ -40,7 +40,7 @@ export interface SushiSwapV2PoolFinderProps extends PoolFinderProps {
 }
 
 export interface TridentPoolFinderProps extends PoolFinderProps {
-  chainId: BentoBoxChainId
+  chainId: TridentChainId
   fee?: Fee
   twap?: boolean
 }

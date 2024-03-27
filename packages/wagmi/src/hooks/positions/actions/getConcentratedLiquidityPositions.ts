@@ -1,8 +1,10 @@
 import { ChainId } from 'sushi/chain'
 import { SUSHISWAP_V3_INIT_CODE_HASH, SushiSwapV3ChainId } from 'sushi/config'
 import { computeSushiSwapV3PoolAddress } from 'sushi/pool'
-import { erc20ABI, readContracts } from 'wagmi'
 
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
+import { readContracts } from '@wagmi/core/actions'
+import { erc20Abi } from 'viem'
 import { getV3FactoryContractConfig } from '../../contracts/useV3FactoryContract'
 import { getV3NonFungiblePositionManagerContractConfig } from '../../contracts/useV3NonFungiblePositionManager'
 import { ConcentratedLiquidityPosition } from '../types'
@@ -39,18 +41,20 @@ const abiShard = [
 export const getConcentratedLiquidityPositions = async ({
   account,
   chainIds,
+  config,
 }: {
   account: `0x${string}` | undefined
   chainIds: SushiSwapV3ChainId[]
+  config: PublicWagmiConfig
 }) => {
   if (!account) return undefined
 
-  const result = await readContracts({
+  const result = await readContracts(config, {
     contracts: chainIds.map(
       (el) =>
         ({
           address: getV3NonFungiblePositionManagerContractConfig(el).address,
-          abi: erc20ABI,
+          abi: erc20Abi,
           chainId: el,
           functionName: 'balanceOf' as const,
           args: [account],
@@ -76,7 +80,7 @@ export const getConcentratedLiquidityPositions = async ({
     }
   })
 
-  const tokenIdResults = await readContracts({
+  const tokenIdResults = await readContracts(config, {
     contracts: tokenIdsArgs.map(
       ([_chainId, account, index]) =>
         ({
@@ -103,8 +107,9 @@ export const getConcentratedLiquidityPositions = async ({
 
   const positions = await getConcentratedLiquidityPositionsFromTokenIds({
     tokenIds,
+    config,
   })
-  const fees = await getConcentratedLiquidityPositionFees({ tokenIds })
+  const fees = await getConcentratedLiquidityPositionFees({ tokenIds, config })
 
   return positions.filter(Boolean).map((el, i) => ({
     ...el,

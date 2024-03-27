@@ -5,9 +5,9 @@ import { DataTable } from '@sushiswap/ui'
 import { ColumnDef, PaginationState, Row } from '@tanstack/react-table'
 import React, { FC, ReactNode, useCallback, useState } from 'react'
 import { ChainId } from 'sushi/chain'
-import { Address } from 'wagmi'
 
 import { ConcentratedLiquidityPositionWithV3Pool } from '@sushiswap/wagmi'
+import { Address } from 'viem'
 import {
   NAME_COLUMN_V3,
   POSITION_SIZE_CELL,

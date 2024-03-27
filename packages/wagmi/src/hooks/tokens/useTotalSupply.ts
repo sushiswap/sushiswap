@@ -1,8 +1,10 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
 import { Amount, Token } from 'sushi/currency'
-import { Address, erc20ABI, useContractReads } from 'wagmi'
+import { Address, erc20Abi } from 'viem'
+import { useReadContracts } from 'wagmi'
 
 function bigIntToCurrencyAmount(totalSupply?: bigint, token?: Token) {
   return token?.isToken && totalSupply
@@ -19,19 +21,31 @@ export const useMultipleTotalSupply = (
         return {
           address: token.wrapped.address as Address,
           chainId: token.chainId,
-          abi: erc20ABI,
+          abi: erc20Abi,
           functionName: 'totalSupply' as const,
         }
       }) || []
     )
   }, [tokens])
 
-  const { data } = useContractReads({
+  const queryClient = useQueryClient()
+
+  const { data, queryKey } = useReadContracts({
     contracts,
-    enabled: tokens && tokens.length > 0,
-    watch: true,
-    keepPreviousData: true,
+    query: {
+      enabled: tokens && tokens.length > 0,
+      keepPreviousData: true,
+    },
   })
+
+  // Doesn't make sense to refresh based on one chain's blocknumber
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries(queryKey, {}, { cancelRefetch: false })
+    }, 4_000)
+
+    return () => clearInterval(interval)
+  }, [queryClient, queryKey])
 
   return useMemo(() => {
     return data

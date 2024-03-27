@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { SushiSwapV3ChainId } from 'sushi/config'
 
+import { useConfig } from 'wagmi'
 import { getConcentratedLiquidityPositionsFromTokenIds } from '../actions'
 
 interface UseConcentratedLiquidityPositionsFromTokenIdParams {
@@ -14,6 +15,8 @@ export const useConcentratedLiquidityPositionsFromTokenId = ({
   chainId,
   enabled = true,
 }: UseConcentratedLiquidityPositionsFromTokenIdParams) => {
+  const config = useConfig()
+
   return useQuery({
     queryKey: [
       'useConcentratedLiquidityPositionsFromTokenId',
@@ -25,6 +28,7 @@ export const useConcentratedLiquidityPositionsFromTokenId = ({
 
       const positions = await getConcentratedLiquidityPositionsFromTokenIds({
         tokenIds: [{ tokenId: BigInt(tokenId), chainId }],
+        config,
       })
 
       return positions[0]

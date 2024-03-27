@@ -4,7 +4,7 @@ import {
   publicClientConfig,
 } from 'sushi/config'
 import { Address, createClient } from 'viem'
-import { simulateContract } from 'viem/contract'
+import { simulateContract } from 'viem/actions'
 
 const MAX_UINT128 = 2n ** 128n - 1n
 

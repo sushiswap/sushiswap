@@ -20,7 +20,6 @@
     "JiroOno",
     "0xMasayoshi"
   ],
-  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -208,7 +207,8 @@
     "serialijse": "0.3.0",
     "tiny-invariant": "1.3.1",
     "tiny-warning": "1.0.3",
-    "toformat": "2.0.0"
+    "toformat": "2.0.0",
+    "tsx": "^4.7.1"
   },
   "devDependencies": {
     "@tsconfig/esm": "1.0.4",
@@ -218,9 +218,10 @@
     "@types/lodash.flatmap": "4.5.9",
     "@types/numeral": "2.0.3",
     "@types/seedrandom": "3.0.1",
+    "@wagmi/core": "2.6.9",
     "ts-node": "10.9.2",
     "typescript": "5.2.2",
-    "viem": "1.21.4",
+    "viem": "2.8.13",
     "vitest": "0.34.6",
     "zod": "3.21.4"
   },

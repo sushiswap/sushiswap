@@ -1,19 +1,16 @@
 import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import { useCallback } from 'react'
 import { ChainId } from 'sushi/chain'
-import { UserRejectedRequestError } from 'viem'
+import { Address, UserRejectedRequestError } from 'viem'
 import {
-  Address,
-  useContractWrite,
-  useNetwork,
-  usePrepareContractWrite,
+  UseSimulateContractParameters,
+  useAccount,
+  usePublicClient,
+  useSimulateContract,
+  useWriteContract,
 } from 'wagmi'
-import {
-  PrepareWriteContractConfig,
-  SendTransactionResult,
-  waitForTransaction,
-} from 'wagmi/actions'
 
+import { SendTransactionReturnType } from 'wagmi/actions'
 import { DistributionCreator } from '../abis/DistributionCreator'
 
 interface UseHarvestAngleRewards {
@@ -21,7 +18,7 @@ interface UseHarvestAngleRewards {
   chainId: ChainId
   enabled?: boolean
   args:
-    | PrepareWriteContractConfig<
+    | UseSimulateContractParameters<
         typeof DistributionCreator,
         'signAndCreateDistribution'
       >['args']
@@ -34,50 +31,56 @@ export const useIncentivizePoolWithRewards = ({
   args,
   enabled = true,
 }: UseHarvestAngleRewards) => {
-  const { chain } = useNetwork()
-  const prepare = usePrepareContractWrite({
+  const { chain } = useAccount()
+  const simulation = useSimulateContract({
     chainId,
     abi: DistributionCreator,
     address: '0x8BB4C975Ff3c250e0ceEA271728547f3802B36Fd',
     functionName: 'signAndCreateDistribution',
     args: args ? args : undefined,
-    enabled: Boolean(enabled && args && chainId === chain?.id),
+    query: {
+      enabled: Boolean(enabled && args && chainId === chain?.id),
+    },
   })
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, e: Error | null) => {
-      if (e instanceof Error) {
-        if (!(e instanceof UserRejectedRequestError)) {
-          createErrorToast(e.message, true)
-        }
-      }
+  const client = usePublicClient()
 
-      if (data) {
-        const ts = new Date().getTime()
-        void createToast({
-          account,
-          type: 'approval',
-          chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
-          summary: {
-            pending: 'Harvesting rewards',
-            completed: 'Successfully harvested rewards',
-            failed: 'Something went wrong harvesting rewards',
-          },
-          groupTimestamp: ts,
-          timestamp: ts,
-        })
+  const onError = useCallback((e: Error) => {
+    if (e instanceof Error) {
+      if (!(e instanceof UserRejectedRequestError)) {
+        createErrorToast(e.message, true)
       }
+    }
+  }, [])
+
+  const onSuccess = useCallback(
+    (data: SendTransactionReturnType) => {
+      const ts = new Date().getTime()
+      void createToast({
+        account,
+        type: 'approval',
+        chainId,
+        txHash: data,
+        promise: client.waitForTransactionReceipt({ hash: data }),
+        summary: {
+          pending: 'Harvesting rewards',
+          completed: 'Successfully harvested rewards',
+          failed: 'Something went wrong harvesting rewards',
+        },
+        groupTimestamp: ts,
+        timestamp: ts,
+      })
     },
-    [account, chainId],
+    [account, chainId, client],
   )
 
   return {
-    prepare,
-    write: useContractWrite({
-      ...prepare.config,
-      onSettled,
+    simulation,
+    write: useWriteContract({
+      mutation: {
+        onSuccess,
+        onError,
+      },
     }),
   }
 }

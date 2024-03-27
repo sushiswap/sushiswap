@@ -5,13 +5,13 @@ import { Button } from '@sushiswap/ui/components/button'
 import { FC, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Chain, ChainId, chainName } from 'sushi/chain'
-import { useNetwork, useSwitchNetwork } from 'wagmi'
+import { useAccount, useSwitchChain } from 'wagmi'
 
 export const NetworkCheck: FC<{ chainId: ChainId }> = ({ chainId }) => {
   const [open, setOpen] = useState(false)
   const isMounted = useIsMounted()
-  const { chain } = useNetwork()
-  const { switchNetwork } = useSwitchNetwork()
+  const { chain } = useAccount()
+  const { switchChain } = useSwitchChain()
 
   // Delay couple seconds
   useEffect(() => {
@@ -40,7 +40,7 @@ export const NetworkCheck: FC<{ chainId: ChainId }> = ({ chainId }) => {
       <div className="block flex justify-end px-3 w-full sm:w-[unset]">
         <Button
           fullWidth
-          onClick={() => switchNetwork?.(chainId)}
+          onClick={() => switchChain?.({ chainId })}
           size="sm"
           className="whitespace-nowrap"
         >

@@ -10,7 +10,7 @@ import {
   type BondMarketsQueryVariables,
   getBuiltGraphSDK,
 } from '@sushiswap/graph-client'
-import { getSteerVaultReserves, getTotalSupply } from '@sushiswap/steer-sdk'
+import { getTotalSupply, getVaultReserves } from '@sushiswap/steer-sdk'
 import {
   getChainIdAddressFromId,
   getIdFromChainIdAddress,
@@ -96,7 +96,7 @@ async function getQuoteToken({
     )
 
     const [{ reserve0, reserve1 }, totalSupply] = await Promise.all([
-      getSteerVaultReserves({ client, vaultId }),
+      getVaultReserves({ client, vaultId }),
       getTotalSupply({ client, vaultId }),
     ])
 

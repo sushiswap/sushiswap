@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
 import { uniswapV2PairAbi } from 'sushi/abi'
 import {
   SUSHISWAP_V2_FACTORY_ADDRESS,
@@ -9,9 +10,12 @@ import {
 } from 'sushi/config'
 import { Amount, Currency, Token, Type } from 'sushi/currency'
 import { SushiSwapV2Pool, computeSushiSwapV2PoolAddress } from 'sushi/pool'
-import { Address, useContractReads } from 'wagmi'
-
-type UseContractReadsConfig = Parameters<typeof useContractReads>['0']
+import { Address } from 'viem'
+import {
+  UseReadContractsParameters,
+  useBlockNumber,
+  useReadContracts,
+} from 'wagmi'
 
 export enum SushiSwapV2PoolState {
   LOADING = 'Loading',
@@ -19,6 +23,8 @@ export enum SushiSwapV2PoolState {
   EXISTS = 'Exists',
   INVALID = 'Invalid',
 }
+
+type Config = Omit<NonNullable<UseReadContractsParameters>, 'contracts'>
 
 function getSushiSwapV2Pools(
   chainId: SushiSwapV2ChainId | undefined,
@@ -71,22 +77,33 @@ interface UseSushiSwapV2PoolsReturn {
 export function useSushiSwapV2Pools(
   chainId: SushiSwapV2ChainId | undefined,
   currencies: [Currency | undefined, Currency | undefined][],
-  config?: Omit<NonNullable<UseContractReadsConfig>, 'contracts'>,
+  config?: Config,
 ): UseSushiSwapV2PoolsReturn {
   const [tokensA, tokensB, contracts] = useMemo(
     () => getSushiSwapV2Pools(chainId, currencies),
     [chainId, currencies],
   )
+  const queryClient = useQueryClient()
 
-  const { data, isLoading, isError } = useContractReads({
+  const { data, isLoading, isError, queryKey } = useReadContracts({
     contracts: contracts,
-    enabled:
-      config?.enabled !== undefined
-        ? config.enabled && contracts.length > 0
-        : contracts.length > 0,
-    watch: !(typeof config?.enabled !== 'undefined' && !config?.enabled),
-    select: (results) => results.map((r) => r.result),
+    query: {
+      enabled:
+        config?.query?.enabled !== undefined
+          ? config?.query?.enabled && contracts.length > 0
+          : contracts.length > 0,
+      select: (results) => results.map((r) => r.result),
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({ chainId, watch: true })
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries(queryKey, {}, { cancelRefetch: false })
+    }
+  }, [blockNumber, queryClient, queryKey])
+
   return useMemo(() => {
     if (contracts.length === 0)
       return {
@@ -105,15 +122,19 @@ export function useSushiSwapV2Pools(
       isLoading,
       isError,
       data: data.map((result, i) => {
-        const tokenA = tokensA[i]
-        const tokenB = tokensB[i]
-        if (!tokenA || !tokenB || tokenA.equals(tokenB))
+        const [tokenA, tokenB] = [tokensA[i], tokensB[i]]
+
+        if (!tokenA || !tokenB || tokenA.equals(tokenB)) {
           return [SushiSwapV2PoolState.INVALID, null]
+        }
+
         if (!result) return [SushiSwapV2PoolState.NOT_EXISTS, null]
+
         const [reserve0, reserve1] = result
         const [token0, token1] = tokenA.sortsBefore(tokenB)
           ? [tokenA, tokenB]
           : [tokenB, tokenA]
+
         return [
           SushiSwapV2PoolState.EXISTS,
           new SushiSwapV2Pool(
@@ -136,7 +157,7 @@ export function useSushiSwapV2Pool(
   chainId: SushiSwapV2ChainId,
   tokenA?: Currency,
   tokenB?: Currency,
-  config?: Omit<UseContractReadsConfig, 'contracts'>,
+  config?: Config,
 ): UseSushiSwapV2PoolReturn {
   const inputs: [[Currency | undefined, Currency | undefined]] = useMemo(
     () => [[tokenA, tokenB]],

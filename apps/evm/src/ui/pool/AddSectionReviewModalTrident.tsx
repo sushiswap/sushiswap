@@ -15,20 +15,16 @@ import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import {
   TridentConstantPoolState,
   TridentStablePoolState,
+  UseCallParameters,
   useAccount,
   useBentoBoxTotals,
-  useNetwork,
-  usePrepareSendTransaction,
+  useCall,
+  usePublicClient,
   useSendTransaction,
   useTotalSupply,
   useTridentRouterContract,
-  useWaitForTransaction,
+  useWaitForTransactionReceipt,
 } from '@sushiswap/wagmi'
-import {
-  SendTransactionResult,
-  waitForTransaction,
-} from '@sushiswap/wagmi/actions'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
 import {
   useApproved,
   useApprovedActions,
@@ -47,11 +43,12 @@ import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'
 import { TridentConstantPool, TridentStablePool } from 'sushi'
 import { slippageAmount } from 'sushi/calculate'
 import { ChainId } from 'sushi/chain'
-import { BentoBoxChainId } from 'sushi/config'
+import { BentoBoxChainId, TridentChainId } from 'sushi/config'
 import { Amount, Token, Type } from 'sushi/currency'
 import { Percent, ZERO } from 'sushi/math'
 import {
   Address,
+  SendTransactionReturnType,
   UserRejectedRequestError,
   encodeAbiParameters,
   encodeFunctionData,
@@ -65,7 +62,7 @@ interface AddSectionReviewModalTridentProps {
   poolAddress: string
   poolState: TridentConstantPoolState | TridentStablePoolState | undefined
   pool: TridentConstantPool | TridentStablePool | null | undefined
-  chainId: BentoBoxChainId
+  chainId: TridentChainId
   token0: Type | undefined
   token1: Type | undefined
   input0: Amount<Type> | undefined
@@ -88,13 +85,14 @@ export const AddSectionReviewModalTrident: FC<
   input0,
   input1,
   children,
-  onSuccess,
+  onSuccess: _onSuccess,
 }) => {
-  const { address } = useAccount()
-  const { chain } = useNetwork()
+  const { address, chain } = useAccount()
   const { signature } = useSignature(APPROVE_TAG_ADD_TRIDENT)
   const { setSignature } = useApprovedActions(APPROVE_TAG_ADD_TRIDENT)
   const { approved } = useApproved(APPROVE_TAG_ADD_TRIDENT)
+  const client = usePublicClient()
+
   const liquidityToken = useMemo(() => {
     return new Token({
       address: poolAddress.includes(':')
@@ -190,20 +188,20 @@ export const AddSectionReviewModalTrident: FC<
     totalSupply,
   ])
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, error: Error | null) => {
-      if (error instanceof UserRejectedRequestError) {
-        createErrorToast(error?.message, true)
-      }
-      if (!data || !chain?.id || !token0 || !token1) return
+  const onSuccess = useCallback(
+    (hash: SendTransactionReturnType) => {
+      setSignature(undefined)
+      _onSuccess()
+
+      if (!chain?.id || !token0 || !token1) return
 
       const ts = new Date().getTime()
       createToast({
         account: address,
         type: 'mint',
         chainId: chain.id,
-        txHash: data.hash,
-        promise: waitForTransaction({ hash: data.hash }),
+        txHash: hash,
+        promise: client.waitForTransactionReceipt({ hash }),
         summary: {
           pending: `Adding liquidity to the ${token0.symbol}/${token1.symbol} pair`,
           completed: `Successfully added liquidity to the ${token0.symbol}/${token1.symbol} pair`,
@@ -213,10 +211,16 @@ export const AddSectionReviewModalTrident: FC<
         groupTimestamp: ts,
       })
     },
-    [address, chain, token0, token1],
+    [client, address, chain, token0, token1, setSignature, _onSuccess],
   )
 
-  const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
+  const onError = useCallback((e: Error) => {
+    if (e instanceof UserRejectedRequestError) {
+      createErrorToast(e?.message, true)
+    }
+  }, [])
+
+  const prepare = useMemo(() => {
     try {
       if (
         !chain?.id ||
@@ -239,6 +243,7 @@ export const AddSectionReviewModalTrident: FC<
       const encoded = encodeAbiParameters(parseAbiParameters('address'), [
         address,
       ])
+
       if (input0) {
         if (input0.currency.isNative) {
           value = BigInt(input0.quotient.toString())
@@ -269,8 +274,9 @@ export const AddSectionReviewModalTrident: FC<
 
       if (liquidityInput.length === 0) return
       return {
-        account: address,
         to: contract.address,
+        account: address,
+        chainId,
         data: batchAction({
           actions: [
             approveMasterContractAction({
@@ -289,7 +295,7 @@ export const AddSectionReviewModalTrident: FC<
           ],
         }),
         value,
-      }
+      } satisfies UseCallParameters
     } catch (_e: unknown) {
       //
     }
@@ -309,30 +315,41 @@ export const AddSectionReviewModalTrident: FC<
     signature,
   ])
 
-  const { config } = usePrepareSendTransaction({
+  const { isError: isSimulationError } = useCall({
     ...prepare,
-    chainId,
-    enabled: Boolean(
-      approved &&
-        minAmount0?.greaterThan(ZERO) &&
-        minAmount1?.greaterThan(ZERO),
-    ),
+    query: {
+      enabled: Boolean(
+        approved &&
+          minAmount0?.greaterThan(ZERO) &&
+          minAmount1?.greaterThan(ZERO),
+      ),
+    },
   })
 
   const {
     sendTransactionAsync,
     isLoading: isWritePending,
-    data,
+    data: hash,
   } = useSendTransaction({
-    ...config,
-    onSettled,
-    onSuccess: () => {
-      setSignature(undefined)
-      onSuccess()
+    mutation: {
+      onSuccess,
+      onError,
     },
   })
 
-  const { status } = useWaitForTransaction({ chainId, hash: data?.hash })
+  const send = useMemo(() => {
+    if (!prepare || isSimulationError) return undefined
+
+    return async (confirm: () => void) => {
+      try {
+        await sendTransactionAsync(prepare)
+
+        confirm()
+      } catch {}
+    }
+  }, [isSimulationError, prepare, sendTransactionAsync])
+
+  const { status } = useWaitForTransactionReceipt({ chainId, hash })
 
   return (
     <DialogProvider>
@@ -356,11 +373,9 @@ export const AddSectionReviewModalTrident: FC<
                 <Button
                   size="xl"
                   id="confirm-add-liquidity"
-                  disabled={
-                    isWritePending || !approved || !sendTransactionAsync
-                  }
+                  disabled={isWritePending || !approved || !send}
                   fullWidth
-                  onClick={() => sendTransactionAsync?.().then(() => confirm())}
+                  onClick={() => send?.(confirm)}
                 >
                   {isWritePending ? <Dots>Confirm transaction</Dots> : 'Add'}
                 </Button>
@@ -376,7 +391,7 @@ export const AddSectionReviewModalTrident: FC<
         successMessage="Successfully added liquidity"
         buttonText="Go to pool"
         buttonLink={`/pools/${chainId}:${poolAddress}`}
-        txHash={data?.hash}
+        txHash={hash}
       />
     </DialogProvider>
   )

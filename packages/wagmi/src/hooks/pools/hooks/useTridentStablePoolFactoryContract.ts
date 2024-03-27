@@ -1,14 +1,22 @@
 'use client'
 
+import { useMemo } from 'react'
+import { TridentChainId } from 'sushi/config'
+import { PublicClient, getContract } from 'viem'
 import { usePublicClient } from 'wagmi'
-import { getContract } from 'wagmi/actions'
 import { getTridentStablePoolFactoryContract } from '../../../contracts'
 
 export function useTridentStablePoolFactoryContract(
-  chainId: number | undefined,
+  chainId: TridentChainId | undefined,
 ) {
-  return getContract({
-    ...getTridentStablePoolFactoryContract(chainId),
-    walletClient: usePublicClient({ chainId }),
-  })
+  const client = usePublicClient({ chainId }) as PublicClient
+
+  return useMemo(() => {
+    if (!chainId) return null
+
+    return getContract({
+      ...getTridentStablePoolFactoryContract(chainId),
+      client,
+    })
+  }, [chainId, client])
 }

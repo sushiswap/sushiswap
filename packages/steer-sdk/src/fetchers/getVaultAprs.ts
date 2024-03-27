@@ -2,11 +2,11 @@ import { fetch } from '@whatwg-node/fetch'
 import { isPromiseFulfilled } from 'sushi'
 import { getChainIdAddressFromId } from 'sushi/format'
 
-interface GetSteerVaultsAprs {
+interface GetVaultsAprs {
   vaultIds: string[]
 }
 
-function getApr(
+async function getApr(
   chainId: number,
   address: string,
   interval?: number,
@@ -21,7 +21,7 @@ function getApr(
     .then((res) => res?.apr)
 }
 
-async function getSteerVaultsAprs({ vaultIds }: GetSteerVaultsAprs) {
+export async function getVaultsAprs({ vaultIds }: GetVaultsAprs) {
   const results = await Promise.allSettled(
     vaultIds.map(async (vaultId) => {
       const { address, chainId } = getChainIdAddressFromId(vaultId)
@@ -36,7 +36,11 @@ async function getSteerVaultsAprs({ vaultIds }: GetSteerVaultsAprs) {
         throw new Error("Couldn't fetch APR")
       }
 
-      const [apr, apr1d, apr1w] = aprs.map((apr) => Number(apr) / 100)
+      const [apr, apr1d, apr1w] = aprs.map((apr) => Number(apr) / 100) as [
+        number,
+        number,
+        number,
+      ]
 
       return {
         apr,
@@ -49,12 +53,16 @@ async function getSteerVaultsAprs({ vaultIds }: GetSteerVaultsAprs) {
   return results.map((r) => (isPromiseFulfilled(r) ? r.value : null))
 }
 
-interface GetSteerVaultsApr {
+interface GetVaultsApr {
   vaultId: string
 }
 
-async function getSteerVaultAprs({ vaultId }: GetSteerVaultsApr) {
-  return (await getSteerVaultsAprs({ vaultIds: [vaultId] }))[0]
-}
+export async function getVaultAprs({ vaultId }: GetVaultsApr) {
+  const results = await getVaultsAprs({ vaultIds: [vaultId] })
 
-export { getSteerVaultAprs, getSteerVaultsAprs }
+  if (!results[0]) {
+    throw new Error(`Failed to fetch APR for vault ${vaultId}`)
+  }
+
+  return results[0]
+}

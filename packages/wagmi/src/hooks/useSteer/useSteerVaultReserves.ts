@@ -1,13 +1,13 @@
 import {
-  getSteerVaultReserves,
-  getSteerVaultsReserves,
+  getVaultsReservesContracts,
+  getVaultsReservesSelect,
 } from '@sushiswap/steer-sdk'
-import { useQuery } from '@tanstack/react-query'
-import { getChainIdAddressFromId } from 'sushi'
-import { usePublicClient } from 'wagmi'
+import { useReadContracts, useSimulateContract } from 'wagmi'
 
-import { PublicClient } from 'viem'
-import { clientsFromIds } from './getClientsFromIds'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
+import { getChainIdAddressFromId } from 'sushi'
+import { useWatchByBlock } from '../watch'
 
 interface UseSteerVaultsReserves {
   vaultIds: string[] | undefined
@@ -18,21 +18,40 @@ export const useSteerVaultsReserves = ({
   vaultIds,
   enabled = true,
 }: UseSteerVaultsReserves) => {
-  const client = usePublicClient()
+  const contracts = useMemo(() => {
+    if (!vaultIds) return undefined
+    return getVaultsReservesContracts({ vaultIds })
+  }, [vaultIds])
 
-  return useQuery({
-    queryKey: ['useSteerVaultsReserves', { vaultIds, client }],
-    queryFn: () => {
-      if (!vaultIds) return null
+  const queryClient = useQueryClient()
+  const query = useReadContracts({
+    contracts,
+    query: {
+      enabled: Boolean(enabled && vaultIds),
+      select: (results) =>
+        results.flatMap(({ result }, i) => {
+          if (!result) return []
 
-      return getSteerVaultsReserves({
-        clients: clientsFromIds(vaultIds) as PublicClient[],
-        vaultIds: vaultIds,
-      })
+          return getVaultsReservesSelect(vaultIds![i], result)
+        }),
     },
-    refetchInterval: 10000,
-    enabled: Boolean(enabled && vaultIds),
   })
+
+  // Doesn't make sense to invalidate queries based on the block number, since
+  // there might be a wide array of chains involved
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries(
+        query.queryKey,
+        {},
+        { cancelRefetch: false },
+      )
+    }, 4_000)
+
+    return () => clearInterval(interval)
+  }, [queryClient, query.queryKey])
+
+  return query
 }
 
 interface UseSteerVaultReserve {
@@ -44,15 +63,25 @@ export const useSteerVaultReserves = ({
   vaultId,
   enabled = true,
 }: UseSteerVaultReserve) => {
-  const client = usePublicClient({
-    chainId: vaultId ? getChainIdAddressFromId(vaultId).chainId : undefined,
+  const { chainId } = useMemo(
+    () => (vaultId ? getChainIdAddressFromId(vaultId) : { chainId: undefined }),
+    [vaultId],
+  )
+
+  const contract = useMemo(() => {
+    if (!vaultId) return undefined
+    return getVaultsReservesContracts({ vaultIds: [vaultId] })[0]
+  }, [vaultId])
+
+  const query = useSimulateContract({
+    ...contract,
+    query: {
+      enabled: Boolean(enabled && vaultId),
+      select: ({ result }) => getVaultsReservesSelect(vaultId!, result),
+    },
   })
 
-  return useQuery({
-    queryKey: ['useSteerVaultsReserve', { vaultId, client }],
-    queryFn: () =>
-      vaultId ? getSteerVaultReserves({ client, vaultId: vaultId }) : null,
-    refetchInterval: 10000,
-    enabled: Boolean(enabled && vaultId),
-  })
+  useWatchByBlock({ chainId, key: query.queryKey })
+
+  return query
 }

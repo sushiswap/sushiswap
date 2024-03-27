@@ -1,25 +1,31 @@
 'use client'
 
-import { allChains } from '@sushiswap/wagmi-config'
+import { publicWagmiConfig } from '@sushiswap/wagmi-config'
+import { useMemo } from 'react'
 import { multicall3Abi } from 'sushi/abi'
-import { getContract } from 'viem'
-import { Address, usePublicClient } from 'wagmi'
+import { PublicClient, getContract } from 'viem'
+import { usePublicClient } from 'wagmi'
 
-type Multicall3ChainId = (typeof allChains)[number]['id']
+export type Multicall3ChainId =
+  (typeof publicWagmiConfig)['chains'][number]['id']
 
 export const getMulticall3ContractConfig = (
   chainId: Multicall3ChainId | undefined,
 ) => ({
-  address: (allChains.find((chain) => chain?.id === chainId)?.contracts
-    ?.multicall3?.address || '') as Address,
+  address: publicWagmiConfig.chains.find((chain) => chain?.id === chainId)!
+    .contracts.multicall3.address,
   abi: multicall3Abi,
 })
 
-export function useMulticall3Contract(chainId: Multicall3ChainId) {
-  const publicClient = usePublicClient({ chainId })
+export function useMulticall3Contract(chainId: Multicall3ChainId | undefined) {
+  const client = usePublicClient({ chainId }) as PublicClient
 
-  return getContract({
-    ...getMulticall3ContractConfig(chainId),
-    publicClient,
-  })
+  return useMemo(() => {
+    if (!chainId) return null
+
+    getContract({
+      ...getMulticall3ContractConfig(chainId),
+      client,
+    })
+  }, [client, chainId])
 }

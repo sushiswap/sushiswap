@@ -2,23 +2,22 @@
 
 import { ChefType } from '@sushiswap/client'
 import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
-import { useCallback, useMemo } from 'react'
-import { masterChefV2Abi, miniChefV2Abi } from 'sushi/abi'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useMemo } from 'react'
+import { erc20Abi, masterChefV2Abi, miniChefV2Abi } from 'sushi/abi'
 import { ChainId } from 'sushi/chain'
 import { SUSHI, SUSHI_ADDRESS } from 'sushi/currency'
 import { Amount, Token } from 'sushi/currency'
-import { UserRejectedRequestError, encodeFunctionData } from 'viem'
+import { Address, UserRejectedRequestError, encodeFunctionData } from 'viem'
 import {
-  Address,
-  erc20ABI,
   useAccount,
-  useContractReads,
-  useNetwork,
-  usePrepareSendTransaction,
+  useBlockNumber,
+  usePublicClient,
+  useReadContracts,
   useSendTransaction,
 } from 'wagmi'
-import { SendTransactionResult, waitForTransaction } from 'wagmi/actions'
-import { UsePrepareSendTransactionConfig } from '../useSendTransaction'
+import { SendTransactionErrorType } from 'wagmi/actions'
+import { SendTransactionData } from 'wagmi/query'
 import {
   MASTERCHEF_ADDRESS,
   MASTERCHEF_V2_ADDRESS,
@@ -27,7 +26,7 @@ import {
 } from './use-master-chef-contract'
 
 interface UseMasterChefReturn
-  extends Pick<ReturnType<typeof useContractReads>, 'isLoading' | 'isError'> {
+  extends Pick<ReturnType<typeof useReadContracts>, 'isLoading' | 'isError'> {
   balance: Amount<Token> | undefined
   harvest: undefined | (() => void)
   pendingSushi: Amount<Token> | undefined
@@ -36,7 +35,7 @@ interface UseMasterChefReturn
 }
 
 interface UseMasterChefParams {
-  chainId: number
+  chainId: ChainId
   chef: ChefType
   pid: number
   token: Token
@@ -54,8 +53,8 @@ export const useMasterChef: UseMasterChef = ({
   token,
   enabled = true,
 }) => {
-  const { chain } = useNetwork()
   const { address } = useAccount()
+  const client = usePublicClient()
   const contract = useMasterChefContract(chainId, chef)
 
   const contracts = useMemo(() => {
@@ -64,9 +63,9 @@ export const useMasterChef: UseMasterChef = ({
     if (chainId === ChainId.ETHEREUM) {
       return [
         {
-          chainId: ChainId.ETHEREUM,
+          chainId: ChainId.ETHEREUM as ChainId,
           address: SUSHI_ADDRESS[chainId] as Address,
-          abi: erc20ABI,
+          abi: erc20Abi,
           functionName: 'balanceOf',
           args: [
             (chef === ChefType.MasterChefV1
@@ -75,7 +74,7 @@ export const useMasterChef: UseMasterChef = ({
           ],
         } as const,
         {
-          chainId: ChainId.ETHEREUM,
+          chainId: ChainId.ETHEREUM as ChainId,
           address: (chef === ChefType.MasterChefV1
             ? MASTERCHEF_ADDRESS[chainId]
             : MASTERCHEF_V2_ADDRESS[chainId]) as Address,
@@ -128,7 +127,7 @@ export const useMasterChef: UseMasterChef = ({
           args: [pid, address as Address],
         } as const,
         {
-          chainId: ChainId.ETHEREUM,
+          chainId: ChainId.ETHEREUM as ChainId,
           address: MASTERCHEF_V2_ADDRESS[chainId] as Address,
           abi: [
             {
@@ -157,7 +156,7 @@ export const useMasterChef: UseMasterChef = ({
           address: SUSHI_ADDRESS[
             chainId as keyof typeof SUSHI_ADDRESS
           ] as Address,
-          abi: erc20ABI,
+          abi: erc20Abi,
           functionName: 'balanceOf',
           args: [
             MINICHEF_ADDRESS[
@@ -194,14 +193,25 @@ export const useMasterChef: UseMasterChef = ({
     return []
   }, [address, chainId, chef, enabled, pid])
 
+  const queryClient = useQueryClient()
+
   // Can't type runtime...
-  const { data, isLoading, isError } = useContractReads({
+  const { data, isLoading, isError, queryKey } = useReadContracts({
     contracts,
-    watch,
-    keepPreviousData: true,
-    enabled: contracts.length > 0 && enabled,
-    select: (results) => results.map((r) => r.result),
+    query: {
+      enabled: contracts.length > 0 && enabled,
+      keepPreviousData: true,
+      select: (results) => results.map((r) => r.result),
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({ chainId, watch: true })
+
+  useEffect(() => {
+    if (watch && blockNumber) {
+      queryClient.invalidateQueries(queryKey, {}, { cancelRefetch: false })
+    }
+  }, [blockNumber, watch, queryClient, queryKey])
 
   const [sushiBalance, balance, pendingSushi] = useMemo(() => {
     const _sushiBalance = data?.[0] ? data?.[0] : undefined
@@ -227,34 +237,36 @@ export const useMasterChef: UseMasterChef = ({
     return [sushiBalance, balance, pendingSushi]
   }, [chainId, data, token])
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, error: Error | null) => {
-      if (error instanceof UserRejectedRequestError) {
-        createErrorToast(error?.message, true)
-      }
-      if (data) {
-        const ts = new Date().getTime()
-        void createToast({
-          account: address,
-          type: 'claimRewards',
-          chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
-          summary: {
-            pending: 'Claiming rewards',
-            completed: 'Successfully claimed rewards',
-            failed: 'Something went wrong when claiming rewards',
-          },
-          groupTimestamp: ts,
-          timestamp: ts,
-        })
-      }
+  const onSuccess = useCallback(
+    (data: SendTransactionData) => {
+      const ts = new Date().getTime()
+      void createToast({
+        account: address,
+        type: 'claimRewards',
+        chainId,
+        txHash: data,
+        promise: client.waitForTransactionReceipt({ hash: data }),
+        summary: {
+          pending: 'Claiming rewards',
+          completed: 'Successfully claimed rewards',
+          failed: 'Something went wrong when claiming rewards',
+        },
+        groupTimestamp: ts,
+        timestamp: ts,
+      })
     },
-    [chainId, address],
+    [chainId, address, client],
   )
 
-  const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
+  const onError = useCallback((e: SendTransactionErrorType) => {
+    if (e instanceof UserRejectedRequestError) {
+      createErrorToast(e?.message, true)
+    }
+  }, [])
+
+  const prepare = useMemo(() => {
     if (!address || !chainId || !data || !contract) return
+
     switch (chef) {
       case ChefType.MasterChefV1:
         return {
@@ -319,20 +331,21 @@ export const useMasterChef: UseMasterChef = ({
     }
   }, [address, chainId, chef, contract, data, pendingSushi, pid, sushiBalance])
 
-  const { config } = usePrepareSendTransaction({
-    ...prepare,
-    chainId,
-    enabled: chainId === chain?.id,
-  })
-
   const {
-    sendTransaction: harvest,
+    sendTransaction: _harvest,
     isLoading: isWritePending,
     isError: isWriteError,
   } = useSendTransaction({
-    ...config,
-    onSettled,
+    mutation: {
+      onSuccess,
+      onError,
+    },
   })
+
+  const harvest = useCallback(() => {
+    if (!prepare) return
+    _harvest(prepare)
+  }, [_harvest, prepare])
 
   return useMemo(() => {
     return {

@@ -2,7 +2,7 @@ import { fetch } from '@whatwg-node/fetch'
 import { isPromiseFulfilled } from 'sushi'
 import { getChainIdAddressFromId } from 'sushi/format'
 
-interface GetSteerVaultsAprs {
+interface GetVaultsAprs {
   vaultIds: string[]
 }
 
@@ -15,7 +15,7 @@ interface AprTimeseries {
   message: string
 }
 
-function getAprTimeseries(
+async function getAprTimeseries(
   chainId: number,
   address: string,
 ): Promise<AprTimeseries['data']> {
@@ -26,7 +26,7 @@ function getAprTimeseries(
     .then((res) => res?.data)
 }
 
-async function getSteerVaultsAprTimeseries({ vaultIds }: GetSteerVaultsAprs) {
+export async function getVaultsAprTimeseries({ vaultIds }: GetVaultsAprs) {
   const results = await Promise.allSettled(
     vaultIds.map(async (vaultId) => {
       const { address, chainId } = getChainIdAddressFromId(vaultId)
@@ -38,12 +38,16 @@ async function getSteerVaultsAprTimeseries({ vaultIds }: GetSteerVaultsAprs) {
   return results.map((r) => (isPromiseFulfilled(r) ? r.value : null))
 }
 
-interface GetSteerVaultsApr {
+interface GetVaultsApr {
   vaultId: string
 }
 
-async function getSteerVaultAprTimeseries({ vaultId }: GetSteerVaultsApr) {
-  return (await getSteerVaultsAprTimeseries({ vaultIds: [vaultId] }))[0]
-}
+export async function getSteerVaultAprTimeseries({ vaultId }: GetVaultsApr) {
+  const results = await getVaultsAprTimeseries({ vaultIds: [vaultId] })
 
-export { getSteerVaultAprTimeseries, getSteerVaultsAprTimeseries }
+  if (!results[0]) {
+    throw new Error(`Failed to fetch APR timeseries for vault ${vaultId}`)
+  }
+
+  return results[0]
+}

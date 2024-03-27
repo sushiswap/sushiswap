@@ -1,10 +1,11 @@
 import { TridentStablePool } from 'sushi'
 import { tridentStablePoolAbi, tridentStablePoolFactoryAbi } from 'sushi/abi'
-import { BentoBoxChainId } from 'sushi/config'
+import { TridentChainId } from 'sushi/config'
 import { Amount, Currency, Token } from 'sushi/currency'
-import { Address, readContracts } from 'wagmi'
-import { getContract } from 'wagmi/actions'
 
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
+import { Address, getContract } from 'viem'
+import { getPublicClient, readContracts } from 'wagmi/actions'
 import { getTridentStablePoolFactoryContract } from '../../../contracts'
 import { pairsUnique } from './utils'
 
@@ -16,45 +17,52 @@ export enum TridentStablePoolState {
 }
 
 interface PoolData {
-  address: string
+  address: Address
   token0: Token
   token1: Token
 }
 
 export const getTridentStablePools = async (
-  chainId: BentoBoxChainId,
+  chainId: TridentChainId,
   currencies: [Currency | undefined, Currency | undefined][],
   totals: Map<string, { base: bigint; elastic: bigint }>,
+  config: PublicWagmiConfig,
 ) => {
-  const contract = getContract(getTridentStablePoolFactoryContract(chainId))
+  const client = getPublicClient(config, { chainId })
+
+  const contract = getContract({
+    ...getTridentStablePoolFactoryContract(chainId),
+    client,
+  })
 
   const _pairsUnique = pairsUnique(currencies)
-  const _pairsUniqueAddr = _pairsUnique.map(([t0, t1]) => [
-    t0.address,
-    t1.address,
-  ])
-  // const _tokensUnique = tokensUnique(_pairsUnique)
+  const _pairsUniqueAddr = _pairsUnique.map(
+    ([t0, t1]) => [t0.address, t1.address] as const,
+  )
 
-  const callStatePoolsCount = await readContracts({
-    contracts: _pairsUniqueAddr.map((el) => ({
-      chainId,
-      address: contract?.address as Address,
-      abi: tridentStablePoolFactoryAbi,
-      functionName: 'poolsCount',
-      args: el as [Address, Address],
-    })),
+  const callStatePoolsCount = await readContracts(config, {
+    contracts: _pairsUniqueAddr.map(
+      (el) =>
+        ({
+          chainId,
+          address: contract?.address,
+          abi: tridentStablePoolFactoryAbi,
+          functionName: 'poolsCount',
+          args: el,
+        }) as const,
+    ),
   })
 
   const callStatePoolsCountProcessed = callStatePoolsCount
     ?.map(
-      (s, i) => [i, s.status === 'success' ? s.result : 0] as [number, bigint],
+      (s, i) => [i, s.status === 'success' ? s.result : 0n] as [number, bigint],
     )
     .filter(([, length]) => length)
     .map(
       ([i, length]) =>
         [
-          _pairsUniqueAddr[i][0] as Address,
-          _pairsUniqueAddr[i][1] as Address,
+          _pairsUniqueAddr[i][0],
+          _pairsUniqueAddr[i][1],
           0n,
           BigInt(length),
         ] as const,
@@ -62,19 +70,22 @@ export const getTridentStablePools = async (
 
   const pairsUniqueProcessed = callStatePoolsCount
     ?.map(
-      (s, i) => [i, s.status === 'success' ? s.result : 0] as [number, bigint],
+      (s, i) => [i, s.status === 'success' ? s.result : 0n] as [number, bigint],
     )
     .filter(([, length]) => length)
     .map(([i]) => [_pairsUnique[i][0], _pairsUnique[i][1]])
 
-  const callStatePools = await readContracts({
-    contracts: (callStatePoolsCountProcessed || []).map((args) => ({
-      chainId,
-      address: contract?.address as Address,
-      abi: tridentStablePoolFactoryAbi,
-      functionName: 'getPools' as const,
-      args,
-    })),
+  const callStatePools = await readContracts(config, {
+    contracts: callStatePoolsCountProcessed.map(
+      (args) =>
+        ({
+          chainId,
+          address: contract?.address,
+          abi: tridentStablePoolFactoryAbi,
+          functionName: 'getPools',
+          args,
+        }) as const,
+    ),
   })
 
   const pools: PoolData[] = []
@@ -83,13 +94,13 @@ export const getTridentStablePools = async (
       s.result.forEach((address) =>
         pools.push({
           address,
-          token0: pairsUniqueProcessed?.[i][0] as Token,
-          token1: pairsUniqueProcessed?.[i][1] as Token,
+          token0: pairsUniqueProcessed?.[i][0],
+          token1: pairsUniqueProcessed?.[i][1],
         }),
       )
   })
 
-  const poolsAddresses = pools.map((p) => p.address as Address)
+  const poolsAddresses = pools.map((p) => p.address)
 
   const contracts = [
     ...poolsAddresses.map((address) => ({
@@ -106,7 +117,7 @@ export const getTridentStablePools = async (
     })),
   ]
 
-  const reservesAndFees = await readContracts({
+  const reservesAndFees = await readContracts(config, {
     contracts,
   })
 

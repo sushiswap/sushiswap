@@ -51,8 +51,8 @@ export const BASES_TO_CHECK_TRADES_AGAINST: {
     LINK[ChainId.ETHEREUM],
     SUSHI[ChainId.ETHEREUM],
   ],
-  [ChainId.RINKEBY]: [WNATIVE[ChainId.RINKEBY], USDC[ChainId.RINKEBY]],
-  [ChainId.KOVAN]: [WNATIVE[ChainId.KOVAN], USDC[ChainId.KOVAN]],
+  // [ChainId.RINKEBY]: [WNATIVE[ChainId.RINKEBY], USDC[ChainId.RINKEBY]],
+  // [ChainId.KOVAN]: [WNATIVE[ChainId.KOVAN], USDC[ChainId.KOVAN]],
   [ChainId.POLYGON]: [
     WNATIVE[ChainId.POLYGON],
     WETH9[ChainId.POLYGON],

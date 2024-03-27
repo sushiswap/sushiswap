@@ -14,10 +14,11 @@ import {
 
 export const defaultQuoteCurrency = {
   [ChainId.ETHEREUM]: SUSHI[ChainId.ETHEREUM],
-  [ChainId.ROPSTEN]: SUSHI[ChainId.ROPSTEN],
-  [ChainId.RINKEBY]: SUSHI[ChainId.RINKEBY],
-  [ChainId.GÖRLI]: SUSHI[ChainId.GÖRLI],
-  [ChainId.KOVAN]: SUSHI[ChainId.KOVAN],
+  [ChainId.SEPOLIA]: USDC[ChainId.SEPOLIA],
+  // [ChainId.ROPSTEN]: SUSHI[ChainId.ROPSTEN],
+  // [ChainId.RINKEBY]: SUSHI[ChainId.RINKEBY],
+  // [ChainId.GÖRLI]: SUSHI[ChainId.GÖRLI],
+  // [ChainId.KOVAN]: SUSHI[ChainId.KOVAN],
   [ChainId.POLYGON]: SUSHI[ChainId.POLYGON],
   // [ChainId.POLYGON_TESTNET]: SUSHI[ChainId.POLYGON_TESTNET],
   [ChainId.FANTOM]: axlUSDC[ChainId.FANTOM],

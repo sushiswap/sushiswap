@@ -1,0 +1,81 @@
+{
+  "status": "Success",
+  "tokens": [
+    {
+      "address": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6
+    },
+    {
+      "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "symbol": "USDC",
+      "name": "USD Coin (PoS)",
+      "decimals": 6
+    },
+    {
+      "address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+      "symbol": "WMATIC",
+      "name": "Wrapped Matic",
+      "decimals": 18
+    },
+    {
+      "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      "symbol": "MATIC",
+      "name": "MATIC",
+      "decimals": 18
+    }
+  ],
+  "tokenFrom": 0,
+  "tokenTo": 3,
+  "primaryPrice": 970884964631.6119,
+  "swapPrice": 969645597035.2832,
+  "priceImpact": 0.0012765339267551967,
+  "amountIn": "1021000000",
+  "assumedAmountOut": "990008154573024264192",
+  "gasSpent": 350000,
+  "route": [
+    {
+      "poolAddress": "0xc6bA44891Cd95eFC3929a428242f97bd9B735eB1",
+      "poolType": "Concentrated",
+      "poolName": "SushiSwapV3 0.05%",
+      "poolFee": 0.0005,
+      "tokenFrom": 0,
+      "tokenTo": 1,
+      "share": 1,
+      "assumedAmountIn": "1021000000",
+      "assumedAmountOut": "1019735147"
+    },
+    {
+      "poolAddress": "0x21988C9CFD08db3b5793c2C6782271dC94749251",
+      "poolType": "Concentrated",
+      "poolName": "SushiSwapV3 0.05%",
+      "poolFee": 0.0005,
+      "tokenFrom": 1,
+      "tokenTo": 2,
+      "share": 1,
+      "assumedAmountIn": "1019735147",
+      "assumedAmountOut": "990008154573024133120"
+    },
+    {
+      "poolAddress": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+      "poolType": "Bridge",
+      "poolName": "Wrap",
+      "poolFee": 0,
+      "tokenFrom": 2,
+      "tokenTo": 3,
+      "share": 1,
+      "assumedAmountIn": "990008154573024133120",
+      "assumedAmountOut": "990008154573024133120"
+    }
+  ],
+  "routeProcessorAddr": "0x46B3fDF7b5CDe91Ac049936bF0bDb12c5d22202e",
+  "routeProcessorArgs": {
+    "tokenIn": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+    "amountIn": "1021000000",
+    "tokenOut": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    "amountOutMin": "985058113800159142871",
+    "to": "0xc86498822EF633F6e1E971484C56e3a087ECC333",
+    "routeCode": "0x023c499c542cEF5E3811e1192ce70d8cC03d5c335901ffff01c6bA44891Cd95eFC3929a428242f97bd9B735eB10046B3fDF7b5CDe91Ac049936bF0bDb12c5d22202e012791Bca1f2de4661ED88A30C99A7a9449Aa8417401ffff0121988C9CFD08db3b5793c2C6782271dC947492510046B3fDF7b5CDe91Ac049936bF0bDb12c5d22202e010d500B1d8E8eF31E21C99d1Db9A6444d3ADf127001ffff0200c86498822EF633F6e1E971484C56e3a087ECC333"
+  }
+}

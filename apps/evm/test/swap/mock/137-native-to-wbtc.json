@@ -1,0 +1,93 @@
+{
+  "status": "Success",
+  "tokens": [
+    {
+      "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      "symbol": "MATIC",
+      "name": "MATIC",
+      "decimals": 18
+    },
+    {
+      "address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+      "symbol": "WMATIC",
+      "name": "Wrapped Matic",
+      "decimals": 18
+    },
+    {
+      "address": "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+      "symbol": "WBTC",
+      "name": "(PoS) Wrapped BTC",
+      "decimals": 8
+    },
+    {
+      "address": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18
+    }
+  ],
+  "tokenFrom": 0,
+  "tokenTo": 2,
+  "primaryPrice": 1.4799186021452525e-15,
+  "swapPrice": 1.4812205714285714e-15,
+  "priceImpact": -0.0008797573605952014,
+  "amountIn": "7000000000000000000000",
+  "assumedAmountOut": "10368544",
+  "gasSpent": 460000,
+  "route": [
+    {
+      "poolAddress": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+      "poolType": "Bridge",
+      "poolName": "Wrap",
+      "poolFee": 0,
+      "tokenFrom": 0,
+      "tokenTo": 1,
+      "share": 1,
+      "assumedAmountIn": "7000000000000000000000",
+      "assumedAmountOut": "7000000000000000000000"
+    },
+    {
+      "poolAddress": "0x6b75F2189F0E11C52e814E09e280eb1a9A8A094a",
+      "poolType": "Concentrated",
+      "poolName": "UniswapV3 0.05%",
+      "poolFee": 0.0005,
+      "tokenFrom": 1,
+      "tokenTo": 2,
+      "share": 0.16666666666666666,
+      "assumedAmountIn": "1166720073243305050112",
+      "assumedAmountOut": "1728295"
+    },
+    {
+      "poolAddress": "0x86f1d8390222A3691C28938eC7404A1661E618e0",
+      "poolType": "Concentrated",
+      "poolName": "UniswapV3 0.05%",
+      "poolFee": 0.0005,
+      "tokenFrom": 1,
+      "tokenTo": 3,
+      "share": 0.8333333333333333,
+      "assumedAmountIn": "5833279926756694818816",
+      "assumedAmountOut": "1691062694563990272"
+    },
+    {
+      "poolAddress": "0x50eaEDB835021E4A108B7290636d62E9765cc6d7",
+      "poolType": "Concentrated",
+      "poolName": "UniswapV3 0.05%",
+      "poolFee": 0.0005,
+      "tokenFrom": 3,
+      "tokenTo": 2,
+      "share": 1,
+      "assumedAmountIn": "1691062694563990272",
+      "assumedAmountOut": "8640249"
+    }
+  ],
+  "routeProcessorAddr": "0x46B3fDF7b5CDe91Ac049936bF0bDb12c5d22202e",
+  "routeProcessorArgs": {
+    "tokenIn": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    "amountIn": "7000000000000000000000",
+    "tokenOut": "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+    "amountOutMin": "10316701",
+    "to": "0xc86498822EF633F6e1E971484C56e3a087ECC333",
+    "routeCode": "0x0301ffff020146B3fDF7b5CDe91Ac049936bF0bDb12c5d22202e0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270010d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270022aab016b75F2189F0E11C52e814E09e280eb1a9A8A094a01c86498822EF633F6e1E971484C56e3a087ECC333ffff0186f1d8390222A3691C28938eC7404A1661E618e00146B3fDF7b5CDe91Ac049936bF0bDb12c5d22202e017ceB23fD6bC0adD59E62ac25578270cFf1b9f61901ffff0150eaEDB835021E4A108B7290636d62E9765cc6d700c86498822EF633F6e1E971484C56e3a087ECC333",
+    "value": "7000000000000000000000"
+  }
+}

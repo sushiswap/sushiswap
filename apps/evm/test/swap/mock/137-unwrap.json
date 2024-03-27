@@ -1,0 +1,47 @@
+{
+  "status": "Success",
+  "tokens": [
+    {
+      "address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+      "symbol": "WMATIC",
+      "name": "Wrapped Matic",
+      "decimals": 18
+    },
+    {
+      "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      "symbol": "MATIC",
+      "name": "MATIC",
+      "decimals": 18
+    }
+  ],
+  "tokenFrom": 0,
+  "tokenTo": 1,
+  "primaryPrice": 1,
+  "swapPrice": 1,
+  "priceImpact": 0,
+  "amountIn": "10000000000000000000",
+  "assumedAmountOut": "10000000000000000000",
+  "gasSpent": 50000,
+  "route": [
+    {
+      "poolAddress": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+      "poolType": "Bridge",
+      "poolName": "Wrap",
+      "poolFee": 0,
+      "tokenFrom": 0,
+      "tokenTo": 1,
+      "share": 1,
+      "assumedAmountIn": "10000000000000000000",
+      "assumedAmountOut": "10000000000000000000"
+    }
+  ],
+  "routeProcessorAddr": "0x46B3fDF7b5CDe91Ac049936bF0bDb12c5d22202e",
+  "routeProcessorArgs": {
+    "tokenIn": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    "amountIn": "10000000000000000000",
+    "tokenOut": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    "amountOutMin": "10000000000000000000",
+    "to": "0xc86498822EF633F6e1E971484C56e3a087ECC333",
+    "routeCode": "0x020d500B1d8E8eF31E21C99d1Db9A6444d3ADf127001ffff0200c86498822EF633F6e1E971484C56e3a087ECC333"
+  }
+}

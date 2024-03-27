@@ -1,8 +1,9 @@
+import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
 import { ReactNode, useEffect } from 'react'
 import { ChainId } from 'sushi/chain'
 import { useEnsName } from 'wagmi'
 
-export type Props = Parameters<typeof useEnsName>[0] & {
+export type Props = Parameters<typeof useEnsName<PublicWagmiConfig>>[0] & {
   children:
     | ReactNode
     | ReactNode[]
@@ -11,7 +12,6 @@ export type Props = Parameters<typeof useEnsName>[0] & {
 
 export const AddressToEnsResolver = ({
   children,
-  onSuccess,
   chainId = ChainId.ETHEREUM,
   ...props
 }: Props): JSX.Element => {
@@ -19,8 +19,10 @@ export const AddressToEnsResolver = ({
 
   // Custom onSuccess callback to send success data with resolved result
   useEffect(() => {
-    if (result.data && onSuccess) onSuccess(result.data)
-  }, [onSuccess, result.data])
+    if (result.data && props.query?.onSuccess) {
+      props.query.onSuccess(result.data)
+    }
+  }, [props.query?.onSuccess, result.data])
 
   if (typeof children === 'function') {
     return children(result)

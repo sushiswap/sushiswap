@@ -1,14 +1,17 @@
 'use client'
 
 import { ChefType } from '@sushiswap/client'
-import { useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
+import { ChainId } from 'sushi/chain'
 import { Amount, Token } from 'sushi/currency'
-import { Address, useContractRead, useContractReads } from 'wagmi'
+import { Address } from 'viem'
+import { useBlockNumber, useReadContract, useReadContracts } from 'wagmi'
 import { getMasterChefContractConfig } from './use-master-chef-contract'
 
 interface UseRewarderPayload {
   account: string | undefined
-  chainId: number
+  chainId: ChainId
   farmId: number
   rewardTokens: Token[]
   rewarderAddresses: string[]
@@ -18,7 +21,7 @@ interface UseRewarderPayload {
 }
 
 interface UseRewarderData
-  extends Pick<ReturnType<typeof useContractRead>, 'isLoading' | 'isError'> {
+  extends Pick<ReturnType<typeof useReadContract>, 'isLoading' | 'isError'> {
   data: (Amount<Token> | undefined)[]
 }
 
@@ -138,14 +141,25 @@ export const useRewarder: UseRewarder = ({
     types,
   ])
 
-  const { isError, isLoading, data } = useContractReads({
+  const queryClient = useQueryClient()
+
+  const { isError, isLoading, data, queryKey } = useReadContracts({
     contracts,
-    watch: true,
-    keepPreviousData: true,
     allowFailure: true,
-    enabled: !!account && !!enabled,
-    select: (results) => results.map((r) => r.result),
+    query: {
+      enabled: !!account && !!enabled,
+      keepPreviousData: true,
+      select: (results) => results.map((r) => r.result),
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({ chainId, watch: true })
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries(queryKey, {}, { cancelRefetch: false })
+    }
+  }, [blockNumber, queryClient, queryKey])
 
   return useMemo(() => {
     if (!data)

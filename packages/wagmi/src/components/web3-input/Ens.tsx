@@ -12,9 +12,13 @@ function Component(
   const { data } = useEnsAddress({
     name: `${props.value}`,
     chainId: ChainId.ETHEREUM,
-    enabled: Boolean(
-      props.value && typeof props.value === 'string' && props.value.length > 2,
-    ),
+    query: {
+      enabled: Boolean(
+        props.value &&
+          typeof props.value === 'string' &&
+          props.value.length > 2,
+      ),
+    },
   })
 
   useEffect(() => {

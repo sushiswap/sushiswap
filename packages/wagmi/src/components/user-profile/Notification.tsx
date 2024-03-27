@@ -22,7 +22,7 @@ import { TimeAgo } from '@sushiswap/ui/components/time-ago'
 import React, { FC } from 'react'
 import { Chain, ChainId } from 'sushi/chain'
 import { Token } from 'sushi/currency'
-import { useWaitForTransaction } from 'wagmi'
+import { useWaitForTransactionReceipt } from 'wagmi'
 
 export const STARGATE_TOKEN = new Token({
   chainId: ChainId.ETHEREUM,
@@ -37,7 +37,7 @@ export const Notification: FC<{
   showExtra?: boolean
   hideStatus?: boolean
 }> = ({ data: notification, showExtra = false, hideStatus = false }) => {
-  const { status } = useWaitForTransaction({
+  const { status } = useWaitForTransactionReceipt({
     chainId: notification.chainId,
     hash: notification.txHash as `0x${string}`,
   })

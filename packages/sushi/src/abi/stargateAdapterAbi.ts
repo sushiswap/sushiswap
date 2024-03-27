@@ -128,4 +128,4 @@ export const stargateAdapterAbi = [
     type: 'function',
   },
   { stateMutability: 'payable', type: 'receive' },
-]
+] as const

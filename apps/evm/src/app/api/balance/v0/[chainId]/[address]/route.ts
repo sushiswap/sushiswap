@@ -1,27 +1,19 @@
-import { allChains, allProviders } from '@sushiswap/wagmi-config'
-import type { Address } from '@wagmi/core'
-import {
-  configureChains,
-  createConfig,
-  erc20ABI,
-  fetchBalance,
-  readContracts,
-} from '@wagmi/core'
+import { publicWagmiConfig } from '@sushiswap/wagmi-config'
+import { createConfig, getBalance, readContracts } from '@wagmi/core'
 import zip from 'lodash.zip'
+import { type ChainId } from 'sushi/chain'
+import { Address, erc20Abi } from 'viem'
 import { z } from 'zod'
 
-const { publicClient } = configureChains(allChains, allProviders)
-createConfig({
-  autoConnect: true,
-  publicClient,
-})
+const config = createConfig(publicWagmiConfig)
 
 const querySchema = z.object({
   chainId: z.coerce
     .number()
     .int()
     .gte(0)
-    .lte(2 ** 256),
+    .lte(2 ** 256)
+    .transform((value) => value as ChainId),
   address: z.coerce.string(),
   tokens: z.array(z.coerce.string()).optional(),
 })
@@ -45,19 +37,19 @@ export async function GET(
   ).json()
   const tokens = tokensSchema.parse(data)
 
-  const balance = await fetchBalance({
+  const balance = await getBalance(config, {
     chainId,
     address: address as Address,
   })
 
-  const balances = await readContracts({
+  const balances = await readContracts(config, {
     allowFailure: true,
     contracts: tokens.map(
       (token) =>
         ({
           chainId,
           address: token as Address,
-          abi: erc20ABI,
+          abi: erc20Abi,
           args: [address as Address],
           functionName: 'balanceOf',
         }) as const,

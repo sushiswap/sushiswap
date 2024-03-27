@@ -8,13 +8,14 @@ import { LinkInternal, classNames } from '@sushiswap/ui'
 import { Currency } from '@sushiswap/ui/components/currency'
 import { NetworkIcon } from '@sushiswap/ui/components/icons'
 import { SkeletonCircle, SkeletonText } from '@sushiswap/ui/components/skeleton'
-import { useQuery, useToken } from '@sushiswap/wagmi'
+import { useToken } from '@sushiswap/wagmi'
 import { FC, useEffect, useMemo, useRef, useState } from 'react'
 import chains, { ChainId, chainShortName } from 'sushi/chain'
 import { Native, Token, Type } from 'sushi/currency'
 import { type TokenList } from 'sushi/token-list'
 import { isAddress } from 'viem'
 
+import { useQuery } from '@tanstack/react-query'
 import { SUPPORTED_CHAIN_IDS } from '../../../config'
 
 const EXAMPLE_CURRENCIES = [
@@ -64,7 +65,9 @@ export const Search: FC = () => {
   const { data: web3Token, isLoading: web3Loading } = useToken({
     address: query as `0x${string}`,
     chainId,
-    enabled: isAddress(query),
+    query: {
+      enabled: isAddress(query),
+    },
   })
 
   const { data: tokenList } = useQuery<TokenList>(

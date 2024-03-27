@@ -4,7 +4,7 @@ import {
   publicClientConfig,
 } from 'sushi/config'
 import { createClient } from 'viem'
-import { readContract } from 'viem/contract'
+import { readContract } from 'viem/actions'
 
 const abiShard = [
   {

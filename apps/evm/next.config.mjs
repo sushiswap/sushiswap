@@ -14,6 +14,9 @@ const nextConfig = {
       fullUrl: true,
     },
   },
+  experimental: {
+    testProxy: true,
+  },
   transpilePackages: ['@sushiswap/wagmi'],
   async redirects() {
     return [

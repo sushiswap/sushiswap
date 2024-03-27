@@ -2,10 +2,11 @@
 
 import { usePool, useSteerVaults } from '@sushiswap/client/hooks'
 import { useAllPrices } from '@sushiswap/react-query'
-import { Address, useAccount, useSteerAccountPositions } from '@sushiswap/wagmi'
+import { useAccount, useSteerAccountPositions } from '@sushiswap/wagmi'
 import { useMemo } from 'react'
 import { ChainId } from 'sushi/chain'
 import { Amount, Token } from 'sushi/currency'
+import { Address } from 'viem'
 
 interface UseSteerPositions {
   chainId?: ChainId

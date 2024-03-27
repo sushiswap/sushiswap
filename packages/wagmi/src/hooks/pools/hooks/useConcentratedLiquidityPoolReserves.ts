@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { SushiSwapV3ChainId } from 'sushi/config'
 import { SushiSwapV3Pool } from 'sushi/pool'
+import { useConfig } from 'wagmi'
 import { getConcentratedLiquidityPoolReserves } from '../actions'
 
 interface UseConcentratedLiquidityPoolReserves {
@@ -14,6 +15,8 @@ export const useConcentratedLiquidityPoolReserves = ({
   chainId,
   enabled = true,
 }: UseConcentratedLiquidityPoolReserves) => {
+  const config = useConfig()
+
   return useQuery({
     queryKey: [
       'useConcentratedLiquidityPoolReserves',
@@ -26,9 +29,10 @@ export const useConcentratedLiquidityPoolReserves = ({
     ],
     queryFn: async () => {
       if (pool) {
-        return await getConcentratedLiquidityPoolReserves({
+        return getConcentratedLiquidityPoolReserves({
           pool,
           chainId,
+          config,
         })
       }
 

@@ -4,11 +4,11 @@ import { InformationCircleIcon } from '@heroicons/react/24/solid'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@sushiswap/ui'
 import { Button, ButtonProps } from '@sushiswap/ui/components/button'
 import { FC, ReactElement, ReactNode } from 'react'
-import { chainName } from 'sushi/chain'
-import { useNetwork, useSwitchNetwork } from 'wagmi'
+import { ChainId, chainName } from 'sushi/chain'
+import { useAccount, useSwitchChain } from 'wagmi'
 
 interface NetworkProps extends ButtonProps {
-  chainId: number | undefined
+  chainId: ChainId | undefined
   hoverCardContent?: ReactNode | undefined
 }
 
@@ -20,33 +20,32 @@ const Network: FC<NetworkProps> = ({
   hoverCardContent,
   ...rest
 }): ReactElement<any, any> | null => {
-  const { chain } = useNetwork()
-  const { switchNetworkAsync } = useSwitchNetwork()
+  const { chain } = useAccount()
+  const { switchChainAsync } = useSwitchChain()
 
   if (!chainId) return null
 
-  const _chainId = Number(chainId)
-  if (chain?.id !== _chainId)
+  if (chain?.id !== chainId) {
     return !hoverCardContent ? (
       <Button
         fullWidth={fullWidth}
         size={size}
         onClick={async () => {
-          await switchNetworkAsync?.(_chainId)
+          await switchChainAsync?.({ chainId })
         }}
         {...rest}
       >
-        Switch to {chainName[_chainId]}
+        Switch to {chainName[chainId]}
       </Button>
     ) : (
       <HoverCard openDelay={0} closeDelay={0}>
         <Button
           fullWidth={fullWidth}
           size={size}
-          onClick={async () => await switchNetworkAsync?.(_chainId)}
+          onClick={async () => await switchChainAsync?.({ chainId })}
           {...rest}
         >
-          Switch to {chainName[_chainId]}
+          Switch to {chainName[chainId]}
           <HoverCardTrigger>
             <InformationCircleIcon width={16} height={16} />
           </HoverCardTrigger>
@@ -56,6 +55,7 @@ const Network: FC<NetworkProps> = ({
         </HoverCardContent>
       </HoverCard>
     )
+  }
 
   return <>{children}</>
 }

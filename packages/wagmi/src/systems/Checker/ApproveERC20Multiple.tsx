@@ -3,8 +3,8 @@
 import { ButtonProps } from '@sushiswap/ui/components/button'
 import { FC } from 'react'
 import { Amount, Type } from 'sushi/currency'
-import { Address } from 'wagmi'
 
+import { Address } from 'viem'
 import { ApproveERC20 } from './ApproveERC20'
 
 interface ApproveERC20MultipleProps extends ButtonProps {

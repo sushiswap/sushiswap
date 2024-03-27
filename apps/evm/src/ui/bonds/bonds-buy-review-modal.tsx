@@ -19,16 +19,15 @@ import {
   createErrorToast,
   createToast,
 } from '@sushiswap/ui'
-import { useSendTransaction } from '@sushiswap/wagmi'
 import {
-  useAccount,
-  useNetwork,
-  usePrepareSendTransaction,
-  useWaitForTransaction,
+  UseSimulateContractParameters,
+  usePublicClient,
+  useSimulateContract,
+  useWriteContract,
 } from '@sushiswap/wagmi'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
+import { useAccount, useWaitForTransactionReceipt } from '@sushiswap/wagmi'
 import { useApproved } from '@sushiswap/wagmi/systems/Checker/Provider'
-import { SendTransactionResult, waitForTransaction } from '@wagmi/core'
+import { SendTransactionReturnType } from '@wagmi/core'
 import format from 'date-fns/format'
 import formatDistance from 'date-fns/formatDistance'
 import { FC, ReactNode, useCallback, useMemo } from 'react'
@@ -42,7 +41,7 @@ import {
 } from 'sushi'
 import { Chain } from 'sushi/chain'
 import { Amount, Token } from 'sushi/currency'
-import { UserRejectedRequestError, encodeFunctionData } from 'viem'
+import { UserRejectedRequestError } from 'viem'
 
 interface BondsBuyReviewModal {
   bond: Bond
@@ -59,12 +58,12 @@ export const BondsBuyReviewModal: FC<BondsBuyReviewModal> = ({
   discount,
   quoteAmount,
   payoutAmount,
-  onSuccess,
+  onSuccess: _onSuccess,
   successLink,
   children,
 }) => {
-  const { chain } = useNetwork()
-  const { address } = useAccount()
+  const { address, chain } = useAccount()
+  const client = usePublicClient()
 
   const { approved } = useApproved(APPROVE_TAG_BONDS)
 
@@ -82,20 +81,17 @@ export const BondsBuyReviewModal: FC<BondsBuyReviewModal> = ({
     return new Percent(5, 1000)
   }, [])
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, error: Error | null) => {
-      if (error instanceof UserRejectedRequestError) {
-        createErrorToast(error?.message, true)
-      }
-      if (!data) return
+  const onSuccess = useCallback(
+    (hash: SendTransactionReturnType) => {
+      _onSuccess()
 
       const ts = new Date().getTime()
       void createToast({
         account: address,
         type: 'mint',
         chainId: bond.chainId,
-        txHash: data.hash,
-        promise: waitForTransaction({ hash: data.hash }),
+        txHash: hash,
+        promise: client.waitForTransactionReceipt({ hash: hash }),
         summary: {
           pending: `Purchasing bond (${payoutAmount.toSignificant(6)} ${
             payoutAmount.currency.symbol
@@ -117,26 +113,30 @@ export const BondsBuyReviewModal: FC<BondsBuyReviewModal> = ({
         groupTimestamp: ts,
       })
     },
-    [address, bond.chainId, payoutAmount, quoteAmount],
+    [client, address, bond.chainId, payoutAmount, quoteAmount, _onSuccess],
   )
 
-  const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
-    if (!discount || !address) return {}
+  const onError = useCallback((e: Error) => {
+    if (e instanceof UserRejectedRequestError) {
+      createErrorToast(e?.message, true)
+    }
+  }, [])
+
+  const prepare = useMemo(() => {
+    if (!discount || !address) return undefined
 
     return {
-      to: bond.tellerAddress,
-      data: encodeFunctionData({
-        abi: bondFixedTermTellerAbi,
-        functionName: 'purchase',
-        args: [
-          address,
-          REFERRER_ADDRESS[bond.chainId],
-          BigInt(bond.marketId),
-          quoteAmount.quotient,
-          slippageAmount(payoutAmount, slippagePercent)[0],
-        ],
-      }),
-    }
+      address: bond.tellerAddress,
+      abi: bondFixedTermTellerAbi,
+      functionName: 'purchase',
+      args: [
+        address,
+        REFERRER_ADDRESS[bond.chainId],
+        BigInt(bond.marketId),
+        quoteAmount.quotient,
+        slippageAmount(payoutAmount, slippagePercent)[0],
+      ],
+    } as const satisfies UseSimulateContractParameters
   }, [
     address,
     bond.chainId,
@@ -148,27 +148,39 @@ export const BondsBuyReviewModal: FC<BondsBuyReviewModal> = ({
     slippagePercent,
   ])
 
-  const { config, isError } = usePrepareSendTransaction({
+  const { data: simulation, isError } = useSimulateContract({
     ...prepare,
     chainId: bond.chainId,
-    enabled: Boolean(bond.chainId === chain?.id && address && approved),
+    query: {
+      enabled: Boolean(bond.chainId === chain?.id && address && approved),
+    },
   })
 
   const {
-    sendTransactionAsync,
+    writeContractAsync,
     isLoading: isWritePending,
     data,
-  } = useSendTransaction({
-    ...config,
-    gas: config?.gas ? config.gas * 2n : undefined,
-    chainId: bond.chainId,
-    onSettled,
-    onSuccess,
+  } = useWriteContract({
+    mutation: {
+      onSuccess,
+      onError,
+    },
   })
 
-  const { status } = useWaitForTransaction({
+  const write = useMemo(() => {
+    if (!simulation || !address) return undefined
+
+    return async (confirm: () => void) => {
+      try {
+        await writeContractAsync(simulation.request)
+        confirm()
+      } catch {}
+    }
+  }, [address, writeContractAsync, simulation])
+
+  const { status } = useWaitForTransactionReceipt({
     chainId: bond.chainId,
-    hash: data?.hash,
+    hash: data,
   })
 
   return (
@@ -287,8 +299,8 @@ export const BondsBuyReviewModal: FC<BondsBuyReviewModal> = ({
                 <Button
                   size="xl"
                   fullWidth
-                  loading={!sendTransactionAsync || isWritePending}
-                  onClick={() => sendTransactionAsync?.().then(() => confirm())}
+                  loading={!write || isWritePending}
+                  onClick={() => write?.(confirm)}
                   testId="confirm-buy-bond"
                   type="button"
                   variant={buttonVariant}
@@ -315,7 +327,7 @@ export const BondsBuyReviewModal: FC<BondsBuyReviewModal> = ({
         )} ${payoutAmount.currency.symbol} with ${quoteAmount.toSignificant(
           4,
         )} ${quoteAmount.currency.symbol})`}
-        txHash={data?.hash}
+        txHash={data}
         buttonLink={successLink}
         buttonText="View your bond"
       />

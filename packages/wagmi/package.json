@@ -74,23 +74,23 @@
     "@types/jest": "29.5.5",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
-    "@wagmi/core": "1.4.13",
+    "@wagmi/core": "2.6.9",
     "eslint-config-sushi": "workspace:*",
     "next": "14.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "typescript": "5.2.2",
-    "viem": "1.21.4",
-    "wagmi": "1.4.13"
+    "viem": "2.8.13",
+    "wagmi": "2.5.11"
   },
   "peerDependencies": {
     "@sentry/nextjs": "7.101.1",
-    "@wagmi/core": "1.4.13",
+    "@wagmi/core": "2.6.9",
     "next": "14.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "viem": "1.21.4",
-    "wagmi": "1.4.13"
+    "viem": "2.8.13",
+    "wagmi": "2.5.11"
   },
   "peerDependenciesMeta": {
     "@sentry/nextjs": {

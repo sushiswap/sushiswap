@@ -14,7 +14,6 @@ import {
 } from '@sushiswap/ui/components/card'
 import { Toggle } from '@sushiswap/ui/components/toggle'
 import {
-  Address,
   useConcentratedLiquidityPool,
   useConcentratedLiquidityPoolReserves,
 } from '@sushiswap/wagmi'
@@ -22,6 +21,7 @@ import React, { FC, useState } from 'react'
 import { useTokenAmountDollarValues } from 'src/lib/hooks'
 import { SushiSwapV3ChainId } from 'sushi/config'
 import { formatUSD } from 'sushi/format'
+import { Address } from 'viem'
 import { ConcentratedLiquidityProvider } from './ConcentratedLiquidityProvider'
 import { ConcentratedPositionsTable } from './ConcentratedPositionsTable'
 import { PoolRewardDistributionsCard } from './PoolRewardDistributionsCard'

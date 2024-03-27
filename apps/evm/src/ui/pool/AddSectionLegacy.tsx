@@ -4,7 +4,6 @@ import { Pool } from '@sushiswap/client'
 import { useIsMounted } from '@sushiswap/hooks'
 import { Button } from '@sushiswap/ui'
 import {
-  Address,
   SushiSwapV2PoolState,
   getSushiSwapRouterContractConfig,
   useSushiSwapV2Pool,
@@ -13,7 +12,7 @@ import { Checker } from '@sushiswap/wagmi/systems'
 import { CheckerProvider } from '@sushiswap/wagmi/systems/Checker/Provider'
 import { FC, useCallback, useMemo, useState } from 'react'
 import { APPROVE_TAG_ADD_LEGACY } from 'src/lib/constants'
-import { ChainId } from 'sushi/chain'
+import { type ChainId } from 'sushi/chain'
 import { SushiSwapV2ChainId } from 'sushi/config'
 import { tryParseAmount } from 'sushi/currency'
 import { useTokensFromPool } from '../../lib/hooks'
@@ -111,7 +110,7 @@ export const AddSectionLegacy: FC<{ pool: Pool }> = ({ pool: _pool }) => {
               size="default"
               variant="outline"
               fullWidth
-              chainId={_pool.chainId}
+              chainId={_pool.chainId as ChainId}
             >
               <Checker.Amounts
                 size="default"
@@ -127,9 +126,7 @@ export const AddSectionLegacy: FC<{ pool: Pool }> = ({ pool: _pool }) => {
                   className="whitespace-nowrap"
                   fullWidth
                   amount={parsedInput0}
-                  contract={
-                    getSushiSwapRouterContractConfig(chainId).address as Address
-                  }
+                  contract={getSushiSwapRouterContractConfig(chainId).address}
                 >
                   <Checker.ApproveERC20
                     size="default"
@@ -138,10 +135,7 @@ export const AddSectionLegacy: FC<{ pool: Pool }> = ({ pool: _pool }) => {
                     className="whitespace-nowrap"
                     fullWidth
                     amount={parsedInput1}
-                    contract={
-                      getSushiSwapRouterContractConfig(chainId)
-                        .address as Address
-                    }
+                    contract={getSushiSwapRouterContractConfig(chainId).address}
                   >
                     <Checker.Success tag={APPROVE_TAG_ADD_LEGACY}>
                       <AddSectionReviewModalLegacy

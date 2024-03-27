@@ -8,6 +8,7 @@ import {
   useTokenAmountDollarValues,
   useUnderlyingTokenBalanceFromPool,
 } from 'src/lib/hooks'
+import { ChainId } from 'sushi/chain'
 import { Amount, Currency, Token } from 'sushi/currency'
 
 interface PoolPositionStakedContext {
@@ -83,7 +84,7 @@ const _PoolPositionStakedProvider: FC<_PoolPositionStakedProviderProps> = ({
   } = useGraphPool(pool)
   const { balance, isLoading, isError, isWritePending, isWriteError } =
     useMasterChef({
-      chainId: pool.chainId,
+      chainId: pool.chainId as ChainId,
       chef: chefType,
       pid: farmId,
       token: liquidityToken,

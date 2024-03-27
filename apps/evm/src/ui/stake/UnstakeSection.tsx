@@ -14,7 +14,7 @@ const _UnstakeSection = () => {
     return tryParseAmount(input, XSUSHI[ChainId.ETHEREUM])
   }, [input])
 
-  const { writeAsync, isLoading: isWritePending } = useBarWithdraw({
+  const { write, isLoading: isWritePending } = useBarWithdraw({
     amount: parsedInput,
     enabled: Boolean(parsedInput?.greaterThan(ZERO)),
   })
@@ -45,9 +45,9 @@ const _UnstakeSection = () => {
           >
             <Button
               size="xl"
-              onClick={() => writeAsync?.().then(() => setInput(''))}
+              onClick={() => write?.().then(() => setInput(''))}
               fullWidth
-              disabled={isWritePending || !writeAsync}
+              disabled={isWritePending || !write}
               testId="unstake-sushi"
             >
               {isWritePending ? <Dots>Confirm transaction</Dots> : 'Unstake'}

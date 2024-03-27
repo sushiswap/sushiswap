@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { TridentConstantPool, computeTridentConstantPoolAddress } from 'sushi'
 import {
   tridentConstantPoolAbi,
@@ -8,8 +8,15 @@ import {
 } from 'sushi/abi'
 import { Amount, Currency, Token } from 'sushi/currency'
 import { Fee } from 'sushi/dex'
-import { Address, useContractReads } from 'wagmi'
+import {
+  UseReadContractsParameters,
+  useBlockNumber,
+  useReadContracts,
+} from 'wagmi'
 
+import { useQueryClient } from '@tanstack/react-query'
+import { TridentChainId } from 'sushi/config'
+import { Address } from 'viem'
 import { TridentConstantPoolState } from '../actions'
 import { useTridentConstantPoolFactoryContract } from './useTridentConstantPoolFactoryContract'
 
@@ -27,15 +34,12 @@ interface UseGetTridentConstantPoolsReturn {
   data: [TridentConstantPoolState, TridentConstantPool | null][]
 }
 
-type Config = Omit<
-  NonNullable<Parameters<typeof useContractReads>['0']>,
-  'contracts'
->
+type Config = Omit<NonNullable<UseReadContractsParameters>, 'contracts'>
 
 export function useGetTridentConstantPools(
-  chainId: number | undefined,
+  chainId: TridentChainId | undefined,
   currencies: [Currency | undefined, Currency | undefined][],
-  config: Config = { enabled: true },
+  config: Config = { query: { enabled: true } },
 ): UseGetTridentConstantPoolsReturn {
   const contract = useTridentConstantPoolFactoryContract(chainId)
   const pairsUnique = useMemo<[Token, Token][]>(() => {
@@ -59,11 +63,14 @@ export function useGetTridentConstantPools(
     [pairsUnique],
   )
 
+  const queryClient = useQueryClient()
+
   const {
     data: callStatePoolsCount,
     isLoading: callStatePoolsCountLoading,
     isError: callStatePoolsCountError,
-  } = useContractReads({
+    queryKey: callStatePoolsCountQueryKey,
+  } = useReadContracts({
     contracts: pairsUniqueAddr.map((el) => ({
       chainId,
       address: contract?.address as Address,
@@ -71,8 +78,10 @@ export function useGetTridentConstantPools(
       functionName: 'poolsCount',
       args: el as [Address, Address],
     })),
-    enabled: Boolean(pairsUniqueAddr.length > 0 && config?.enabled),
-    watch: !config?.enabled,
+
+    query: {
+      enabled: Boolean(pairsUniqueAddr.length > 0 && config?.query?.enabled),
+    },
   })
 
   const callStatePoolsCountProcessed = useMemo(() => {
@@ -103,7 +112,8 @@ export function useGetTridentConstantPools(
     data: callStatePools,
     isLoading: callStatePoolsLoading,
     isError: callStatePoolsError,
-  } = useContractReads({
+    queryKey: callStatePoolsQueryKey,
+  } = useReadContracts({
     contracts: useMemo(() => {
       if (!callStatePoolsCountProcessed) return []
       return callStatePoolsCountProcessed.map((args) => ({
@@ -115,13 +125,14 @@ export function useGetTridentConstantPools(
       }))
     }, [callStatePoolsCountProcessed, chainId, contract?.address]),
 
-    enabled: Boolean(
-      callStatePoolsCountProcessed &&
-        callStatePoolsCountProcessed?.length > 0 &&
-        config?.enabled,
-    ),
-    watch: !config?.enabled,
-    select: (results) => results.map((r) => r.result),
+    query: {
+      enabled: Boolean(
+        callStatePoolsCountProcessed &&
+          callStatePoolsCountProcessed?.length > 0 &&
+          config?.query?.enabled,
+      ),
+      select: (results) => results.map((r) => r.result),
+    },
   })
 
   const pools = useMemo(() => {
@@ -163,12 +174,34 @@ export function useGetTridentConstantPools(
     data: reservesAndFees,
     isLoading: reservesAndFeesLoading,
     isError: reservesAndFeesError,
-  } = useContractReads({
+    queryKey: reservesAndFeesQueryKey,
+  } = useReadContracts({
     contracts,
-    enabled: poolsAddresses.length > 0 && config?.enabled,
-    watch: !config?.enabled,
-    select: (results) => results.map((r) => r.result),
+    query: {
+      enabled: poolsAddresses.length > 0 && config?.query?.enabled,
+      select: (results) => results.map((r) => r.result),
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({ chainId, watch: true })
+
+  useEffect(() => {
+    if (blockNumber) {
+      ;[
+        callStatePoolsCountQueryKey,
+        callStatePoolsQueryKey,
+        reservesAndFeesQueryKey,
+      ].forEach((key) => {
+        queryClient.invalidateQueries(key, {}, { cancelRefetch: false })
+      })
+    }
+  }, [
+    blockNumber,
+    queryClient,
+    callStatePoolsCountQueryKey,
+    callStatePoolsQueryKey,
+    reservesAndFeesQueryKey,
+  ])
 
   return useMemo(() => {
     return {
@@ -223,7 +256,7 @@ export function useGetTridentConstantPools(
 }
 
 export function useTridentConstantPools(
-  chainId: number,
+  chainId: TridentChainId,
   pools: PoolInput[],
 ): [TridentConstantPoolState, TridentConstantPool | null][] {
   const tridentConstantPoolFactory =
@@ -272,18 +305,30 @@ export function useTridentConstantPools(
     [tridentConstantPoolFactory, input],
   )
 
-  const { data } = useContractReads({
+  const queryClient = useQueryClient()
+
+  const { data, queryKey } = useReadContracts({
     contracts: poolsAddresses.map((address) => ({
       chainId,
       address,
       abi: tridentConstantPoolAbi,
       functionName: 'getReserves' as const,
     })),
-    enabled: poolsAddresses.length > 0,
-    watch: true,
-    keepPreviousData: true,
-    select: (results) => results.map((r) => r.result),
+
+    query: {
+      enabled: poolsAddresses.length > 0,
+      keepPreviousData: true,
+      select: (results) => results.map((r) => r.result),
+    },
   })
+
+  const { data: blockNumber } = useBlockNumber({ chainId, watch: true })
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries(queryKey, {}, { cancelRefetch: false })
+    }
+  }, [blockNumber, queryClient, queryKey])
 
   return useMemo(() => {
     if (poolsAddresses.length === 0)
@@ -317,7 +362,7 @@ export function useTridentConstantPools(
 }
 
 export function useTridentConstantPool(
-  chainId: number,
+  chainId: TridentChainId,
   tokenA: Currency | undefined,
   tokenB: Currency | undefined,
   fee: Fee,

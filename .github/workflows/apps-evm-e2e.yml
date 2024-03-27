@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        block-number: [47479278]
+        block-number: [55062171]
         chain-id: [137]
         node-version: [20]
         pnpm-version: [8.15.3]
@@ -72,6 +72,7 @@ jobs:
           NEXT_PUBLIC_APP_ENV: 'test'
           NEXT_PUBLIC_ALCHEMY_ID: ${{ secrets.NEXT_PUBLIC_ALCHEMY_ID }}
           NEXT_PUBLIC_CHAIN_ID: ${{ matrix.chain-id }}
+          NEXT_PUBLIC_SWAP_API_BASE_URL: 'https://mock-swap-api'
           NEXT_TELEMETRY_DISABLED: 1
 
       - name: Upload test results

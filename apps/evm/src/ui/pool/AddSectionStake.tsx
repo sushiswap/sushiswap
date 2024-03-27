@@ -65,17 +65,15 @@ const _AddSectionStake: FC<AddSectionStakeProps> = withCheckerRoot(
       return [tryParseAmount(value, liquidityToken)]
     }, [liquidityToken, value])
 
-    const { sendTransaction, isLoading: isWritePending } = useMasterChefDeposit(
-      {
-        amount: amounts[0],
-        chainId: liquidityToken.chainId,
-        chef: chefType,
-        pid: farmId,
-        enabled: Boolean(
-          approved && amounts[0]?.greaterThan(ZERO) && liquidityToken,
-        ),
-      },
-    )
+    const { write, isLoading: isWritePending } = useMasterChefDeposit({
+      amount: amounts[0],
+      chainId: liquidityToken.chainId,
+      chef: chefType,
+      pid: farmId,
+      enabled: Boolean(
+        approved && amounts[0]?.greaterThan(ZERO) && liquidityToken,
+      ),
+    })
 
     return (
       <AddSectionStakeWidget
@@ -94,7 +92,7 @@ const _AddSectionStake: FC<AddSectionStakeProps> = withCheckerRoot(
             size="default"
             variant="outline"
             fullWidth
-            chainId={pool.chainId}
+            chainId={pool.chainId as ChainId}
           >
             <Checker.Amounts
               size="default"
@@ -110,18 +108,20 @@ const _AddSectionStake: FC<AddSectionStakeProps> = withCheckerRoot(
                 id="stake-approve-slp"
                 amount={amounts[0]}
                 contract={
-                  getMasterChefContractConfig(pool.chainId, chefType)?.address
+                  getMasterChefContractConfig(pool.chainId as ChainId, chefType)
+                    ?.address
                 }
                 enabled={Boolean(
-                  getMasterChefContractConfig(pool.chainId, chefType)?.address,
+                  getMasterChefContractConfig(pool.chainId as ChainId, chefType)
+                    ?.address,
                 )}
               >
                 <Checker.Success tag={APPROVE_TAG_STAKE}>
                   <Button
                     size="default"
-                    onClick={() => sendTransaction?.()}
+                    onClick={write}
                     fullWidth
-                    disabled={isWritePending || !approved || !sendTransaction}
+                    disabled={isWritePending || !approved || !write}
                     testId="stake-liquidity"
                   >
                     {isWritePending ? (

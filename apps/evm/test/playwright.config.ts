@@ -19,7 +19,7 @@ const baseURL = `http://localhost:${PORT}`
  */
 const config: PlaywrightTestConfig = {
   // quiet: true,
-  // testMatch: 'simple.test.ts',
+  testMatch: ['pool.test.ts', 'simple.test.ts'],
   testIgnore: [
     'smart.test.ts',
     // 'swap.test.test',
@@ -128,6 +128,7 @@ const config: PlaywrightTestConfig = {
         `EDGE_CONFIG=${String(process.env.EDGE_CONFIG)}`,
         'NEXT_PUBLIC_APP_ENV=test',
         `NEXT_PUBLIC_CHAIN_ID=${String(process.env.NEXT_PUBLIC_CHAIN_ID)}`,
+        'NEXT_PUBLIC_SWAP_API_BASE_URL=https://mock-swap-api',
         'npm run start -- --experimental-test-proxy',
       ].join(' '),
       port: 3000,
@@ -137,6 +138,9 @@ const config: PlaywrightTestConfig = {
         EDGE_CONFIG: String(process.env.EDGE_CONFIG),
         NEXT_PUBLIC_APP_ENV: String(process.env.NEXT_PUBLIC_APP_ENV),
         NEXT_PUBLIC_CHAIN_ID: String(process.env.NEXT_PUBLIC_CHAIN_ID),
+        NEXT_PUBLIC_SWAP_API_BASE_URL: String(
+          process.env.NEXT_PUBLIC_SWAP_API_BASE_URL,
+        ),
       },
       // stderr: 'pipe',
       // stdout: 'pipe',

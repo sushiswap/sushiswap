@@ -14,21 +14,17 @@ import {
 import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import {
   PoolFinderType,
+  UseCallParameters,
   useAccount,
   useBentoBoxTotals,
-  useNetwork,
-  usePrepareSendTransaction,
+  useCall,
+  usePublicClient,
   useSendTransaction,
   useTridentConstantPoolFactoryContract,
   useTridentRouterContract,
   useTridentStablePoolFactoryContract,
-  useWaitForTransaction,
+  useWaitForTransactionReceipt,
 } from '@sushiswap/wagmi'
-import {
-  SendTransactionResult,
-  waitForTransaction,
-} from '@sushiswap/wagmi/actions'
-import { UsePrepareSendTransactionConfig } from '@sushiswap/wagmi/hooks/useSendTransaction'
 import {
   useApproved,
   useApprovedActions,
@@ -51,11 +47,12 @@ import {
   computeTridentStablePoolAddress,
 } from 'sushi'
 import { ChainId } from 'sushi/chain'
-import { BentoBoxChainId } from 'sushi/config'
+import { BentoBoxChainId, TridentChainId } from 'sushi/config'
 import { Amount, Type } from 'sushi/currency'
 import { Fee } from 'sushi/dex'
 import {
   Address,
+  SendTransactionReturnType,
   UserRejectedRequestError,
   encodeAbiParameters,
   encodeFunctionData,
@@ -66,7 +63,7 @@ import {
 import { AddSectionReviewModal } from './AddSectionReviewModal'
 
 interface CreateSectionReviewModalTridentProps {
-  chainId: BentoBoxChainId
+  chainId: TridentChainId
   token0: Type | undefined
   token1: Type | undefined
   input0: Amount<Type> | undefined
@@ -79,8 +76,8 @@ interface CreateSectionReviewModalTridentProps {
 export const CreateSectionReviewModalTrident: FC<
   CreateSectionReviewModalTridentProps
 > = ({ token0, token1, input0, input1, fee, poolType, chainId, children }) => {
-  const { address } = useAccount()
-  const { chain } = useNetwork()
+  const client = usePublicClient()
+  const { address, chain } = useAccount()
   const { signature } = useSignature(APPROVE_TAG_CREATE_TRIDENT)
   const { setSignature } = useApprovedActions(APPROVE_TAG_CREATE_TRIDENT)
   const { approved } = useApproved(APPROVE_TAG_CREATE_TRIDENT)
@@ -184,20 +181,19 @@ export const CreateSectionReviewModalTrident: FC<
     totals,
   ])
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, error: Error | null) => {
-      if (error instanceof UserRejectedRequestError) {
-        createErrorToast(error?.message, true)
-      }
+  const onSuccess = useCallback(
+    (hash: SendTransactionReturnType) => {
+      setSignature(undefined)
 
-      if (!data || !chain?.id || !token0 || !token1) return
+      if (!chain?.id || !token0 || !token1) return
+
       const ts = new Date().getTime()
       createToast({
         account: address,
         type: 'mint',
         chainId: chain.id,
-        txHash: data.hash,
-        promise: waitForTransaction({ hash: data.hash }),
+        txHash: hash,
+        promise: client.waitForTransactionReceipt({ hash }),
         summary: {
           pending: `Adding liquidity to the ${token0.symbol}/${token1.symbol} pair`,
           completed: `Successfully added liquidity to the ${token0.symbol}/${token1.symbol} pair`,
@@ -207,10 +203,16 @@ export const CreateSectionReviewModalTrident: FC<
         groupTimestamp: ts,
       })
     },
-    [chain, token0, token1, address],
+    [client, chain, token0, token1, address, setSignature],
   )
 
-  const prepare = useMemo<UsePrepareSendTransactionConfig>(() => {
+  const onError = useCallback((e: Error) => {
+    if (e instanceof UserRejectedRequestError) {
+      createErrorToast(e?.message, true)
+    }
+  }, [])
+
+  const prepare = useMemo(() => {
     try {
       if (
         !chain?.id ||
@@ -227,7 +229,7 @@ export const CreateSectionReviewModalTrident: FC<
         !totals?.[token1.wrapped.address] ||
         !address
       ) {
-        return
+        return undefined
       }
 
       let value
@@ -265,8 +267,9 @@ export const CreateSectionReviewModalTrident: FC<
       }
 
       return {
-        from: address,
+        account: address,
         to: contract.address,
+        value: value ?? 0n,
         data: batchAction({
           actions: [
             approveMasterContractAction({
@@ -298,8 +301,7 @@ export const CreateSectionReviewModalTrident: FC<
             }),
           ],
         }),
-        value: value ?? 0n,
-      }
+      } satisfies UseCallParameters
     } catch (e: unknown) {
       console.error(e)
     }
@@ -320,25 +322,37 @@ export const CreateSectionReviewModalTrident: FC<
     totals,
   ])
 
-  const { config } = usePrepareSendTransaction({
+  const { isError: isSimulationError } = useCall({
     ...prepare,
-    chainId,
-    enabled: Boolean(approved && totals),
+    query: {
+      enabled: Boolean(approved && totals),
+    },
   })
 
   const {
     sendTransactionAsync,
     isLoading: isWritePending,
-    data,
+    data: hash,
   } = useSendTransaction({
-    ...config,
-    onSettled,
-    onSuccess: () => {
-      setSignature(undefined)
+    mutation: {
+      onSuccess,
+      onError,
     },
   })
 
-  const { status } = useWaitForTransaction({ chainId, hash: data?.hash })
+  const send = useMemo(() => {
+    if (!prepare || isSimulationError) return
+
+    return async (confirm: () => void) => {
+      try {
+        await sendTransactionAsync(prepare)
+
+        confirm()
+      } catch {}
+    }
+  }, [isSimulationError, prepare, sendTransactionAsync])
+
+  const { status } = useWaitForTransactionReceipt({ chainId, hash })
 
   return (
     <DialogProvider>
@@ -362,9 +376,11 @@ export const CreateSectionReviewModalTrident: FC<
                 <Button
                   id="confirm-add-liquidity"
                   size="xl"
-                  disabled={!isValid || isWritePending || !sendTransactionAsync}
+                  disabled={
+                    !isValid || isWritePending || !send || isSimulationError
+                  }
                   fullWidth
-                  onClick={() => sendTransactionAsync?.().then(() => confirm())}
+                  onClick={() => send?.(confirm)}
                 >
                   {isWritePending ? <Dots>Confirm transaction</Dots> : 'Add'}
                 </Button>
@@ -380,7 +396,7 @@ export const CreateSectionReviewModalTrident: FC<
         successMessage={'Successfully added liquidity'}
         buttonText="Go to pool"
         buttonLink={`/pools/${chainId}:${poolAddress}`}
-        txHash={data?.hash}
+        txHash={hash}
       />
     </DialogProvider>
   )

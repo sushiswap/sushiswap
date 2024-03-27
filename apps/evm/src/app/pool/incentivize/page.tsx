@@ -28,12 +28,11 @@ import {
   typographyVariants,
 } from '@sushiswap/ui'
 import {
-  Address,
-  readContract,
   useAccount,
   useConcentratedLiquidityPool,
+  usePublicClient,
   useSignMessage,
-  useWaitForTransaction,
+  useWaitForTransactionReceipt,
 } from '@sushiswap/wagmi'
 import { DistributionCreator } from '@sushiswap/wagmi'
 import { useIncentivizePoolWithRewards } from '@sushiswap/wagmi'
@@ -49,7 +48,7 @@ import { Chain } from 'sushi/chain'
 import { ANGLE_ENABLED_NETWORKS, SushiSwapV3ChainId } from 'sushi/config'
 import { Token, Type, tryParseAmount } from 'sushi/currency'
 import { SushiSwapV3Pool } from 'sushi/pool'
-import { zeroAddress } from 'viem'
+import { Address, zeroAddress } from 'viem'
 import { ConcentratedLiquidityProvider } from '../../../ui/pool/ConcentratedLiquidityProvider'
 import {
   ConcentratedLiquidityURLStateProvider,
@@ -136,8 +135,8 @@ const Incentivize = withCheckerRoot(() => {
   }, [angleRewardTokens, epochs, rewardToken])
 
   const {
-    prepare: { isError },
-    write: { writeAsync, isLoading: isIncentivizeLoading, data },
+    simulation: { isError, data: simulationData },
+    write: { writeContractAsync, isLoading: isIncentivizeLoading, data },
   } = useIncentivizePoolWithRewards({
     account: address,
     args:
@@ -172,17 +171,19 @@ const Incentivize = withCheckerRoot(() => {
     ),
   })
 
+  const client = usePublicClient()
+
   const sign = useCallback(async () => {
-    const message = await readContract({
+    const message = await client.readContract({
       abi: DistributionCreator,
       address: '0x8BB4C975Ff3c250e0ceEA271728547f3802B36Fd',
       functionName: 'message',
     })
 
     signMessage({ message })
-  }, [signMessage])
+  }, [client, signMessage])
 
-  const { status } = useWaitForTransaction({ chainId, hash: data?.hash })
+  const { status } = useWaitForTransactionReceipt({ chainId, hash: data })
 
   const rewardTokens = useMemo(
     () =>
@@ -646,9 +647,21 @@ const Incentivize = withCheckerRoot(() => {
                                           loading={
                                             isIncentivizeLoading && !isError
                                           }
-                                          onClick={() =>
-                                            writeAsync?.().then(() => confirm())
-                                          }
+                                          onClick={async () => {
+                                            if (
+                                              !writeContractAsync ||
+                                              !simulationData
+                                            ) {
+                                              return
+                                            }
+
+                                            try {
+                                              await writeContractAsync(
+                                                simulationData.request,
+                                              )
+                                              confirm()
+                                            } catch {}
+                                          }}
                                           disabled={
                                             isIncentivizeLoading || isError
                                           }
@@ -687,7 +700,7 @@ const Incentivize = withCheckerRoot(() => {
           successMessage={`Successfully incentivized the ${token0.symbol}/${token1.symbol} V3 pool`}
           buttonText="Go to pool"
           buttonLink={`/pools/${pool.chainId}:${v3Address}?activeTab=myPositions`}
-          txHash={data?.hash}
+          txHash={data}
         />
       ) : null}
     </DialogProvider>

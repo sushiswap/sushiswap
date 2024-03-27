@@ -4,14 +4,18 @@ import { createErrorToast, createToast } from '@sushiswap/ui/components/toast'
 import { useCallback, useMemo, useState } from 'react'
 // import * as Sentry from '@sentry/nextjs'
 import { Amount, Type } from 'sushi/currency'
-import { UserRejectedRequestError, maxUint256 } from 'viem'
 import {
   Address,
+  SendTransactionReturnType,
+  UserRejectedRequestError,
+  maxUint256,
+} from 'viem'
+import {
   useAccount,
-  useContractWrite,
-  usePrepareContractWrite,
+  usePublicClient,
+  useSimulateContract,
+  useWriteContract,
 } from 'wagmi'
-import { SendTransactionResult, waitForTransaction } from 'wagmi/actions'
 
 import { useTokenAllowance } from './useTokenAllowance'
 
@@ -35,12 +39,10 @@ export const useTokenApproval = ({
   spender,
   enabled = true,
   approveMax,
-}: UseTokenApprovalParams): [
-  ApprovalState,
-  ReturnType<typeof useContractWrite>,
-] => {
+}: UseTokenApprovalParams) => {
   const { address } = useAccount()
   const [pending, setPending] = useState(false)
+  const client = usePublicClient()
   const {
     data: allowance,
     isLoading: isAllowanceLoading,
@@ -53,7 +55,7 @@ export const useTokenApproval = ({
     enabled: Boolean(amount?.currency?.isToken && enabled),
   })
 
-  const { config } = usePrepareContractWrite({
+  const { data: simulation } = useSimulateContract({
     chainId: amount?.currency.chainId,
     abi: [
       {
@@ -75,35 +77,36 @@ export const useTokenApproval = ({
       spender as Address,
       approveMax ? maxUint256 : amount ? amount.quotient : 0n,
     ],
-    enabled: Boolean(
-      amount &&
-        spender &&
-        address &&
-        allowance &&
-        enabled &&
-        !isAllowanceLoading,
-    ),
+    query: {
+      enabled: Boolean(
+        amount &&
+          spender &&
+          address &&
+          allowance &&
+          enabled &&
+          !isAllowanceLoading,
+      ),
+    },
     // onError: (error) => Sentry.captureException(`approve prepare error: ${error.message}`),
   })
 
-  const onSettled = useCallback(
-    (data: SendTransactionResult | undefined, e: Error | null) => {
-      if (e instanceof Error) {
-        if (!(e instanceof UserRejectedRequestError)) {
-          createErrorToast(e.message, true)
-        }
-      }
+  const onSuccess = useCallback(
+    async (data: SendTransactionReturnType) => {
+      if (!amount) return
 
-      if (data && amount) {
-        setPending(true)
-
+      setPending(true)
+      try {
         const ts = new Date().getTime()
+        const receiptPromise = client.waitForTransactionReceipt({
+          hash: data,
+        })
+
         void createToast({
           account: address,
           type: 'approval',
           chainId: amount.currency.chainId,
-          txHash: data.hash,
-          promise: waitForTransaction({ hash: data.hash }),
+          txHash: data,
+          promise: receiptPromise,
           summary: {
             pending: `Approving ${amount.currency.symbol}`,
             completed: `Successfully approved ${amount.currency.symbol}`,
@@ -112,26 +115,39 @@ export const useTokenApproval = ({
           groupTimestamp: ts,
           timestamp: ts,
         })
+
+        await receiptPromise
+        await refetch()
+      } finally {
+        setPending(false)
       }
     },
-    [address, amount],
+    [refetch, client, amount, address],
   )
 
-  const execute = useContractWrite({
-    ...config,
-    onSettled,
-    onSuccess: (data) => {
-      waitForTransaction({ hash: data.hash })
-        .then(() => {
-          refetch().then(() => {
-            setPending(false)
-          })
-        })
-        .catch(() => setPending(false))
+  const onError = useCallback((e: Error) => {
+    if (e instanceof Error) {
+      if (!(e instanceof UserRejectedRequestError)) {
+        createErrorToast(e.message, true)
+      }
+    }
+  }, [])
+
+  const execute = useWriteContract({
+    // ...data?.request,
+    mutation: {
+      onError,
+      onSuccess,
     },
   })
 
-  return useMemo(() => {
+  const write = useMemo(() => {
+    if (!execute.writeContract || !simulation?.request) return
+
+    return () => execute.writeContract(simulation.request)
+  }, [execute.writeContract, simulation?.request])
+
+  return useMemo<[ApprovalState, { write: undefined | (() => void) }]>(() => {
     let state = ApprovalState.UNKNOWN
     if (amount?.currency.isNative) state = ApprovalState.APPROVED
     else if (allowance && amount && allowance.greaterThan(amount))
@@ -143,6 +159,6 @@ export const useTokenApproval = ({
     else if (allowance && amount && allowance.lessThan(amount))
       state = ApprovalState.NOT_APPROVED
 
-    return [state, execute]
-  }, [allowance, amount, execute, isAllowanceLoading, pending])
+    return [state, { write }]
+  }, [allowance, amount, write, isAllowanceLoading, pending])
 }

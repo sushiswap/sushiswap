@@ -1,6 +1,6 @@
-import type { Abi, ContractFunctionConfig } from 'viem'
+import type { Abi, ContractFunctionParameters } from 'viem'
 
 export type Contract<TAbi extends Abi = []> = Omit<
-  ContractFunctionConfig<TAbi>,
+  ContractFunctionParameters<TAbi>,
   'functionName' | 'args'
 >

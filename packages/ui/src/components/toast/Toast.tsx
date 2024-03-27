@@ -49,7 +49,9 @@ export const createToast = (props: PromiseNotification) => {
         },
       )
     })
-    .catch(() => {
+    .catch((e) => {
+      console.error(e)
+
       setTimeout(onDismiss, 3000)
 
       // Spawn error notification

@@ -1,5 +1,5 @@
 import { fetch } from '@whatwg-node/fetch'
-import { isPromiseFulfilled } from 'sushi'
+import { isPromiseFulfilled } from 'sushi/validate'
 
 interface Payload {
   strategyConfigData: {
@@ -21,13 +21,13 @@ interface Payload {
   }
 }
 
-interface GetSteerStrategiesPayloads {
+interface GetStrategiesPayloads {
   payloadHashes: string[]
 }
 
-async function getSteerStrategiesPayloads({
+export async function getStrategiesPayloads({
   payloadHashes,
-}: GetSteerStrategiesPayloads) {
+}: GetStrategiesPayloads) {
   const results = await Promise.allSettled(
     payloadHashes.map(async (payloadHash) => {
       return fetch(`https://ipfs.io/ipfs/${payloadHash}`).then(
@@ -39,12 +39,16 @@ async function getSteerStrategiesPayloads({
   return results.map((r) => (isPromiseFulfilled(r) ? r.value : null))
 }
 
-interface GetSteerPayload {
+interface GetPayload {
   payloadHash: string
 }
 
-async function getSteerStrategyPayload({ payloadHash }: GetSteerPayload) {
-  return (await getSteerStrategiesPayloads({ payloadHashes: [payloadHash] }))[0]
-}
+export async function getStrategyPayload({ payloadHash }: GetPayload) {
+  const results = await getStrategiesPayloads({ payloadHashes: [payloadHash] })
 
-export { getSteerStrategiesPayloads, getSteerStrategyPayload }
+  if (!results[0]) {
+    throw new Error(`Failed to fetch payload for hash ${payloadHash}`)
+  }
+
+  return results[0]
+}

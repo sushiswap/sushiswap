@@ -43,13 +43,13 @@ export const useBalancesQuery = (
 export const useBalances = (variables: UseBalances) => {
   const { chainId } = variables
   const { data: tokens } = useTokens({ chainId })
-
   const select: UseBalancesQuerySelect = useCallback(
     (data) => {
       if (!tokens) return {}
 
       return Object.entries(data).reduce<Record<string, Amount<Type>>>(
         (acc, [address, amount]) => {
+          console.log({ tokens, address, amount })
           if (address.toLowerCase() === NativeAddress) {
             acc[address] = Amount.fromRawAmount(Native.onChain(chainId), amount)
           } else {

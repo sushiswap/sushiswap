@@ -13,6 +13,7 @@
     "test": "npx playwright test -c test/playwright.config.ts"
   },
   "dependencies": {
+    "@covalenthq/client-sdk": "0.9.4",
     "@headlessui/react": "1.7.7",
     "@heroicons/react": "2.0.13",
     "@heroicons/react-v1": "npm:@heroicons/react@v1",

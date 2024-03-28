@@ -1,5 +1,7 @@
-import { saveTokens } from '@sushiswap/dexie'
+// import { saveTokens } from '@sushiswap/dexie'
+import { useCustomTokens } from '@sushiswap/hooks'
 import { useQuery } from '@tanstack/react-query'
+import ms from 'ms'
 import { Token } from 'sushi/currency'
 import { getAddress } from 'viem'
 
@@ -15,24 +17,40 @@ type Data = {
   decimals: number
 }
 
-export const fetchTokensQueryFn = async () => {
+export const fetchTokensQueryFn = async ({
+  customTokenMap,
+}: { customTokenMap: Record<string, Token> }) => {
   const resp = await fetch('https://tokens.sushi.com/v0')
   if (resp.status === 200) {
     const data: Data[] = await resp.json()
-    await saveTokens({
-      tokens: data.map(({ id, address, symbol, decimals, name }) => {
-        const [chainId] = id.split(':')
-        return {
+
+    // DO WE REALLY NEED THIS
+    // await saveTokens({
+    //   tokens: data.map(({ id, address, symbol, decimals, name }) => {
+    //     const [chainId] = id.split(':')
+    //     return {
+    //       id,
+    //       address,
+    //       symbol,
+    //       decimals,
+    //       name,
+    //       status: 'APPROVED',
+    //       chainId: Number(chainId),
+    //     }
+    //   }),
+    // })
+
+    Object.entries(customTokenMap).forEach(
+      ([id, { address, name, symbol, decimals }]) => {
+        data.push({
           id,
-          address,
-          symbol,
+          address: address!,
+          name: name!,
+          symbol: symbol!,
           decimals,
-          name,
-          status: 'APPROVED',
-          chainId: Number(chainId),
-        }
-      }),
-    })
+        })
+      },
+    )
 
     return data.reduce<Record<number, Record<string, Token>>>(
       (acc, { id, name, symbol, decimals }) => {
@@ -63,12 +81,13 @@ export const fetchTokensQueryFn = async () => {
 }
 
 export const useTokens = ({ chainId }: UseTokensParams) => {
+  const { data: customTokenMap } = useCustomTokens()
   return useQuery({
-    queryKey: ['tokens'],
-    queryFn: fetchTokensQueryFn,
+    queryKey: ['tokens', Object.keys(customTokenMap).length],
+    queryFn: () => fetchTokensQueryFn({ customTokenMap }),
     select: (data) => data[chainId],
     keepPreviousData: true,
-    staleTime: 900000, // 15 mins
-    cacheTime: 86400000, // 24hs
+    staleTime: ms('15m'), // 15 mins
+    cacheTime: ms('24h'), // 24hs
   })
 }

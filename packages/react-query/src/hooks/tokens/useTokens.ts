@@ -8,7 +8,8 @@ interface UseTokensParams {
 }
 
 type Data = {
-  id: string
+  // id: string
+  chainId: number
   address: string
   name: string
   symbol: string
@@ -16,14 +17,14 @@ type Data = {
 }
 
 export const fetchTokensQueryFn = async () => {
-  const resp = await fetch('https://tokens.sushi.com/v0')
+  const resp = await fetch('https://tokens.sushi.com/v2')
   if (resp.status === 200) {
     const data: Data[] = await resp.json()
     await saveTokens({
-      tokens: data.map(({ id, address, symbol, decimals, name }) => {
-        const [chainId] = id.split(':')
+      tokens: data.map(({ chainId, address, symbol, decimals, name }) => {
+        // const [chainId] = id.split(':')
         return {
-          id,
+          id: `${chainId}:${address}`,
           address,
           symbol,
           decimals,
@@ -35,11 +36,11 @@ export const fetchTokensQueryFn = async () => {
     })
 
     return data.reduce<Record<number, Record<string, Token>>>(
-      (acc, { id, name, symbol, decimals }) => {
-        const [_chainId, _address] = id.split(':')
+      (acc, { chainId, address, name, symbol, decimals }) => {
+        // const [_chainId, _address] = id.split(':')
 
-        const chainId = Number(_chainId)
-        const address = String(_address)
+        // const chainId = Number(_chainId)
+        // const address = String(_address)
 
         if (!acc?.[chainId]) acc[chainId] = {}
 

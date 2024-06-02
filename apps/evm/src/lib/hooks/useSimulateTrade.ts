@@ -39,6 +39,7 @@ export function useSimulateTrade({
     functionName: trade?.functionName,
     args: trade?.writeArgs as any,
     value: trade?.value || 0n,
+    gasPrice: trade?.gasPrice,
     query: {
       retry: (i, error) => {
         if (

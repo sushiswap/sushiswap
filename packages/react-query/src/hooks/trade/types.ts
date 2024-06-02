@@ -44,6 +44,7 @@ export interface UseTradeReturn {
   route: TradeType['route']
   value?: bigint | undefined
   tokenTax: Percent | false | undefined
+  gasPrice: bigint | null | undefined
 }
 
 export type UseTradeQuerySelect = (data: TradeType) => UseTradeReturn

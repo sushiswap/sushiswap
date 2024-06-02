@@ -95,6 +95,7 @@ export const useClientTrade = (variables: UseTradeParams) => {
           functionName: 'processRoute',
           value: undefined,
           tokenTax: undefined,
+          gasPrice: undefined,
         }
 
       const route = Router.findSpecialRoute(
@@ -234,6 +235,7 @@ export const useClientTrade = (variables: UseTradeParams) => {
                 writeArgs,
                 value,
                 tokenTax,
+                gasPrice,
               }),
             250,
           ),

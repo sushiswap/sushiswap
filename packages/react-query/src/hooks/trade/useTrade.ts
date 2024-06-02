@@ -207,6 +207,7 @@ export const useTrade = (variables: UseTradeParams) => {
           writeArgs,
           value,
           tokenTax,
+          gasPrice,
         }
       }
 
@@ -223,6 +224,7 @@ export const useTrade = (variables: UseTradeParams) => {
         functionName: 'processRoute',
         value: undefined,
         tokenTax: undefined,
+        gasPrice: undefined,
       }
     },
     [

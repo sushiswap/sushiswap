@@ -40,11 +40,11 @@ const EXPLORE_NAVIGATION_LINKS: {
     href: '/stake',
     description: 'Earn protocol fees by staking SUSHI.',
   },
-  {
-    title: 'Pay',
-    href: '/furo',
-    description: 'Automate salaries and vesting schedules.',
-  },
+  // {
+  //   title: 'Pay',
+  //   href: '/furo',
+  //   description: 'Automate salaries and vesting schedules.',
+  // },
   {
     title: 'Analytics',
     href: '/analytics',
@@ -176,10 +176,10 @@ const navigationMenuItems = [
     title: 'Stake',
     href: '/stake',
   },
-  {
-    title: 'Pay',
-    href: '/furo',
-  },
+  // {
+  //   title: 'Pay',
+  //   href: '/furo',
+  // },
   {
     title: 'More',
     items: TOOLS_NAVIGATION_LINKS,

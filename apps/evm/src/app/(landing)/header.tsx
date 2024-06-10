@@ -75,13 +75,13 @@ export const Header: FC = () => {
                 </NavigationMenuLink>
               </LinkInternal>
             </NavigationMenuItem>
-            <NavigationMenuItem className="hidden md:block">
+            {/* <NavigationMenuItem className="hidden md:block">
               <LinkInternal href="/furo">
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   Pay
                 </NavigationMenuLink>
               </LinkInternal>
-            </NavigationMenuItem>
+            </NavigationMenuItem> */}
             <NavigationMenuItem className="hidden md:block">
               <NavigationMenuTrigger>More</NavigationMenuTrigger>
               <NavigationMenuContent>

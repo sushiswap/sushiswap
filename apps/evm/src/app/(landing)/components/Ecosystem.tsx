@@ -11,40 +11,40 @@ interface TabsExpendableCardData extends ExpendableCardData {
 }
 
 const TABS: TabsExpendableCardData[] = [
-  {
-    title: 'Furo Streaming',
-    summary:
-      'Automate your DAO salaries and vesting schedules while earning interest from yield strategies.',
-    image:
-      'https://res.cloudinary.com/sushi-cdn/image/upload/v1669286681/Frame_38656_lci5if.webp',
-    content: (
-      <>
-        <p>
-          Furo is Sushi’s payment streaming and token vesting application, a
-          useful and efficient way of setting up automatic payments for
-          contributors to your protocol or DAO, or for executing a company
-          payroll.
-        </p>
-        <h3>Fully customizable</h3>
-        <p>
-          With Furo’s easy to use interface, set any number of parameters you’d
-          like: the asset to be paid in, the frequency with which to pay them
-          that asset, when to start paying it, when to stop paying it, etc. Or,
-          set up traditional token vestings with optional cliffs, complete with
-          an array of options for paying out as well.
-        </p>
-        <h3>Completely under your control</h3>
-        <p>
-          Additionally, choose to keep your funds in the Sushi Vault to accrue
-          more yield, making your direct deposits even larger without you having
-          to do a thing.
-        </p>
-      </>
-    ),
-    link: 'https://www.sushi.com/furo',
-    linkText: 'Pay Someone',
-    caption: 'For Retail Users',
-  },
+  // {
+  //   title: 'Furo Streaming',
+  //   summary:
+  //     'Automate your DAO salaries and vesting schedules while earning interest from yield strategies.',
+  //   image:
+  //     'https://res.cloudinary.com/sushi-cdn/image/upload/v1669286681/Frame_38656_lci5if.webp',
+  //   content: (
+  //     <>
+  //       <p>
+  //         Furo is Sushi’s payment streaming and token vesting application, a
+  //         useful and efficient way of setting up automatic payments for
+  //         contributors to your protocol or DAO, or for executing a company
+  //         payroll.
+  //       </p>
+  //       <h3>Fully customizable</h3>
+  //       <p>
+  //         With Furo’s easy to use interface, set any number of parameters you’d
+  //         like: the asset to be paid in, the frequency with which to pay them
+  //         that asset, when to start paying it, when to stop paying it, etc. Or,
+  //         set up traditional token vestings with optional cliffs, complete with
+  //         an array of options for paying out as well.
+  //       </p>
+  //       <h3>Completely under your control</h3>
+  //       <p>
+  //         Additionally, choose to keep your funds in the Sushi Vault to accrue
+  //         more yield, making your direct deposits even larger without you having
+  //         to do a thing.
+  //       </p>
+  //     </>
+  //   ),
+  //   link: 'https://www.sushi.com/furo',
+  //   linkText: 'Pay Someone',
+  //   caption: 'For Retail Users',
+  // },
   // {
   //   title: 'Kashi Lending',
   //   summary: 'Define your own risk profile. Borrow and Lend with confidence',

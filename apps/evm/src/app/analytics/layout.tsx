@@ -53,7 +53,7 @@ export default function AnalyticsLayout({
                     Pools
                   </PathnameButton>
                 </LinkInternal>
-                <LinkInternal
+                {/* <LinkInternal
                   shallow={true}
                   scroll={false}
                   href={'/analytics/pay'}
@@ -66,8 +66,8 @@ export default function AnalyticsLayout({
                   >
                     Sushi Pay
                   </PathnameButton>
-                </LinkInternal>
-                <LinkInternal
+                </LinkInternal> */}
+                {/* <LinkInternal
                   shallow={true}
                   scroll={false}
                   href={'/analytics/vault'}
@@ -80,7 +80,7 @@ export default function AnalyticsLayout({
                   >
                     Sushi Vault
                   </PathnameButton>
-                </LinkInternal>
+                </LinkInternal> */}
               </div>
             </Container>
             <section className="flex flex-col flex-1">

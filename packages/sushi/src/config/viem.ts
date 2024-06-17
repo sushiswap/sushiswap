@@ -624,7 +624,7 @@ export const publicTransports = {
 } as const satisfies Record<ChainId, Transport>
 
 export const publicChains = [
-  mainnet,
+  mainnet, // Mainnet must be first, wagmi picks the first chain as the default
   arbitrumNova,
   arbitrum,
   avalanche,

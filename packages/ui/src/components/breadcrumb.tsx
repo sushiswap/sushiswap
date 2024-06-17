@@ -2,7 +2,7 @@
 
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { usePathname, useSearchParams } from 'next/navigation'
-import React, { Suspense } from 'react'
+import React, { FC, Suspense, useCallback, useMemo } from 'react'
 
 import classNames from 'classnames'
 import { Button } from './button'
@@ -40,9 +40,31 @@ const Params = () => {
   ) : null
 }
 
-export const Breadcrumb = () => {
+export const Breadcrumb: FC<{
+  replace?: Record<string, string>
+  truncate?: boolean
+}> = ({ replace, truncate = true }) => {
   const pathname = usePathname()
-  const items = pathname.split('/').slice(2)
+
+  const replaceFn = useCallback(
+    (text: string) => {
+      if (!replace) return text
+
+      return Object.entries(replace).reduce((acc, [from, to]) => {
+        return acc.replace(new RegExp(from, 'g'), to)
+      }, text)
+    },
+    [replace],
+  )
+
+  const items = useMemo(() => {
+    const split = pathname.split('/').slice(1)
+
+    return split.map((url) => ({
+      url: url.replace(/%3A/g, ':'),
+      label: replaceFn(url),
+    }))
+  }, [replaceFn, pathname])
 
   return (
     <div className="flex gap-x-1.5 items-center text-sm py-4">
@@ -67,25 +89,26 @@ export const Breadcrumb = () => {
             className="text-muted-foreground"
           />
           {items.map((segment, i) => {
-            const segments = [...items]
-              .map((s) => s.replace(/%3A/g, ':'))
-              .slice(0, i + 1)
+            if (i === 0) return null
+
+            const segments = [...items].slice(0, i + 1)
+            const link = `/${segments.map(({ url }) => url).join('/')}`
+
             return (
-              <React.Fragment key={segment}>
+              <React.Fragment key={segment.label}>
                 <Button
                   variant="link"
                   size="sm"
-                  key={segment}
+                  key={segment.label}
                   className={classNames(
-                    'hover:underline !inline font-normal capitalize whitespace-nowrap max-w-[120px] truncate',
+                    'hover:underline !inline font-normal capitalize whitespace-nowrap',
+                    truncate ? 'max-w-[120px] truncate' : 'overflow-ellipsis',
                     i < items.length - 1
                       ? '!font-normal !text-muted-foreground'
                       : '!font-medium !text-gray-900 dark:!text-slate-50',
                   )}
                 >
-                  <LinkInternal href={`/pool/${segments.join('/')}`}>
-                    {segment.replace(/%3A/g, ':')}
-                  </LinkInternal>
+                  <LinkInternal href={link}>{segment.label}</LinkInternal>
                 </Button>
 
                 {i < items.length - 1 ? (

@@ -13,6 +13,7 @@
     "test": "npx playwright test"
   },
   "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.22.1",
     "@aptos-labs/wallet-adapter-ant-design": "2.2.0",
     "@aptos-labs/wallet-adapter-core": "3.10.0",
     "@aptos-labs/wallet-adapter-react": "2.3.1",

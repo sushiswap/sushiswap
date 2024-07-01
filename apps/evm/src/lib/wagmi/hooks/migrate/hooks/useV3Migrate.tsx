@@ -1,3 +1,9 @@
+import {
+  LiquidityEventName,
+  LiquiditySource,
+  sendAnalyticsEvent,
+  useTrace,
+} from '@sushiswap/telemetry'
 import { createErrorToast, createToast } from '@sushiswap/ui'
 import { SendTransactionReturnType } from '@wagmi/core'
 import { useCallback, useMemo } from 'react'
@@ -50,6 +56,8 @@ export const useV3Migrate = ({
   enabled = true,
 }: UseV3Migrate) => {
   const client = usePublicClient()
+
+  const trace = useTrace()
 
   const { multicall: multicallContract, migrate: migrateContract } =
     useMemo(() => {
@@ -164,6 +172,12 @@ export const useV3Migrate = ({
     (data: SendTransactionReturnType) => {
       if (!account) return
 
+      sendAnalyticsEvent(LiquidityEventName.MIGRATE_LIQUIDITY_SUBMITTED, {
+        action: `${LiquiditySource.V2}->${LiquiditySource.V3}`,
+        label: `${args.token0?.symbol}/${args.token1?.symbol}`,
+        ...trace,
+      })
+
       const ts = new Date().getTime()
       void createToast({
         account,
@@ -180,7 +194,7 @@ export const useV3Migrate = ({
         groupTimestamp: ts,
       })
     },
-    [account, chainId, client],
+    [account, chainId, client, trace, args.token0, args.token1],
   )
 
   const onError = useCallback((e: Error) => {

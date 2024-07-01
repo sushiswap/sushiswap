@@ -12,6 +12,7 @@ import React, {
   useState,
 } from 'react'
 
+import { InterfaceEventName, sendAnalyticsEvent } from '@sushiswap/telemetry'
 import classNames from 'classnames'
 import Link from 'next/link'
 import { ChainId } from 'sushi'
@@ -39,6 +40,7 @@ export const OnramperButton: FC<{
   const { setOpen } = useOnramperContext()
 
   const onClick = useCallback(() => {
+    sendAnalyticsEvent(InterfaceEventName.FIAT_ONRAMP_WIDGET_OPENED)
     setOpen(true)
   }, [setOpen])
 

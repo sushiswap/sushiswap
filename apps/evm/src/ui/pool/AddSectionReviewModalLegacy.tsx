@@ -1,5 +1,12 @@
 import { CogIcon } from '@heroicons/react-v1/outline'
 import { SlippageToleranceStorageKey, TTLStorageKey } from '@sushiswap/hooks'
+import { NativeAddress } from '@sushiswap/react-query'
+import {
+  LiquidityEventName,
+  LiquiditySource,
+  sendAnalyticsEvent,
+  useTrace,
+} from '@sushiswap/telemetry'
 import {
   DialogConfirm,
   DialogContent,
@@ -305,12 +312,27 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
       SlippageToleranceStorageKey.AddLiquidity,
     )
     const client = usePublicClient()
+    const trace = useTrace()
 
     const onSuccess = useCallback(
       (hash: SendTransactionReturnType) => {
         _onSuccess()
 
         if (!token0 || !token1) return
+
+        sendAnalyticsEvent(LiquidityEventName.REMOVE_LIQUIDITY_SUBMITTED, {
+          chain_id: chainId,
+          txHash: hash,
+          address,
+          source: LiquiditySource.V2,
+          label: [token0.symbol, token1.symbol].join('/'),
+          token0_address: token0.isNative ? NativeAddress : token0.address,
+          token0_amount: input0?.quotient,
+          token1_address: token1.isNative ? NativeAddress : token1.address,
+          token1_amount: input1?.quotient,
+          create_pool: poolState === SushiSwapV2PoolState.NOT_EXISTS,
+          ...trace,
+        })
 
         const ts = new Date().getTime()
         void createToast({
@@ -328,7 +350,18 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
           groupTimestamp: ts,
         })
       },
-      [client, chainId, token0, token1, address, _onSuccess],
+      [
+        client,
+        chainId,
+        token0,
+        token1,
+        address,
+        _onSuccess,
+        trace,
+        poolState,
+        input0,
+        input1,
+      ],
     )
 
     const onError = useCallback((e: Error) => {

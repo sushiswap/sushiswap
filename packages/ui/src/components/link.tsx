@@ -1,3 +1,6 @@
+'use client'
+
+import { InterfaceEventName, sendAnalyticsEvent } from '@sushiswap/telemetry'
 import Link from 'next/link'
 import { AnchorHTMLAttributes, FC } from 'react'
 
@@ -8,12 +11,21 @@ const LinkExternal: FC<AnchorHTMLAttributes<HTMLAnchorElement>> = ({
   ...props
 }) => {
   return (
-    <a
-      {...props}
-      target={target}
-      rel={rel}
-      className="cursor-pointer text-blue hover:underline"
-    />
+    <button
+      onClick={() =>
+        sendAnalyticsEvent(InterfaceEventName.EXTERNAL_LINK_CLICK, {
+          label: props.href,
+        })
+      }
+      type="button"
+    >
+      <a
+        {...props}
+        target={target}
+        rel={rel}
+        className="cursor-pointer text-blue hover:underline"
+      />
+    </button>
   )
 }
 

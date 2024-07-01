@@ -2,6 +2,12 @@ import {
   ChevronDoubleDownIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline'
+import {
+  BrowserEvent,
+  InterfaceElementName,
+  InterfaceEventName,
+  TraceEvent,
+} from '@sushiswap/telemetry'
 import { List } from '@sushiswap/ui'
 import { CoinbaseWalletIcon } from '@sushiswap/ui/icons/CoinbaseWalletIcon'
 import { FrameIcon } from '@sushiswap/ui/icons/FrameIcon'
@@ -71,19 +77,26 @@ export const ConnectView: FC<{ onSelect(): void }> = ({ onSelect }) => {
       {/* <List.Label>Wallet</List.Label> */}
       <List.Control className="bg-gray-100 dark:!bg-slate-700">
         {_connectors.map((connector) => (
-          <List.MenuItem
-            onClick={() => _onSelect(connector.id)}
-            icon={Icons[connector.name]}
-            title={
-              connector.name === 'Safe'
-                ? 'Gnosis Safe'
-                : connector.name === 'WalletConnectLegacy'
-                  ? 'WalletConnect'
-                  : connector.name
-            }
-            key={connector.id}
-            hoverIcon={ChevronRightIcon}
-          />
+          <TraceEvent
+            events={[BrowserEvent.onClick]}
+            name={InterfaceEventName.WALLET_SELECTED}
+            properties={{ wallet_type: connector.name }}
+            element={InterfaceElementName.WALLET_TYPE_OPTION}
+          >
+            <List.MenuItem
+              onClick={() => _onSelect(connector.id)}
+              icon={Icons[connector.name]}
+              title={
+                connector.name === 'Safe'
+                  ? 'Gnosis Safe'
+                  : connector.name === 'WalletConnectLegacy'
+                    ? 'WalletConnect'
+                    : connector.name
+              }
+              key={connector.id}
+              hoverIcon={ChevronRightIcon}
+            />
+          </TraceEvent>
         ))}
       </List.Control>
     </List>

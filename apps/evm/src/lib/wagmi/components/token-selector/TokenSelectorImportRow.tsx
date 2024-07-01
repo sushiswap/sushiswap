@@ -1,5 +1,11 @@
 import { useTokenSecurity } from '@sushiswap/react-query'
 import {
+  BrowserEvent,
+  InterfaceElementName,
+  InterfaceEventName,
+  TraceEvent,
+} from '@sushiswap/telemetry'
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -143,9 +149,19 @@ export const TokenSelectorImportRow: FC<TokenSelectorImportRow> = ({
           <DialogFooter>
             <div className="flex flex-col gap-3 w-full">
               {!honeypot ? (
-                <Button fullWidth size="xl" onClick={onClick}>
-                  I understand
-                </Button>
+                <TraceEvent
+                  events={[BrowserEvent.onClick, BrowserEvent.onKeyPress]}
+                  name={InterfaceEventName.TOKEN_IMPORTED}
+                  properties={{
+                    token_symbol: currency?.symbol,
+                    token_address: currency?.address,
+                  }}
+                  element={InterfaceElementName.IMPORT_TOKEN_BUTTON}
+                >
+                  <Button fullWidth size="xl" onClick={onClick}>
+                    I understand
+                  </Button>
+                </TraceEvent>
               ) : (
                 <div className="flex flex-col gap-3">
                   <DialogTrigger asChild>

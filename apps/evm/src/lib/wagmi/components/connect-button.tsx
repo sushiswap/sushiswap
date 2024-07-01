@@ -1,6 +1,12 @@
 'use client'
 
 import { useConnectModal } from '@rainbow-me/rainbowkit'
+import {
+  BrowserEvent,
+  InterfaceElementName,
+  InterfaceEventName,
+  TraceEvent,
+} from '@sushiswap/telemetry'
 import { Button, ButtonProps } from '@sushiswap/ui'
 import React, { FC, useCallback } from 'react'
 import { useConnect } from '../hooks/wallet/useConnect'
@@ -31,14 +37,20 @@ export const ConnectButton: FC<ButtonProps> = ({
   }
 
   return (
-    <Button
-      {...props}
-      onClick={onConnect}
-      onKeyDown={onConnect}
-      testId="connect"
+    <TraceEvent
+      events={[BrowserEvent.onClick]}
+      name={InterfaceEventName.CONNECT_WALLET_BUTTON_CLICKED}
+      element={InterfaceElementName.CONNECT_WALLET_BUTTON}
     >
-      <span className="hidden sm:block">Connect Wallet</span>
-      <span className="block sm:hidden">Connect</span>
-    </Button>
+      <Button
+        {...props}
+        onClick={onConnect}
+        onKeyDown={onConnect}
+        testId="connect"
+      >
+        <span className="hidden sm:block">Connect Wallet</span>
+        <span className="block sm:hidden">Connect</span>
+      </Button>
+    </TraceEvent>
   )
 }

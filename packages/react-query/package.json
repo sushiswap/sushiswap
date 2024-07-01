@@ -45,6 +45,7 @@
   "dependencies": {
     "@sushiswap/dexie": "workspace:*",
     "@sushiswap/hooks": "workspace:*",
+    "@sushiswap/telemetry": "workspace:*",
     "@tanstack/react-query": "4.28.0",
     "@tanstack/react-query-devtools": "4.28.0",
     "idb-keyval": "6.2.0",

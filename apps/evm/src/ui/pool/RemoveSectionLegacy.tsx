@@ -7,6 +7,12 @@ import {
   useDebounce,
   useIsMounted,
 } from '@sushiswap/hooks'
+import {
+  LiquidityEventName,
+  LiquiditySource,
+  sendAnalyticsEvent,
+  useTrace,
+} from '@sushiswap/telemetry'
 import { Button, Dots, createToast } from '@sushiswap/ui'
 import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { APPROVE_TAG_REMOVE_LEGACY } from 'src/lib/constants'
@@ -167,11 +173,21 @@ export const RemoveSectionLegacy: FC<RemoveSectionLegacyProps> =
         : undefined
     }, [balance, percentToRemoveDebounced])
 
+    const trace = useTrace()
+
     const onSuccess = useCallback(
       (hash: SendTransactionReturnType) => {
         setPercentage('0')
 
         if (!chain?.id) return
+
+        sendAnalyticsEvent(LiquidityEventName.REMOVE_LIQUIDITY_SUBMITTED, {
+          chain_id: chain.id,
+          address,
+          source: LiquiditySource.V2,
+          label: [token0.symbol, token1.symbol].join('/'),
+          ...trace,
+        })
 
         const ts = new Date().getTime()
         void createToast({
@@ -189,7 +205,7 @@ export const RemoveSectionLegacy: FC<RemoveSectionLegacyProps> =
           groupTimestamp: ts,
         })
       },
-      [client, chain, token0.symbol, token1.symbol, address],
+      [client, chain, token0.symbol, token1.symbol, address, trace],
     )
 
     const [prepare, setPrepare] = useState<UseCallParameters | undefined>(

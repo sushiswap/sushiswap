@@ -9,11 +9,20 @@ import {
   usePinnedTokens,
 } from '@sushiswap/hooks'
 import {
+  NativeAddress,
   useBalances,
   useOtherTokenListsQuery,
   usePrices,
   useTokens,
 } from '@sushiswap/react-query'
+import {
+  BrowserEvent,
+  InterfaceElementName,
+  InterfaceEventName,
+  InterfaceModalName,
+  Trace,
+  TraceEvent,
+} from '@sushiswap/telemetry'
 import {
   Dialog,
   DialogContent,
@@ -194,127 +203,150 @@ export const TokenSelector: FC<TokenSelectorProps> = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="!flex flex-col justify-start min-h-[85vh]">
-        <DialogHeader>
-          <DialogTitle>Select a token</DialogTitle>
-          <DialogDescription>
-            Select a token from our default list or search for a token by symbol
-            or address.
-          </DialogDescription>
-        </DialogHeader>
-        {!hideSearch ? (
-          <div className="flex gap-2">
-            <TextField
-              placeholder="Search by token or address"
-              icon={MagnifyingGlassIcon}
-              type="text"
-              testdata-id={`${id}-address-input`}
-              value={query}
-              onValueChange={setQuery}
-            />
-          </div>
-        ) : null}
+        <Trace
+          name={InterfaceEventName.TOKEN_SELECTOR_OPENED}
+          modal={InterfaceModalName.TOKEN_SELECTOR}
+          shouldLogImpression
+        >
+          <DialogHeader>
+            <DialogTitle>Select a token</DialogTitle>
+            <DialogDescription>
+              Select a token from our default list or search for a token by
+              symbol or address.
+            </DialogDescription>
+          </DialogHeader>
+          {!hideSearch ? (
+            <div className="flex gap-2">
+              <TextField
+                placeholder="Search by token or address"
+                icon={MagnifyingGlassIcon}
+                type="text"
+                testdata-id={`${id}-address-input`}
+                value={query}
+                onValueChange={setQuery}
+              />
+            </div>
+          ) : null}
 
-        {pinnedTokens.length > 0 && !hidePinnedTokens ? (
-          <div className="flex flex-wrap gap-2">
-            {pinnedTokens.map(({ token, isDefault }) => (
-              <div key={token.id} className="group">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="group"
+          {pinnedTokens.length > 0 && !hidePinnedTokens ? (
+            <div className="flex flex-wrap gap-2">
+              {pinnedTokens.map(({ token, isDefault }) => (
+                <TraceEvent
+                  events={[BrowserEvent.onClick, BrowserEvent.onKeyPress]}
+                  name={InterfaceEventName.TOKEN_SELECTED}
+                  properties={{
+                    token_symbol: token?.symbol,
+                    token_address: token?.isNative
+                      ? NativeAddress
+                      : token?.address,
+                    total_balances_usd:
+                      balancesMap?.[
+                        token?.isNative ? NativeAddress : token?.address
+                      ]?.quotient,
+                  }}
+                  element={InterfaceElementName.COMMON_BASES_CURRENCY_BUTTON}
                   key={token.id}
-                  onClick={() => _onSelect(token)}
                 >
-                  <Currency.Icon
-                    width={20}
-                    height={20}
-                    className={buttonIconVariants({ size: 'default' })}
-                    currency={token}
-                    disableLink
-                  />
-                  {token.symbol}
-                  {!isDefault && (
-                    <IconButton
-                      size="xs"
-                      name="remove"
-                      icon={XMarkIcon}
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        _onPin(token.id)
-                      }}
-                    />
-                  )}
-                </Button>
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        <List.Control className="relative flex flex-1 flex-col flex-grow gap-3 px-1 py-0.5 min-h-[128px]">
-          <div
-            data-state={isLoading ? 'active' : 'inactive'}
-            className={classNames(
-              'data-[state=active]:block data-[state=active]:flex-1 data-[state=inactive]:hidden',
-              'py-0.5 h-[64px] -mb-3',
-            )}
-          >
-            <div className="flex items-center w-full h-full px-3 rounded-lg">
-              <div className="flex items-center justify-between flex-grow gap-2 rounded">
-                <div className="flex flex-row items-center flex-grow gap-4">
-                  <SkeletonCircle radius={40} />
-                  <div className="flex flex-col items-start">
-                    <SkeletonText className="w-full w-[100px]" />
-                    <SkeletonText fontSize="sm" className="w-full w-[60px]" />
+                  <div className="group">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="group"
+                      key={token.id}
+                      onClick={() => _onSelect(token)}
+                    >
+                      <Currency.Icon
+                        width={20}
+                        height={20}
+                        className={buttonIconVariants({ size: 'default' })}
+                        currency={token}
+                        disableLink
+                      />
+                      {token.symbol}
+                      {!isDefault && (
+                        <IconButton
+                          size="xs"
+                          name="remove"
+                          icon={XMarkIcon}
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            _onPin(token.id)
+                          }}
+                        />
+                      )}
+                    </Button>
                   </div>
-                </div>
+                </TraceEvent>
+              ))}
+            </div>
+          ) : null}
 
-                <div className="flex flex-col w-full">
-                  <SkeletonText className="w-[80px]" />
-                  <SkeletonText
-                    fontSize="sm"
-                    align="right"
-                    className="w-[40px]"
-                  />
+          <List.Control className="relative flex flex-1 flex-col flex-grow gap-3 px-1 py-0.5 min-h-[128px]">
+            <div
+              data-state={isLoading ? 'active' : 'inactive'}
+              className={classNames(
+                'data-[state=active]:block data-[state=active]:flex-1 data-[state=inactive]:hidden',
+                'py-0.5 h-[64px] -mb-3',
+              )}
+            >
+              <div className="flex items-center w-full h-full px-3 rounded-lg">
+                <div className="flex items-center justify-between flex-grow gap-2 rounded">
+                  <div className="flex flex-row items-center flex-grow gap-4">
+                    <SkeletonCircle radius={40} />
+                    <div className="flex flex-col items-start">
+                      <SkeletonText className="w-full w-[100px]" />
+                      <SkeletonText fontSize="sm" className="w-full w-[60px]" />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col w-full">
+                    <SkeletonText className="w-[80px]" />
+                    <SkeletonText
+                      fontSize="sm"
+                      align="right"
+                      className="w-[40px]"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div
-            data-state={isLoading ? 'inactive' : 'active'}
-            className={classNames(
-              'data-[state=active]:block data-[state=active]:flex-1 data-[state=inactive]:hidden',
-            )}
-          >
-            {queryToken &&
-              !customTokenMap[
-                `${queryToken.chainId}:${queryToken.wrapped.address}`
-              ] &&
-              !tokenMap?.[`${queryToken.wrapped.address}`] && (
-                <TokenSelectorImportRow
-                  currency={queryToken}
-                  onImport={() => queryToken && handleImport(queryToken)}
-                />
+            <div
+              data-state={isLoading ? 'inactive' : 'active'}
+              className={classNames(
+                'data-[state=active]:block data-[state=active]:flex-1 data-[state=inactive]:hidden',
               )}
-            <TokenSelectorCurrencyList
-              selected={selected}
-              onSelect={_onSelect}
-              id={id}
-              pin={{ onPin: _onPin, isPinned: isTokenPinned }}
-              officialTokenIds={officialTokenIds}
-              currencies={sortedTokenList}
-              chainId={chainId}
-              balancesMap={balancesMap ?? {}}
-              pricesMap={pricesMap}
-              isBalanceLoading={isBalanceLoading}
-            />
-            {sortedTokenList?.length === 0 && !queryToken && chainId && (
-              <span className="h-10 flex items-center justify-center text-center text-sm text-gray-500 dark:text-slate-500">
-                No results found.
-              </span>
-            )}
-          </div>
-        </List.Control>
+            >
+              {queryToken &&
+                !customTokenMap[
+                  `${queryToken.chainId}:${queryToken.wrapped.address}`
+                ] &&
+                !tokenMap?.[`${queryToken.wrapped.address}`] && (
+                  <TokenSelectorImportRow
+                    currency={queryToken}
+                    onImport={() => queryToken && handleImport(queryToken)}
+                  />
+                )}
+              <TokenSelectorCurrencyList
+                selected={selected}
+                onSelect={_onSelect}
+                id={id}
+                pin={{ onPin: _onPin, isPinned: isTokenPinned }}
+                officialTokenIds={officialTokenIds}
+                currencies={sortedTokenList}
+                chainId={chainId}
+                balancesMap={balancesMap ?? {}}
+                pricesMap={pricesMap}
+                isBalanceLoading={isBalanceLoading}
+              />
+              {sortedTokenList?.length === 0 && !queryToken && chainId && (
+                <span className="h-10 flex items-center justify-center text-center text-sm text-gray-500 dark:text-slate-500">
+                  No results found.
+                </span>
+              )}
+            </div>
+          </List.Control>
+        </Trace>
       </DialogContent>
     </Dialog>
   )

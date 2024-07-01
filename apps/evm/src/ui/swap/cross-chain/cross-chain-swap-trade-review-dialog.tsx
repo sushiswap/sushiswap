@@ -1,6 +1,14 @@
 'use client'
 
 import {
+  BrowserEvent,
+  InterfaceElementName,
+  SwapEventName,
+  TraceEvent,
+  sendAnalyticsEvent,
+  useTrace,
+} from '@sushiswap/telemetry'
+import {
   DialogClose,
   DialogContent,
   DialogCustom,
@@ -30,20 +38,6 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Chain, chainName } from 'sushi/chain'
-import {
-  SUSHIXSWAP_2_ADDRESS,
-  SushiXSwap2ChainId,
-  isSushiXSwap2ChainId,
-} from 'sushi/config'
-import { shortenAddress } from 'sushi/format'
-import { ZERO } from 'sushi/math'
-import {
-  SendTransactionReturnType,
-  UserRejectedRequestError,
-  stringify,
-} from 'viem'
-
 import { APPROVE_TAG_XSWAP } from 'src/lib/constants'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'
 import { SushiXSwap2Adapter } from 'src/lib/swap/useCrossChainTrade/SushiXSwap2'
@@ -54,14 +48,27 @@ import { warningSeverity } from 'src/lib/swap/warningSeverity'
 import { useBalanceWeb3Refetch } from 'src/lib/wagmi/hooks/balances/useBalanceWeb3Refetch'
 import { useApproved } from 'src/lib/wagmi/systems/Checker/Provider'
 import { sushiXSwap2Abi } from 'sushi/abi'
+import { Chain, chainName } from 'sushi/chain'
+import {
+  SUSHIXSWAP_2_ADDRESS,
+  SushiXSwap2ChainId,
+  isSushiXSwap2ChainId,
+} from 'sushi/config'
 import { Native } from 'sushi/currency'
+import { shortenAddress } from 'sushi/format'
+import { ZERO } from 'sushi/math'
+import {
+  SendTransactionReturnType,
+  UserRejectedRequestError,
+  stringify,
+} from 'viem'
 import {
   useAccount,
+  usePublicClient,
   useSimulateContract,
   useTransaction,
   useWriteContract,
 } from 'wagmi'
-import { usePublicClient } from 'wagmi'
 import {
   ConfirmationDialogContent,
   Divider,
@@ -142,6 +149,12 @@ export const CrossChainSwapTradeReviewDialog: FC<{ children: ReactNode }> = ({
     if (error) {
       console.error('cross chain swap prepare error', error)
       if (error.message.startsWith('user rejected transaction')) return
+
+      sendAnalyticsEvent(SwapEventName.XSWAP_ESTIMATE_GAS_CALL_FAILED, {
+        route: stringify(trade?.route),
+        error: error.message,
+      })
+
       log.error('cross chain swap prepare error', {
         trade: stringify(trade),
         error: stringify(error),
@@ -160,6 +173,8 @@ export const CrossChainSwapTradeReviewDialog: FC<{ children: ReactNode }> = ({
     }, 500)
   }, [])
 
+  const trace = useTrace()
+
   const onWriteSuccess = useCallback(
     async (hash: SendTransactionReturnType) => {
       setStepStates({
@@ -171,6 +186,12 @@ export const CrossChainSwapTradeReviewDialog: FC<{ children: ReactNode }> = ({
       setSwapAmount('')
 
       if (!tradeRef?.current || !chainId0) return
+
+      sendAnalyticsEvent(SwapEventName.XSWAP_SIGNED, {
+        ...trace,
+        route: stringify(trade?.route),
+        txHash: hash,
+      })
 
       const receiptPromise = client0.waitForTransactionReceipt({ hash })
 
@@ -198,10 +219,26 @@ export const CrossChainSwapTradeReviewDialog: FC<{ children: ReactNode }> = ({
         const receipt = await receiptPromise
         const trade = tradeRef.current
         if (receipt.status === 'success') {
+          sendAnalyticsEvent(SwapEventName.XSWAP_SRC_TRANSACTION_COMPLETED, {
+            txHash: hash,
+            address: receipt.from,
+            src_chain_id: trade?.amountIn?.currency?.chainId,
+            dst_chain_id: trade?.amountOut?.currency?.chainId,
+            transaction_type: trade?.transactionType,
+            route: stringify(trade?.route),
+          })
           log.info('cross chain swap success (source)', {
             trade: stringify(trade),
           })
         } else {
+          sendAnalyticsEvent(SwapEventName.XSWAP_SRC_TRANSACTION_FAILED, {
+            txHash: hash,
+            address: receipt.from,
+            src_chain_id: trade?.amountIn?.currency?.chainId,
+            dst_chain_id: trade?.amountOut?.currency?.chainId,
+            transaction_type: trade?.transactionType,
+            route: stringify(trade?.route),
+          })
           log.error('cross chain swap failed (source)', {
             trade: stringify(trade),
           })
@@ -233,6 +270,7 @@ export const CrossChainSwapTradeReviewDialog: FC<{ children: ReactNode }> = ({
       }
     },
     [
+      trace,
       setSwapAmount,
       chainId0,
       client0,
@@ -257,6 +295,11 @@ export const CrossChainSwapTradeReviewDialog: FC<{ children: ReactNode }> = ({
       })
 
       createErrorToast(e.message, false)
+
+      sendAnalyticsEvent(SwapEventName.XSWAP_ERROR, {
+        route: stringify(trade?.route),
+        error: e instanceof Error ? e.message : undefined,
+      })
 
       log.error('cross chain swap error', {
         trade: stringify(trade),
@@ -417,6 +460,20 @@ export const CrossChainSwapTradeReviewDialog: FC<{ children: ReactNode }> = ({
           .waitForTransactionReceipt({
             hash: receipt.hash,
           })
+          .catch((e) => {
+            sendAnalyticsEvent(SwapEventName.XSWAP_DST_TRANSACTION_FAILED, {
+              chain_id: chainId1,
+              txHash: receipt.hash,
+              error: e instanceof Error ? e.message : undefined,
+            })
+            throw e
+          })
+          .then(() => {
+            sendAnalyticsEvent(SwapEventName.XSWAP_DST_TRANSACTION_COMPLETED, {
+              chain_id: chainId1,
+              txHash: axelarScanData?.dstTxHash,
+            })
+          })
           .then(reset),
         summary: {
           pending: `Swapping ${
@@ -565,33 +622,43 @@ export const CrossChainSwapTradeReviewDialog: FC<{ children: ReactNode }> = ({
                 )}
               </div>
               <DialogFooter>
-                <Button
-                  fullWidth
-                  size="xl"
-                  loading={!write && !isError}
-                  onClick={() => write?.(confirm)}
-                  disabled={
-                    isWritePending ||
-                    Boolean(!write && +swapAmountString > 0) ||
-                    isError
-                  }
-                  color={
-                    isError
-                      ? 'red'
-                      : warningSeverity(trade?.priceImpact) >= 3
-                        ? 'red'
-                        : 'blue'
-                  }
-                  testId="confirm-swap"
+                <TraceEvent
+                  events={[BrowserEvent.onClick]}
+                  element={InterfaceElementName.CONFIRM_SWAP_BUTTON}
+                  name={SwapEventName.XSWAP_SUBMITTED_BUTTON_CLICKED}
+                  properties={{
+                    route: trade?.route,
+                    ...trace,
+                  }}
                 >
-                  {isError ? (
-                    'Shoot! Something went wrong :('
-                  ) : isWritePending ? (
-                    <Dots>Confirm Swap</Dots>
-                  ) : (
-                    `Swap ${token0?.symbol} for ${token1?.symbol}`
-                  )}
-                </Button>
+                  <Button
+                    fullWidth
+                    size="xl"
+                    loading={!write && !isError}
+                    onClick={() => write?.(confirm)}
+                    disabled={
+                      isWritePending ||
+                      Boolean(!write && +swapAmountString > 0) ||
+                      isError
+                    }
+                    color={
+                      isError
+                        ? 'red'
+                        : warningSeverity(trade?.priceImpact) >= 3
+                          ? 'red'
+                          : 'blue'
+                    }
+                    testId="confirm-swap"
+                  >
+                    {isError ? (
+                      'Shoot! Something went wrong :('
+                    ) : isWritePending ? (
+                      <Dots>Confirm Swap</Dots>
+                    ) : (
+                      `Swap ${token0?.symbol} for ${token1?.symbol}`
+                    )}
+                  </Button>
+                </TraceEvent>
               </DialogFooter>
             </DialogContent>
           </>

@@ -1,0 +1,65 @@
+{
+  "name": "@sushiswap/telemetry",
+  "version": "0.0.0",
+  "description": "Sushi Telemetry",
+  "keywords": [
+    "sushi",
+    "telemetry"
+  ],
+  "homepage": "https://www.sushi.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sushiswap/sushiswap.git",
+    "directory": "packages/telemetry"
+  },
+  "license": "MIT",
+  "sideEffects": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": [
+      "./dist/*.js",
+      "./dist/*/index.js"
+    ]
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "src/*",
+        "src/*/index"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --pretty --noEmit",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "dev": "tsc --watch",
+    "test": "jest --passWithNoTests"
+  },
+  "devDependencies": {
+    "@tsconfig/esm": "1.0.4",
+    "@tsconfig/strictest": "2.0.2",
+    "@types/gtag.js": "0.0.19",
+    "@types/react": "18.2.14",
+    "@types/react-dom": "18.2.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.4.5"
+  },
+  "peerDependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": false
+    },
+    "react-dom": {
+      "optional": false
+    }
+  }
+}

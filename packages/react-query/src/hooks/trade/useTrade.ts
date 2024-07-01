@@ -1,3 +1,8 @@
+import {
+  SwapEventName,
+  sendAnalyticsEvent,
+  useTrace,
+} from '@sushiswap/telemetry'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 import { slippageAmount } from 'sushi/calculate'
@@ -42,6 +47,7 @@ export const useTradeQuery = (
   }: UseTradeParams,
   select: UseTradeQuerySelect,
 ) => {
+  const trace = useTrace()
   return useQuery({
     queryKey: [
       'getTrade',
@@ -94,6 +100,12 @@ export const useTradeQuery = (
         toToken as Type,
         recipient,
       )
+
+      sendAnalyticsEvent(SwapEventName.SWAP_QUOTE_RECEIVED, {
+        route: stringify(resp1.route),
+        ...trace,
+      })
+
       return resp1
     },
     refetchOnWindowFocus: true,

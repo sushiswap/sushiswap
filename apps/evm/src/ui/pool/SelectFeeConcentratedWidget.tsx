@@ -1,6 +1,12 @@
 import { RadioGroup } from '@headlessui/react'
 import { ChevronRightIcon } from '@heroicons/react-v1/solid'
 import {
+  FeePoolSelectAction,
+  LiquidityEventName,
+  sendAnalyticsEvent,
+  useTrace,
+} from '@sushiswap/telemetry'
+import {
   Button,
   Card,
   CardDescription,
@@ -16,7 +22,7 @@ import {
   Toggle,
 } from '@sushiswap/ui'
 import { Dots } from '@sushiswap/ui'
-import React, { FC, memo, useMemo } from 'react'
+import React, { FC, memo, useCallback, useMemo } from 'react'
 import { usePoolsByTokenPair } from 'src/lib/hooks/usePoolsByTokenPair'
 import { SushiSwapV3FeeAmount } from 'sushi/config'
 import { Type } from 'sushi/currency'
@@ -52,11 +58,26 @@ interface SelectFeeConcentratedWidget {
 export const SelectFeeConcentratedWidget: FC<SelectFeeConcentratedWidget> =
   memo(function SelectFeeWidget({
     feeAmount,
-    setFeeAmount,
+    setFeeAmount: _setFeeAmount,
     token0,
     token1,
     disableIfNotExists = false,
   }) {
+    const trace = useTrace()
+
+    const setFeeAmount = useCallback(
+      (fee: SushiSwapV3FeeAmount) => {
+        _setFeeAmount(fee)
+        sendAnalyticsEvent(LiquidityEventName.SELECT_LIQUIDITY_POOL_FEE_TIER, {
+          chain_id: token0?.chainId,
+          label: [token0?.symbol, token1?.symbol].join('/'),
+          action: FeePoolSelectAction.MANUAL,
+          fee,
+          ...trace,
+        })
+      },
+      [_setFeeAmount, trace, token0?.chainId, token0?.symbol, token1?.symbol],
+    )
     const { data: pools, isLoading } = usePoolsByTokenPair(
       token0?.wrapped.id,
       token1?.wrapped.id,

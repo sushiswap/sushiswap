@@ -11,6 +11,8 @@ export function didUserReject(error: any): boolean {
   const reason = getReason(error)
   if (
     error?.code === 4001 ||
+    // viem
+    error?.details === 'User rejected the request.' ||
     // ethers v5.7.0 wrapped error
     error?.code === 'ACTION_REJECTED' ||
     // For Rainbow :

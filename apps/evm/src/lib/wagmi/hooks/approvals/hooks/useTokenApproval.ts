@@ -1,5 +1,6 @@
 'use client'
 
+import { InterfaceEventName, sendAnalyticsEvent } from '@sushiswap/telemetry'
 import { createErrorToast, createToast } from '@sushiswap/ui'
 import { useCallback, useMemo, useState } from 'react'
 // import * as Sentry from '@sentry/nextjs'
@@ -94,6 +95,11 @@ export const useTokenApproval = ({
     async (data: SendTransactionReturnType) => {
       if (!amount) return
 
+      sendAnalyticsEvent(InterfaceEventName.APPROVE_TOKEN_TXN_SUBMITTED, {
+        chain_id: amount.currency.chainId,
+        token_address: amount.currency.wrapped.address,
+        token_symbol: amount.currency.symbol,
+      })
       setPending(true)
       try {
         const ts = new Date().getTime()

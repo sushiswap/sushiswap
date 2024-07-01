@@ -1,5 +1,12 @@
 import { CogIcon } from '@heroicons/react-v1/outline'
 import { SlippageToleranceStorageKey, TTLStorageKey } from '@sushiswap/hooks'
+import { NativeAddress } from '@sushiswap/react-query'
+import {
+  LiquidityEventName,
+  LiquiditySource,
+  sendAnalyticsEvent,
+  useTrace,
+} from '@sushiswap/telemetry'
 import {
   Button,
   Currency,
@@ -94,6 +101,8 @@ export const AddSectionReviewModalConcentrated: FC<
   const { [Bound.LOWER]: priceLower, [Bound.UPPER]: priceUpper } = pricesAtTicks
   const client = usePublicClient()
 
+  const trace = useTrace()
+
   const isSorted =
     token0 && token1 && token0.wrapped.sortsBefore(token1.wrapped)
   const leftPrice = useMemo(
@@ -139,6 +148,20 @@ export const AddSectionReviewModalConcentrated: FC<
 
       if (!token0 || !token1) return
 
+      sendAnalyticsEvent(LiquidityEventName.ADD_LIQUIDITY_SUBMITTED, {
+        chain_id: chainId,
+        address,
+        txHash: hash,
+        source: LiquiditySource.V3,
+        label: [token0.symbol, token1.symbol].join('/'),
+        token0_address: token0.isNative ? NativeAddress : token0.address,
+        token0_amount: input0?.quotient,
+        token1_address: token1.isNative ? NativeAddress : token1.address,
+        token1_amount: input1?.quotient,
+        create_pool: noLiquidity,
+        ...trace,
+      })
+
       const ts = new Date().getTime()
       void createToast({
         account: address,
@@ -161,7 +184,18 @@ export const AddSectionReviewModalConcentrated: FC<
         groupTimestamp: ts,
       })
     },
-    [_onSuccess, token0, token1, address, chainId, client, noLiquidity],
+    [
+      _onSuccess,
+      token0,
+      token1,
+      address,
+      chainId,
+      client,
+      noLiquidity,
+      trace,
+      input0,
+      input1,
+    ],
   )
 
   const onError = useCallback((e: Error) => {

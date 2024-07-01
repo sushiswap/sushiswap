@@ -1,3 +1,3 @@
-import type { Address } from 'sushi/types'
+import type { Address } from './address.js'
 
 export type ID = `${string}:${Address}`

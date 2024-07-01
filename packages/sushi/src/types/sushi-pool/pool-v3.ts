@@ -1,9 +1,6 @@
-import {
-  type PoolId,
-  SushiSwapProtocol,
-  type SushiSwapV3Protocol,
-} from 'sushi/types'
-import type { SushiSwapV3ChainId } from '../../config/sushiswap-v3'
+import type { SushiSwapV3ChainId } from '../../config/sushiswap-v3.js'
+import type { PoolId } from './pool-id.js'
+import { SushiSwapProtocol, type SushiSwapV3Protocol } from './protocol.js'
 
 type Extension = {
   sqrtPrice: bigint

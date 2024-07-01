@@ -1,4 +1,4 @@
-import type { SushiPositionBase } from 'sushi/types'
+import type { SushiPositionBase } from './sushi-position-base.js'
 
 export type SushiPositionStaked<
   T extends SushiPositionBase = SushiPositionBase,

@@ -1,3 +1,3 @@
-export * from './sushi-position-staked'
-export * from './sushi-position-with-pool'
-export * from './sushi-position-base'
+export * from './sushi-position-staked.js'
+export * from './sushi-position-with-pool.js'
+export * from './sushi-position-base.js'

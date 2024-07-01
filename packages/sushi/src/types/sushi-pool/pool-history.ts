@@ -1,4 +1,4 @@
-import { PoolId } from 'sushi/types'
+import { PoolId } from './pool-id.js'
 
 export type PoolHistory1D<T extends PoolId = PoolId> = T & {
   liquidityUSD1dChange: number

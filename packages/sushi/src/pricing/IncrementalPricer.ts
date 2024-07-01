@@ -1,5 +1,5 @@
 import { Address } from 'viem'
-import { Token } from '../currency'
+import { Token } from '../currency/Token.js'
 import { RPool, RToken, calcTokenAddressPrices } from '../tines/index.js'
 import { PoolEdge, TokenVert, makePoolTokenGraph } from './PoolTokenGraph.js'
 

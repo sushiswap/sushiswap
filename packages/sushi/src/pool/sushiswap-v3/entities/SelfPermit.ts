@@ -1,5 +1,5 @@
 import { Interface } from '@ethersproject/abi'
-import ISelfPermit from '@uniswap/v3-periphery/artifacts/contracts/interfaces/ISelfPermit.sol/ISelfPermit.json'
+import { selfPermitAbi } from '../../../abi/selfPermitAbi.js'
 import { toHex } from '../../../convert/index.js'
 import { Token } from '../../../currency/index.js'
 import { BigintIsh } from '../../../math/index.js'
@@ -29,7 +29,7 @@ function isAllowedPermit(
 }
 
 export abstract class SelfPermit {
-  public static INTERFACE: Interface = new Interface(ISelfPermit.abi)
+  public static INTERFACE: Interface = new Interface(selfPermitAbi)
 
   /**
    * Cannot be constructed.

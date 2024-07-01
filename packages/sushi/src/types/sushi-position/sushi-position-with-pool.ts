@@ -1,5 +1,5 @@
-import type { PoolId } from 'sushi/types'
-import { SushiPositionBase } from './sushi-position-base'
+import type { PoolId } from '../sushi-pool/pool-id.js'
+import { SushiPositionBase } from './sushi-position-base.js'
 
 export type SushiPositionWithPool<
   Pool extends PoolId = PoolId,

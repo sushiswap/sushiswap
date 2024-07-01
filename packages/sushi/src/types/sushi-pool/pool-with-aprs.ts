@@ -1,4 +1,4 @@
-import type { PoolId } from 'sushi/types'
+import type { PoolId } from './pool-id.js'
 
 export type PoolWithAprs<T extends PoolId = PoolId> = T &
   PoolWithIncentiveApr<T> &

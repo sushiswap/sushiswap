@@ -1,4 +1,4 @@
-import { ChainId } from '../chain'
+import { ChainId } from '../chain/index.js'
 
 // export const UNISWAP_V2_FACTORY_ADDRESS =
 //   '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f' as `0x${string}`

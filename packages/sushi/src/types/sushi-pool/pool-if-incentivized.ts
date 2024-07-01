@@ -1,4 +1,4 @@
-import type { PoolId } from 'sushi/types'
+import type { PoolId } from './pool-id.js'
 
 type PoolIfIncentivizedRequired = {
   isIncentivized: boolean

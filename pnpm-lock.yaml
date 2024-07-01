@@ -15,6 +15,9 @@ patchedDependencies:
   '@viem/anvil@0.0.6':
     hash: eusculfp2fywcngsmmmriurpl4
     path: patches/@viem__anvil@0.0.6.patch
+  next@14.2.3:
+    hash: lgn7w2rh4gprdey4qlz3quyu4e
+    path: patches/next@14.2.3.patch
 
 importers:
 
@@ -356,7 +359,7 @@ importers:
         version: 4.7.0
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       next-axiom:
         specifier: 0.17.0
         version: 0.17.0(next@14.2.3)
@@ -585,7 +588,7 @@ importers:
         version: 4.0.0
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       next-axiom:
         specifier: 1.1.1
         version: 1.1.1(next@14.2.3)(react@18.2.0)
@@ -866,7 +869,7 @@ importers:
         version: 4.1.1
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       next-themes:
         specifier: 0.2.1
         version: 0.2.1(next@14.2.3)(react-dom@18.2.0)(react@18.2.0)
@@ -1032,7 +1035,7 @@ importers:
     devDependencies:
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
 
   config/tailwindcss:
     dependencies:
@@ -1187,7 +1190,7 @@ importers:
     optionalDependencies:
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@sushiswap/jest-config':
         specifier: workspace:*
@@ -1331,7 +1334,7 @@ importers:
         version: 4.6.0
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@sushiswap/jest-config':
         specifier: workspace:*
@@ -1576,7 +1579,7 @@ importers:
         version: 29.7.0(@types/node@20.10.0)
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -1619,7 +1622,7 @@ importers:
     optionalDependencies:
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@tsconfig/esm':
         specifier: 1.0.4
@@ -1654,9 +1657,6 @@ importers:
       '@uniswap/v3-core':
         specifier: 1.0.1
         version: 1.0.1
-      '@uniswap/v3-periphery':
-        specifier: 1.4.4
-        version: 1.4.4
       big.js:
         specifier: 6.1.1
         version: 6.1.1
@@ -1898,7 +1898,7 @@ importers:
         version: 10.4.14(postcss@8.4.23)
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       postcss:
         specifier: 8.4.23
         version: 8.4.23
@@ -13883,7 +13883,7 @@ packages:
       '@sentry/vercel-edge': 7.101.1
       '@sentry/webpack-plugin': 1.21.0
       chalk: 3.0.0
-      next: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       resolve: 1.22.8
       rollup: 2.78.0
@@ -13914,7 +13914,7 @@ packages:
       '@sentry/vercel-edge': 7.110.0
       '@sentry/webpack-plugin': 1.21.0
       chalk: 3.0.0
-      next: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       resolve: 1.22.8
       rollup: 2.78.0
@@ -13945,7 +13945,7 @@ packages:
       '@sentry/vercel-edge': 8.13.0
       '@sentry/webpack-plugin': 2.20.1(webpack@5.91.0)
       chalk: 3.0.0
-      next: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       resolve: 1.22.8
       rollup: 3.29.4
       stacktrace-parser: 0.1.10
@@ -18132,7 +18132,7 @@ packages:
       react:
         optional: true
     dependencies:
-      next: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       server-only: 0.0.1
     dev: false
@@ -34166,7 +34166,7 @@ packages:
     peerDependencies:
       next: ^12.1.4 || ^13
     dependencies:
-      next: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       whatwg-fetch: 3.6.20
     dev: false
 
@@ -34177,7 +34177,7 @@ packages:
       next: '>=13.4'
       react: '>=18.0.0'
     dependencies:
-      next: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       remeda: 1.56.0
       whatwg-fetch: 3.6.17
@@ -34190,7 +34190,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -34198,7 +34198,7 @@ packages:
   /next-tick@1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
 
-  /next@14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0):
+  /next@14.2.3(patch_hash=lgn7w2rh4gprdey4qlz3quyu4e)(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.45.0)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-dowFkFTR8v79NPJO4QsBUtxv0g9BrS/phluVpMAt2ku7H+cbcBJlopXjkWlwxrk/xGqMemr7JkGPGemPrLLX7A==}
     engines: {node: '>=18.17.0'}
     hasBin: true
@@ -34240,6 +34240,7 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+    patched: true
 
   /nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}

@@ -1,0 +1,76 @@
+diff --git a/dist/experimental/testmode/playwright/step.js b/dist/experimental/testmode/playwright/step.js
+index b4c71c93ec599cba43d3b0ded3fe3b8574d8b16e..c2189cd19454b6801728270ed13e5fbd79a7af85 100644
+--- a/dist/experimental/testmode/playwright/step.js
++++ b/dist/experimental/testmode/playwright/step.js
+@@ -1,40 +1,39 @@
+-"use strict";
+-Object.defineProperty(exports, "__esModule", {
+-    value: true
+-});
+-Object.defineProperty(exports, "step", {
+-    enumerable: true,
+-    get: function() {
+-        return step;
+-    }
+-});
+-const _test = require("@playwright/test");
++'use strict'
++Object.defineProperty(exports, '__esModule', {
++  value: true,
++})
++Object.defineProperty(exports, 'step', {
++  enumerable: true,
++  get: function () {
++    return step
++  },
++})
++const _test = require('@playwright/test')
+ function isWithRunAsStep(testInfo) {
+-    return "_runAsStep" in testInfo;
++  return '_runAsStep' in testInfo
+ }
+ async function step(testInfo, props, handler) {
+-    if (isWithRunAsStep(testInfo)) {
+-        return testInfo._runAsStep(props, ({ complete })=>handler(complete));
+-    }
+-    // Fallback to the `test.step()`.
+-    let result;
+-    let reportedError;
+-    try {
+-        console.log(props.title, props);
+-        await _test.test.step(props.title, async ()=>{
+-            result = await handler(({ error })=>{
+-                reportedError = error;
+-                if (reportedError) {
+-                    throw reportedError;
+-                }
+-            });
+-        });
+-    } catch (error) {
+-        if (error !== reportedError) {
+-            throw error;
++  if (isWithRunAsStep(testInfo)) {
++    return testInfo._runAsStep(props, ({ complete }) => handler(complete))
++  }
++  // Fallback to the `test.step()`.
++  let result
++  let reportedError
++  try {
++    await _test.test.step(props.title, async () => {
++      result = await handler(({ error }) => {
++        reportedError = error
++        if (reportedError) {
++          throw reportedError
+         }
++      })
++    })
++  } catch (error) {
++    if (error !== reportedError) {
++      throw error
+     }
+-    return result;
++  }
++  return result
+ }
+ 
+ //# sourceMappingURL=step.js.map

@@ -51,7 +51,8 @@
       "@types/react-dom": "18.2.6"
     },
     "patchedDependencies": {
-      "@viem/anvil@0.0.6": "patches/@viem__anvil@0.0.6.patch"
+      "@viem/anvil@0.0.6": "patches/@viem__anvil@0.0.6.patch",
+      "next@14.2.3": "patches/next@14.2.3.patch"
     }
   }
 }

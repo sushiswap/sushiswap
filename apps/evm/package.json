@@ -2,6 +2,7 @@
   "name": "evm",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "check": "tsc --pretty --noEmit",
@@ -83,7 +84,7 @@
   "devDependencies": {
     "@0xsquid/squid-types": "0.1.78",
     "@next/eslint-plugin-next": "14.2.3",
-    "@playwright/test": "1.37.0",
+    "@playwright/test": "1.45.0",
     "@sushiswap/jest-config": "workspace:*",
     "@sushiswap/typescript-config": "workspace:*",
     "@tsconfig/next": "2.0.1",

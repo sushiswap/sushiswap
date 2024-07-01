@@ -1,6 +1,6 @@
 import type { PlaywrightTestConfig } from '@playwright/test'
 import { devices } from '@playwright/test'
-import { defineConfig } from 'next/experimental/testmode/playwright'
+import { defineConfig } from 'next/experimental/testmode/playwright.js'
 
 // Use process.env.PORT by default and fallback to port 3000
 const PORT = process.env.PORT || 3000
@@ -48,7 +48,6 @@ const config: PlaywrightTestConfig = {
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
-
     headless: !process.env.CI ? false : true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,

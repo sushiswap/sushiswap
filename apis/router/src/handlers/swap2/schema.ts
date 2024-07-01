@@ -1,5 +1,5 @@
 import { RouterLiquiditySource } from 'sushi/router'
-import { Address } from 'viem'
+import type { Address } from 'viem'
 import z from 'zod'
 
 // Swap 2.0

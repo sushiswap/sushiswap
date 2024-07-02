@@ -7,6 +7,7 @@ import {
   darkTheme as rainbowDarkTheme,
   lightTheme as rainbowLightTheme,
 } from '@rainbow-me/rainbowkit'
+import { useIsMounted } from '@sushiswap/hooks'
 import { useTheme } from 'next-themes'
 import { type FC, type ReactNode, useMemo } from 'react'
 import { getWagmiInitialState, wagmiConfig } from 'src/lib/wagmi/config'
@@ -57,16 +58,17 @@ export const WagmiConfig: FC<{
   cookie: string | null
 }> = ({ children, cookie }) => {
   const initialState = getWagmiInitialState(cookie)
+  const isMounted = useIsMounted()
 
   const { resolvedTheme } = useTheme()
 
   const rainbowKitTheme = useMemo(() => {
-    if (resolvedTheme === 'dark') {
+    if (isMounted && resolvedTheme === 'dark') {
       return darkTheme
     }
 
     return lightTheme
-  }, [resolvedTheme])
+  }, [resolvedTheme, isMounted])
 
   return (
     <WagmiProvider config={wagmiConfig} initialState={initialState}>

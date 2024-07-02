@@ -1,6 +1,6 @@
 'use client'
 
-import { useLocalStorage } from '@sushiswap/hooks'
+import { useIsMounted, useLocalStorage } from '@sushiswap/hooks'
 import {
   CardContent,
   CardDescription,
@@ -18,6 +18,7 @@ import { PathnameButton } from '../pathname-button'
 
 export const SwapModeButtons = () => {
   const [bannerMinimized] = useLocalStorage('xswap-banner-minimized', false)
+  const isMounted = useIsMounted()
 
   return (
     <div className="flex gap-2">
@@ -26,7 +27,7 @@ export const SwapModeButtons = () => {
           Swap
         </PathnameButton>
       </Link>
-      {bannerMinimized ? (
+      {bannerMinimized && isMounted ? (
         <HoverCard>
           <motion.div layoutId="container">
             <motion.div layout layoutId="title">

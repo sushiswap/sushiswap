@@ -1,5 +1,6 @@
 'use client'
 
+import { useIsMounted } from '@sushiswap/hooks'
 import { Collapsible, Explainer, SkeletonBox, classNames } from '@sushiswap/ui'
 import React, { FC } from 'react'
 import { AddressToEnsResolver } from 'src/lib/wagmi/components/account/AddressToEnsResolver'
@@ -22,6 +23,7 @@ import {
 
 export const SimpleSwapTradeStats: FC = () => {
   const { address } = useAccount()
+  const isMounted = useIsMounted()
   const {
     state: { chainId, swapAmountString, recipient, forceClient },
   } = useDerivedStateSimpleSwap()
@@ -148,7 +150,8 @@ export const SimpleSwapTradeStats: FC = () => {
             )}
           </span>
         </div>
-        {recipient && isAddress(recipient) && (
+
+        {recipient && isAddress(recipient) && isMounted && (
           <div className="flex justify-between items-center border-t border-gray-200 dark:border-slate-200/5 mt-2 pt-2">
             <span className="font-medium text-sm text-gray-700 dark:text-slate-300">
               Recipient

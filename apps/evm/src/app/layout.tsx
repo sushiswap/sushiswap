@@ -42,7 +42,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${roboto_mono.variable} dark`}
-      suppressHydrationWarning={true}
+      suppressHydrationWarning
     >
       <link
         rel="apple-touch-icon"
@@ -64,14 +64,14 @@ export default function RootLayout({
       <link rel="manifest" href="/site.webmanifest?v=1" />
       <link rel="mask-icon" href="/safari-pinned-tab.svg?v=1" color="#fa52a0" />
       <link rel="shortcut icon" href="/favicon.ico?v=1" />
-      <body className="h-screen" suppressHydrationWarning={true}>
-        <div className="flex flex-col h-full">
-          <Providers cookie={cookie}>
+      <body className="h-screen">
+        <Providers cookie={cookie}>
+          <div className="flex flex-col h-full">
             <SanctionedAddressDialog />
             {children}
-          </Providers>
-          <Trackers />
-        </div>
+          </div>
+        </Providers>
+        <Trackers />
       </body>
     </html>
   )

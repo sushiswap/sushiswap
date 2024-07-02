@@ -1,5 +1,5 @@
 import { Interface } from '@ethersproject/abi'
-import IPeripheryPaymentsWithFee from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IPeripheryPaymentsWithFee.sol/IPeripheryPaymentsWithFee.json'
+import { peripheryPaymentsWithFeeAbi } from '../../../abi/peripheryPaymentsWithFeeAbi.js'
 import { toHex } from '../../../convert/index.js'
 import { Token } from '../../../currency/index.js'
 import { Percent } from '../../../math/index.js'
@@ -19,7 +19,7 @@ export interface FeeOptions {
 
 export abstract class Payments {
   public static INTERFACE: Interface = new Interface(
-    IPeripheryPaymentsWithFee.abi,
+    peripheryPaymentsWithFeeAbi,
   )
 
   /**

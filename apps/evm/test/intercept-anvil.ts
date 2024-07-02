@@ -1,5 +1,5 @@
 import { Page } from '@playwright/test'
-import { NextFixture } from 'next/experimental/testmode/playwright'
+import type { NextFixture } from 'next/experimental/testmode/playwright'
 import { http, Address, createTestClient } from 'viem'
 import { foundry } from 'viem/chains'
 
@@ -26,6 +26,8 @@ export const interceptAnvil = async (page: Page, next: NextFixture) => {
       // )
       return fetch(url, request)
     }
+
+    return 'continue'
   })
 }
 

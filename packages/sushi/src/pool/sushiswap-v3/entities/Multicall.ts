@@ -1,8 +1,8 @@
 import { Interface } from '@ethersproject/abi'
-import IMulticall from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IMulticall.sol/IMulticall.json'
+import { multicallAbi } from '../../../abi/multicallAbi.js'
 
 export abstract class Multicall {
-  public static INTERFACE: Interface = new Interface(IMulticall.abi)
+  public static INTERFACE: Interface = new Interface(multicallAbi)
 
   /**
    * Cannot be constructed.

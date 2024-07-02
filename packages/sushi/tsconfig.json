@@ -1,5 +1,5 @@
 {
-  "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/node18/tsconfig"],
+  "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/node20/tsconfig"],
   "include": ["src"],
   "exclude": [
     "node_modules",
@@ -17,10 +17,6 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "paths": {
-      "sushi/types": [
-        "./src/types"
-      ]
-    }
+    "verbatimModuleSyntax": false
   }
 }

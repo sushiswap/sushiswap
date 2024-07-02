@@ -1,4 +1,4 @@
-import { ChainId } from '../chain'
+import { ChainId } from '../chain/index.js'
 
 const SUPPORTED_CHAIN_IDS = [
   ChainId.AVALANCHE,

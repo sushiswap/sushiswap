@@ -1,4 +1,4 @@
-export * from './bigint-serializer'
+export * from './bigint-serializer/index.js'
 export * from './calculate/index.js'
 export * from './chain/index.js'
 // export * from './config.js'

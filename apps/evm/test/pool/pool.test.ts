@@ -1,4 +1,4 @@
-import { test } from 'next/experimental/testmode/playwright'
+import { test } from 'next/experimental/testmode/playwright.js'
 import { SupportedChainId } from 'src/config'
 import {
   SushiSwapV3FeeAmount,

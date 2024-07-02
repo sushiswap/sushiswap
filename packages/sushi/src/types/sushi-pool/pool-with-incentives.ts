@@ -1,11 +1,9 @@
 import type { ChainId } from 'sushi/chain'
-import type {
-  Address,
-  PoolId,
-  PoolIfIncentivized,
-  PoolWithIncentiveApr,
-  Token,
-} from 'sushi/types'
+import type { Address } from '../address.js'
+import type { Token } from '../token.js'
+import type { PoolId } from './pool-id.js'
+import type { PoolIfIncentivized } from './pool-if-incentivized.js'
+import type { PoolWithIncentiveApr } from './pool-with-aprs.js'
 
 export enum RewarderType {
   Primary = 'Primary',

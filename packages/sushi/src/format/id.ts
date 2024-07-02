@@ -1,5 +1,6 @@
-import type { Address, ID } from 'sushi/types'
 import type { ChainId } from '../chain/index.js'
+import { Address } from '../types/address.js'
+import { ID } from '../types/id.js'
 import { unsanitize } from './unsanitize.js'
 
 export const getIdFromChainIdAddress = (

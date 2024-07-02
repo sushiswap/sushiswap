@@ -1,5 +1,6 @@
 import type { ChainId } from 'sushi/chain'
-import type { Address, ID } from 'sushi/types'
+import type { Address } from './address.js'
+import type { ID } from './id.js'
 
 export type Token = {
   id: ID

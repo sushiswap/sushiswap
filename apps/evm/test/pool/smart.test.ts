@@ -3,7 +3,7 @@
 //   // NextFixture,
 //   expect,
 //   test,
-// } from 'next/experimental/testmode/playwright'
+// } from 'next/experimental/testmode/playwright.js'
 // import { SupportedChainId } from 'src/config'
 // import { ChainId } from 'sushi/chain'
 // import { prepareERC20Balance as setupERC20Balance } from 'test/erc20'

@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { test } from 'next/experimental/testmode/playwright'
+import { test } from 'next/experimental/testmode/playwright.js'
 import { ChainId } from 'sushi/chain'
 import { Native, Token, USDC, USDT, WBTC } from 'sushi/currency'
 

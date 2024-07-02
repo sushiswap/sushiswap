@@ -1,6 +1,6 @@
-import type { PoolId } from 'sushi/types'
-import { SushiSwapProtocol, SushiSwapV2Protocol } from 'sushi/types'
-import type { SushiSwapV2ChainId } from '../../config/sushiswap-v2'
+import type { SushiSwapV2ChainId } from '../../config/sushiswap-v2.js'
+import type { PoolId } from './pool-id.js'
+import { SushiSwapProtocol, type SushiSwapV2Protocol } from './protocol.js'
 
 export type PoolV2<T extends PoolId = PoolId> = T &
   Omit<PoolId, 'chainId' | 'protocol'> & {

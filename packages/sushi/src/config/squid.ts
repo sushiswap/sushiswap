@@ -1,5 +1,5 @@
 import { Hex } from 'viem'
-import { ChainId } from '../chain'
+import { ChainId } from '../chain/index.js'
 
 export const SquidIntegratorId = 'sushiswap-sdk'
 

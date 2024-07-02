@@ -1,4 +1,5 @@
-import type { Address, PoolId } from 'sushi/types'
+import type { Address } from '../address.js'
+import type { PoolId } from '../sushi-pool/pool-id.js'
 
 export type SushiPositionBase = {
   user: Address

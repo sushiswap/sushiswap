@@ -19,7 +19,7 @@ const baseURL = `http://localhost:${PORT}`
  */
 const config: PlaywrightTestConfig = {
   // quiet: true,
-  testMatch: [/*'pool.test.ts',*/ 'simple.test.ts'],
+  testMatch: ['pool.test.ts', 'simple.test.ts'],
   testIgnore: [
     'smart.test.ts',
     // 'swap.test.test',

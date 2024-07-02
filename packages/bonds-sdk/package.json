@@ -70,8 +70,8 @@
     "viem": "2.10.11"
   },
   "peerDependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "19.0.0-rc-8971381549-20240625",
+    "react-dom": "19.0.0-rc-8971381549-20240625"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -82,6 +82,6 @@
     }
   },
   "optionalDependencies": {
-    "next": "14.2.3"
+    "next": "15.0.0-canary.45"
   }
 }

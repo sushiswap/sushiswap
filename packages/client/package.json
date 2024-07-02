@@ -77,7 +77,8 @@
     "@tsconfig/esm": "1.0.4",
     "@tsconfig/strictest": "2.0.2",
     "@types/node": "20",
-    "react": "18.2.0",
+    "eslint": "8.43.0",
+    "react": "19.0.0-rc-8971381549-20240625",
     "swr": "2.1.5",
     "tsup": "7.2.0",
     "typescript": "5.4.5"

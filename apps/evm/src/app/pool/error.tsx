@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
-import * as Sentry from '@sentry/nextjs'
+import { captureException } from '@sentry/nextjs'
 import { Button, LinkInternal, typographyVariants } from '@sushiswap/ui'
 import { useEffect } from 'react'
 
@@ -10,8 +10,9 @@ export default function ErrorPage({
 }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     // Log the error to sentry
-    Sentry.captureException(error)
+    captureException(error)
   }, [error])
+
   return (
     <div className="flex justify-center items-center pt-20 px-4">
       <div className="flex flex-col gap-8 text-center">

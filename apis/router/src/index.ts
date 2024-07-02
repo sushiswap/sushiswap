@@ -1,7 +1,12 @@
 import 'dotenv/config'
 
 import process from 'node:process'
-import * as Sentry from '@sentry/node'
+import {
+  Handlers as SentryHandlers,
+  Integrations as SentryIntegrations,
+  captureMessage,
+  init as initSentry,
+} from '@sentry/node'
 import { Logger, LogsMessageLevel } from '@sushiswap/extractor'
 import cors from 'cors'
 import express, { type Express, type Response } from 'express'
@@ -46,18 +51,18 @@ async function start() {
   //   updatePrices(client)
   // })
   client.start()
-  Sentry.init({
+  initSentry({
     sampleRate: 1,
     dsn: SENTRY_DSN,
     environment: SENTRY_ENVIRONMENT,
     integrations: [
       // enable HTTP calls tracing
-      new Sentry.Integrations.Http({
+      new SentryIntegrations.Http({
         breadcrumbs: true,
         tracing: true,
       }),
       // enable Express.js middleware tracing
-      new Sentry.Integrations.Express({
+      new SentryIntegrations.Express({
         app,
       }),
     ],
@@ -73,7 +78,7 @@ async function start() {
       context?: string,
       trace_id?: string,
     ) => {
-      Sentry.captureMessage(
+      captureMessage(
         msg,
         context === undefined
           ? level
@@ -95,9 +100,9 @@ async function start() {
 
   // RequestHandler creates a separate execution context, so that all
   // transactions/spans/breadcrumbs are isolated across requests
-  app.use(Sentry.Handlers.requestHandler())
+  app.use(SentryHandlers.requestHandler())
   // TracingHandler creates a trace for every incoming request
-  app.use(Sentry.Handlers.tracingHandler())
+  app.use(SentryHandlers.tracingHandler())
 
   app.use(cors())
 
@@ -128,7 +133,7 @@ async function start() {
   app.get(`/price/v1/${CHAIN_ID}/:address`, priceByAddressHandler)
 
   // The error handler must be registered before any other error middleware and after all controllers
-  app.use(Sentry.Handlers.errorHandler())
+  app.use(SentryHandlers.errorHandler())
 
   app.listen(PORT, () => {
     console.log(`Router ${CHAIN_ID} app listening on port ${PORT}`)

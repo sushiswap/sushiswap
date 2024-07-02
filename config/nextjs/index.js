@@ -23,6 +23,7 @@ const defaultNextConfig = {
       '@sushiswap/ui',
       'sushi',
       'date-fns',
+      '@sentry/nextjs',
     ],
   },
   images: {
@@ -44,13 +45,23 @@ const defaultNextConfig = {
     ],
   },
   webpack: (config, { webpack }) => {
-    if (config.plugins) {
-      config.plugins.push(
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^(lokijs|pino-pretty|encoding)$/,
-        }),
-      )
+    if (!config.plugins) {
+      config.plugins = []
     }
+
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^(lokijs|pino-pretty|encoding)$/,
+      }),
+    )
+
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __SENTRY_DEBUG__: false,
+        __SENTRY_TRACING__: false,
+        __RRWEB_EXCLUDE_IFRAME__: true,
+      }),
+    )
     // Ignore import trace warnings from graphclient & sentry
     config.ignoreWarnings = [
       {

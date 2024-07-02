@@ -1,6 +1,6 @@
 'use client' // Error components must be Client Components
 
-import * as Sentry from '@sentry/nextjs'
+import { captureException } from '@sentry/nextjs'
 
 import { useLogger } from 'next-axiom'
 import { useEffect } from 'react'
@@ -13,7 +13,7 @@ export default function SwapError({
 
   useEffect(() => {
     // Capture the error and send it to Sentry
-    Sentry.captureException(error)
+    captureException(error)
   }, [error])
 
   useEffect(() => {

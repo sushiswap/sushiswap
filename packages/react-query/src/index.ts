@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/nextjs'
+import { captureException } from '@sentry/nextjs'
 import {
   QueryCache,
   QueryClient,
@@ -16,7 +16,7 @@ const queryClientConfig = {
       if (error instanceof Error) {
         if (error.name === 'ConnectorNotConnectedError') return
       }
-      Sentry.captureException(error, { data: { query } })
+      captureException(error, { data: { query } })
     },
   }),
 }

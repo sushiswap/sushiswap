@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/node'
+import { captureMessage } from '@sentry/node'
 import {
   ADDITIONAL_BASES,
   BASES_TO_CHECK_TRADES_AGAINST,
@@ -45,7 +45,7 @@ export function updatePrices(client: ExtractorClient, currency = Currency.USD) {
         0.5,
       )
       if (diff > 1)
-        Sentry.captureMessage(
+        captureMessage(
           `${CHAIN_ID}: Price check failed: ${diff.toFixed(
             1,
           )}% of prices differing more than 0.5%`,

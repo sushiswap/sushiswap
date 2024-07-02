@@ -1,6 +1,11 @@
 'use client'
 
 import {
+  createErrorToast,
+  createInfoToast,
+  createToast,
+} from '@sushiswap/notifications'
+import {
   DialogClose,
   DialogContent,
   DialogCustom,
@@ -18,7 +23,6 @@ import { Button } from '@sushiswap/ui'
 import { Dots } from '@sushiswap/ui'
 import { List } from '@sushiswap/ui'
 import { SkeletonText } from '@sushiswap/ui'
-import { createErrorToast, createInfoToast, createToast } from '@sushiswap/ui'
 import { nanoid } from 'nanoid'
 import { log } from 'next-axiom'
 import React, {

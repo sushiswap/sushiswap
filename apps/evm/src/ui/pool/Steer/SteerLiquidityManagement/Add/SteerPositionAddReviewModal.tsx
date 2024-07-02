@@ -1,5 +1,6 @@
 'use client'
 
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import {
   STEER_PERIPHERY_ADDRESS,
   SteerVault,
@@ -7,6 +8,7 @@ import {
 } from '@sushiswap/steer-sdk'
 import { steerPeripheryAbi } from '@sushiswap/steer-sdk/abi'
 import {
+  Button,
   Currency,
   DialogConfirm,
   DialogContent,
@@ -16,12 +18,9 @@ import {
   DialogProvider,
   DialogReview,
   DialogTitle,
-  createErrorToast,
-  createToast,
+  Dots,
+  List,
 } from '@sushiswap/ui'
-import { Button } from '@sushiswap/ui'
-import { Dots } from '@sushiswap/ui'
-import { List } from '@sushiswap/ui'
 import React, { FC, ReactNode, useCallback, useMemo } from 'react'
 import { Chain } from 'sushi/chain'
 import { Amount } from 'sushi/currency'

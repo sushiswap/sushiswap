@@ -315,6 +315,9 @@ importers:
       '@sushiswap/nextjs-config':
         specifier: workspace:*
         version: link:../../config/nextjs
+      '@sushiswap/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
       '@sushiswap/react-query':
         specifier: workspace:*
         version: link:../../packages/react-query
@@ -490,9 +493,6 @@ importers:
       '@sushiswap/database':
         specifier: workspace:*
         version: link:../../packages/database
-      '@sushiswap/dexie':
-        specifier: workspace:*
-        version: link:../../packages/dexie
       '@sushiswap/graph-client':
         specifier: workspace:*
         version: link:../../packages/graph-client
@@ -502,6 +502,9 @@ importers:
       '@sushiswap/nextjs-config':
         specifier: workspace:*
         version: link:../../config/nextjs
+      '@sushiswap/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
       '@sushiswap/react-query':
         specifier: workspace:*
         version: link:../../packages/react-query
@@ -1318,55 +1321,6 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
 
-  packages/dexie:
-    dependencies:
-      dexie:
-        specifier: 3.2.4
-        version: 3.2.4
-      dexie-react-hooks:
-        specifier: 1.1.6
-        version: 1.1.6(@types/react@18.2.14)(dexie@3.2.4)(react@18.2.0)
-      lodash.groupby:
-        specifier: 4.6.0
-        version: 4.6.0
-      next:
-        specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.24.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.37.0)(react-dom@18.2.0)(react@18.2.0)
-    devDependencies:
-      '@sushiswap/jest-config':
-        specifier: workspace:*
-        version: link:../../config/jest
-      '@tsconfig/esm':
-        specifier: 1.0.4
-        version: 1.0.4
-      '@tsconfig/strictest':
-        specifier: 2.0.2
-        version: 2.0.2
-      '@types/lodash.groupby':
-        specifier: 4.6.7
-        version: 4.6.7
-      '@types/react':
-        specifier: 18.2.14
-        version: 18.2.14
-      '@types/react-dom':
-        specifier: 18.2.6
-        version: 18.2.6
-      jest:
-        specifier: 29.7.0
-        version: 29.7.0(@types/node@20.10.0)
-      react:
-        specifier: 18.2.0
-        version: 18.2.0
-      react-dom:
-        specifier: 18.2.0
-        version: 18.2.0(react@18.2.0)
-      sushi:
-        specifier: workspace:*
-        version: link:../sushi
-      typescript:
-        specifier: 5.4.5
-        version: 5.4.5
-
   packages/extractor:
     dependencies:
       '@cryptoalgebra/integral-core':
@@ -1517,11 +1471,51 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
 
+  packages/notifications:
+    dependencies:
+      '@heroicons/react':
+        specifier: 2.0.13
+        version: 2.0.13(react@18.2.0)
+      '@sushiswap/ui':
+        specifier: workspace:*
+        version: link:../ui
+      idb:
+        specifier: ^8.0.0
+        version: 8.0.0
+      nanoid:
+        specifier: 4.0.0
+        version: 4.0.0
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      react-toastify:
+        specifier: 9.1.3
+        version: 9.1.3(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@tsconfig/esm':
+        specifier: 1.0.4
+        version: 1.0.4
+      '@tsconfig/strictest':
+        specifier: 2.0.2
+        version: 2.0.2
+      '@types/react':
+        specifier: 18.2.14
+        version: 18.2.14
+      '@types/react-dom':
+        specifier: 18.2.6
+        version: 18.2.6
+      sushi:
+        specifier: workspace:*
+        version: link:../sushi
+      typescript:
+        specifier: 5.4.5
+        version: 5.4.5
+
   packages/react-query:
     dependencies:
-      '@sushiswap/dexie':
-        specifier: workspace:*
-        version: link:../dexie
       '@sushiswap/hooks':
         specifier: workspace:*
         version: link:../hooks
@@ -1531,9 +1525,6 @@ importers:
       '@tanstack/react-query-devtools':
         specifier: 4.28.0
         version: 4.28.0(@tanstack/react-query@4.28.0)(react-dom@18.2.0)(react@18.2.0)
-      idb-keyval:
-        specifier: 6.2.0
-        version: 6.2.0
       ms:
         specifier: 2.1.3
         version: 2.1.3
@@ -1793,9 +1784,6 @@ importers:
       '@react-hook/window-scroll':
         specifier: 1.3.0
         version: 1.3.0(react@18.2.0)
-      '@sushiswap/dexie':
-        specifier: workspace:*
-        version: link:../dexie
       '@sushiswap/hooks':
         specifier: workspace:*
         version: link:../hooks
@@ -1856,9 +1844,6 @@ importers:
       react-spring:
         specifier: 9.6.1
         version: 9.6.1(@react-three/fiber@8.16.2)(konva@9.3.6)(react-dom@18.2.0)(react-konva@16.8.6)(react-native@0.73.7)(react-zdog@1.2.2)(react@18.2.0)(three@0.163.0)(zdog@1.1.3)
-      react-toastify:
-        specifier: 9.1.3
-        version: 9.1.3(react-dom@18.2.0)(react@18.2.0)
       react-virtualized-auto-sizer:
         specifier: 1.0.7
         version: 1.0.7(react-dom@18.2.0)(react@18.2.0)
@@ -17204,12 +17189,6 @@ packages:
       '@types/lodash': 4.14.197
     dev: true
 
-  /@types/lodash.groupby@4.6.7:
-    resolution: {integrity: sha512-dFUR1pqdMgjIBbgPJ/8axJX6M1C7zsL+HF4qdYMQeJ7XOp0Qbf37I3zh9gpXr/ks6tgEYPDRqyZRAnFYvewYHQ==}
-    dependencies:
-      '@types/lodash': 4.14.197
-    dev: true
-
   /@types/lodash.maxby@4.6.9:
     resolution: {integrity: sha512-sLH16KjHUjrLya0zAtIOQ4xraDpLhnYBgcgRwevpxj06El1Pbeu9B4F8o0u8eBvZv8iDw/5qteJwmKDw3wEyuA==}
     dependencies:
@@ -24297,23 +24276,6 @@ packages:
       minimist: 1.2.8
     dev: true
 
-  /dexie-react-hooks@1.1.6(@types/react@18.2.14)(dexie@3.2.4)(react@18.2.0):
-    resolution: {integrity: sha512-xSblWtmPwhafWNWMECsW7zMMmBu8goH3QqTxEfwBNoNG1mgsM0oFclippev7ss9HhKICqBwTjgqpscci5Ed4mA==}
-    peerDependencies:
-      '@types/react': 18.2.14
-      dexie: ^3.2 || ^4.0.1-alpha
-      react: '>=16'
-    dependencies:
-      '@types/react': 18.2.14
-      dexie: 3.2.4
-      react: 18.2.0
-    dev: false
-
-  /dexie@3.2.4:
-    resolution: {integrity: sha512-VKoTQRSv7+RnffpOJ3Dh6ozknBqzWw/F3iqMdsZg958R0AS8AnY9x9d1lbwENr0gzeGJHXKcGhAMRaqys6SxqA==}
-    engines: {node: '>=6.0'}
-    dev: false
-
   /dezalgo@1.0.4:
     resolution: {integrity: sha512-rXSP0bf+5n0Qonsb+SVVfNfIsimO4HEtmnIpPHY8Q1UCzKlQrDMfdobr8nJOOsRgWCyMRqeSBQzmWUMq7zvVig==}
     dependencies:
@@ -29476,17 +29438,15 @@ packages:
     dependencies:
       postcss: 8.4.23
 
-  /idb-keyval@6.2.0:
-    resolution: {integrity: sha512-uw+MIyQn2jl3+hroD7hF8J7PUviBU7BPKWw4f/ISf32D4LoGu98yHjrzWWJDASu9QNrX10tCJqk9YY0ClWm8Ng==}
-    dependencies:
-      safari-14-idb-fix: 3.0.0
-    dev: false
-
   /idb-keyval@6.2.1:
     resolution: {integrity: sha512-8Sb3veuYCyrZL+VBt9LJfZjLUPWVvqn8tG28VqYNFCo43KHcKuq+b4EiXGeuaLAQWL2YmyDgMp2aSpH9JHsEQg==}
 
   /idb@7.1.1:
     resolution: {integrity: sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ==}
+    dev: false
+
+  /idb@8.0.0:
+    resolution: {integrity: sha512-l//qvlAKGmQO31Qn7xdzagVPPaHTxXx199MhrAFuVBTPqydcPYBWjkrbv4Y0ktB+GmWOiwHl237UUOrLmQxLvw==}
     dev: false
 
   /identity-obj-proxy@3.0.0:
@@ -32368,10 +32328,6 @@ packages:
 
   /lodash.frompairs@4.0.1:
     resolution: {integrity: sha512-dvqe2I+cO5MzXCMhUnfYFa9MD+/760yx2aTAN1lqEcEkf896TxgrX373igVdqSJj6tQd0jnSLE1UMuKufqqxFw==}
-    dev: false
-
-  /lodash.groupby@4.6.0:
-    resolution: {integrity: sha512-5dcWxm23+VAoz+awKmBaiBvzox8+RqMgFhi7UvX9DHZr2HdxHXM/Wrf8cfKpsW37RNrvtPn6hSwNqurSILbmJw==}
     dev: false
 
   /lodash.isarguments@3.1.0:
@@ -39063,10 +39019,6 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       mri: 1.2.0
-
-  /safari-14-idb-fix@3.0.0:
-    resolution: {integrity: sha512-eBNFLob4PMq8JA1dGyFn6G97q3/WzNtFK4RnzT1fnLq+9RyrGknzYiM/9B12MnKAxuj1IXr7UKYtTNtjyKMBog==}
-    dev: false
 
   /safe-array-concat@1.0.0:
     resolution: {integrity: sha512-9dVEFruWIsnie89yym+xWTAYASdpw3CJV7Li/6zBewGf9z2i1j31rP6jnY0pHEO4QZh6N0K11bFjWmdR8UGdPQ==}

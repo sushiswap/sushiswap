@@ -1,4 +1,3 @@
-// import { saveTokens } from '@sushiswap/dexie'
 import { useCustomTokens } from '@sushiswap/hooks'
 import { useQuery } from '@tanstack/react-query'
 import ms from 'ms'
@@ -23,22 +22,6 @@ export const fetchTokensQueryFn = async ({
   const resp = await fetch('https://tokens.sushi.com/v0')
   if (resp.status === 200) {
     const data: Data[] = await resp.json()
-
-    // DO WE REALLY NEED THIS
-    // await saveTokens({
-    //   tokens: data.map(({ id, address, symbol, decimals, name }) => {
-    //     const [chainId] = id.split(':')
-    //     return {
-    //       id,
-    //       address,
-    //       symbol,
-    //       decimals,
-    //       name,
-    //       status: 'APPROVED',
-    //       chainId: Number(chainId),
-    //     }
-    //   }),
-    // })
 
     Object.entries(customTokenMap).forEach(
       ([id, { address, name, symbol, decimals }]) => {

@@ -1,6 +1,10 @@
 'use client'
 
-import { createErrorToast, createFailedToast, createToast } from '@sushiswap/ui'
+import {
+  createErrorToast,
+  createFailedToast,
+  createToast,
+} from '@sushiswap/notifications'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { BENTOBOX_ADDRESS, BentoBoxChainId } from 'sushi/config'

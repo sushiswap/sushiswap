@@ -14,7 +14,6 @@ const defaultNextConfig = {
       '@heroicons/react-v1/outline',
       '@sushiswap/client',
       '@sushiswap/database',
-      '@sushiswap/dexie',
       '@sushiswap/graph-client',
       '@sushiswap/hooks',
       '@sushiswap/react-query',

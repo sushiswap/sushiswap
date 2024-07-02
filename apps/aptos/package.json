@@ -28,6 +28,7 @@
     "@rise-wallet/wallet-adapter": "^0.1.2",
     "@sushiswap/hooks": "workspace:*",
     "@sushiswap/nextjs-config": "workspace:*",
+    "@sushiswap/notifications": "workspace:*",
     "@sushiswap/react-query": "workspace:*",
     "@sushiswap/tailwindcss-config": "workspace:*",
     "@sushiswap/ui": "workspace:*",

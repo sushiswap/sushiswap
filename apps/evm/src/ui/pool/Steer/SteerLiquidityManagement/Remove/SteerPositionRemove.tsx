@@ -2,6 +2,7 @@
 
 import { CogIcon } from '@heroicons/react-v1/solid'
 import { SlippageToleranceStorageKey, useDebounce } from '@sushiswap/hooks'
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import { SteerVault, isSteerChainId } from '@sushiswap/steer-sdk'
 import { steerMultiPositionManager } from '@sushiswap/steer-sdk/abi'
 import {
@@ -14,8 +15,6 @@ import {
   SettingsModule,
   SettingsOverlay,
   classNames,
-  createErrorToast,
-  createToast,
 } from '@sushiswap/ui'
 import React, { FC, useCallback, useMemo, useState } from 'react'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'

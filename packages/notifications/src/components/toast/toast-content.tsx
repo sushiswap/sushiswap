@@ -1,15 +1,14 @@
 'use client'
 
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
-import React, { FC, ReactNode, useState } from 'react'
-
-import { TimeAgo } from '../time-ago'
+import { TimeAgo } from '@sushiswap/ui'
+import { type FC, type ReactNode, useState } from 'react'
 
 interface ToastContent {
   icon?: ReactNode
   summary: ReactNode | ReactNode[]
   code?: boolean
-  href?: string
+  href?: string | undefined
 }
 
 export const ToastContent: FC<ToastContent> = ({

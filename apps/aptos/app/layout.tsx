@@ -3,6 +3,7 @@ import { Inter, Roboto_Mono } from 'next/font/google'
 
 import '@sushiswap/ui/index.css'
 
+import { ToastContainer } from '@sushiswap/notifications'
 import React from 'react'
 import { Header } from './header'
 import { Providers } from './providers'
@@ -59,6 +60,7 @@ export default function RootLayout({
       <link rel="shortcut icon" href="/favicon.ico?v=1" />
       <body className="h-screen">
         <div className="flex flex-col h-full">
+          <ToastContainer />
           <Providers>
             <Header />
             {children}

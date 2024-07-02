@@ -1,7 +1,7 @@
 'use client'
 
 import { ChefType } from '@sushiswap/client'
-import { createErrorToast, createToast } from '@sushiswap/ui'
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import { useCallback, useMemo } from 'react'
 import { ChainId } from 'sushi'
 import { masterChefV1Abi, masterChefV2Abi, miniChefV2Abi } from 'sushi/abi'

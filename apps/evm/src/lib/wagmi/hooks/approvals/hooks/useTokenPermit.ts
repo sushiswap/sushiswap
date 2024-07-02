@@ -1,7 +1,7 @@
 'use client'
 
 import { TTLStorageKey } from '@sushiswap/hooks'
-import { createErrorToast } from '@sushiswap/ui'
+import { createErrorToast } from '@sushiswap/notifications'
 // import * as Sentry from '@sentry/nextjs'
 import { useCallback, useMemo, useState } from 'react'
 import { eip2612Abi } from 'sushi/abi'

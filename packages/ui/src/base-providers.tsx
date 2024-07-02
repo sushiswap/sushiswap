@@ -1,9 +1,7 @@
 'use client'
 
-import { FC, ReactNode } from 'react'
-
 import { ThemeProvider } from 'next-themes'
-import { ToastContainer } from './components/toast'
+import { FC, ReactNode } from 'react'
 
 interface BaseProvidersProps {
   children: ReactNode | ReactNode[]
@@ -20,7 +18,6 @@ export const BaseProviders: FC<BaseProvidersProps> = ({
       disableTransitionOnChange
       forcedTheme={forcedTheme}
     >
-      <ToastContainer />
       <div id="network-check-portal" />
       {children}
       <div id="popover-portal" />

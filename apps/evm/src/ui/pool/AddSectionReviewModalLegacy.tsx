@@ -1,5 +1,6 @@
 import { CogIcon } from '@heroicons/react-v1/outline'
 import { SlippageToleranceStorageKey, TTLStorageKey } from '@sushiswap/hooks'
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import {
   DialogConfirm,
   DialogContent,
@@ -16,7 +17,6 @@ import {
 } from '@sushiswap/ui'
 import { Button } from '@sushiswap/ui'
 import { Dots } from '@sushiswap/ui'
-import { createErrorToast, createToast } from '@sushiswap/ui'
 import { FC, ReactNode, useCallback, useMemo } from 'react'
 import { APPROVE_TAG_ADD_LEGACY } from 'src/lib/constants'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'

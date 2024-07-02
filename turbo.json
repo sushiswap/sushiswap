@@ -3,6 +3,7 @@
   "globalEnv": [],
   "globalPassThroughEnv": [],
   "globalDependencies": [".npmrc", ".nvmrc", "tsconfig.json"],
+  "ui": "stream",
   "tasks": {
     "anvil": {
       "cache": false,
@@ -69,7 +70,7 @@
       "dependsOn": ["^build"]
     },
     "start": {
-      "dependsOn": ["^build", "generate", "export"],
+      "dependsOn": ["^build", "generate"],
       "env": [
         "ALCHEMY_ID",
         "APP_ENV",

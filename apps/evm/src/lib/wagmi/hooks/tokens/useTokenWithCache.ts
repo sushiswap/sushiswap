@@ -1,4 +1,3 @@
-import { getToken, saveTokens } from '@sushiswap/dexie'
 import { useCustomTokens } from '@sushiswap/hooks'
 import { PublicWagmiConfig } from '@sushiswap/wagmi-config'
 import { useQuery } from '@tanstack/react-query'
@@ -92,32 +91,12 @@ export const getTokenWithCacheQueryFn = async ({
     } as Data
   }
 
-  // Try fetching from dexie
-  const token = await getToken({ chainId, address })
-  if (token) {
-    return token as Data
-  }
-
   // Try fetching from API
   const resp = await fetch(`https://tokens.sushi.com/v0/${chainId}/${address}`)
   if (resp.status === 200) {
     const { address, name, symbol, decimals, status, id }: Data =
       await resp.json()
-    const [chainId] = id.split(':')
 
-    await saveTokens({
-      tokens: [
-        {
-          address: address.toLowerCase(),
-          chainId: Number(chainId),
-          name,
-          symbol,
-          decimals,
-          status,
-          id,
-        },
-      ],
-    })
     return { address, name, symbol, decimals, status, id }
 
     // Try fetching from wagmi
@@ -127,22 +106,6 @@ export const getTokenWithCacheQueryFn = async ({
       chainId,
     })
     const { decimals, address: tokenAddress, symbol, name } = resp
-
-    if (name && symbol) {
-      await saveTokens({
-        tokens: [
-          {
-            address: tokenAddress,
-            chainId: Number(chainId),
-            name,
-            symbol,
-            decimals,
-            status: 'UNKNOWN',
-            id: `${chainId}:${tokenAddress}`,
-          },
-        ],
-      })
-    }
 
     return {
       address: tokenAddress,

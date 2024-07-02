@@ -1,4 +1,4 @@
-import { createErrorToast, createToast } from '@sushiswap/ui'
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import { SendTransactionReturnType } from '@wagmi/core'
 import { useCallback, useMemo } from 'react'
 import { SushiSwapV3FeeAmount } from 'sushi/config'

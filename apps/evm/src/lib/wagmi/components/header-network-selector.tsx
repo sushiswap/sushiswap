@@ -1,7 +1,7 @@
 import { useIsMounted } from '@sushiswap/hooks'
+import { createErrorToast } from '@sushiswap/notifications'
 import { Button } from '@sushiswap/ui'
 import { NetworkSelector, NetworkSelectorOnSelectCallback } from '@sushiswap/ui'
-import { createErrorToast } from '@sushiswap/ui'
 import { NetworkIcon } from '@sushiswap/ui/icons/NetworkIcon'
 import React, { FC, Suspense, useCallback } from 'react'
 import { Chain, ChainId } from 'sushi/chain'

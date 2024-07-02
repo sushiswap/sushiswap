@@ -2,7 +2,7 @@
 
 import 'react-toastify/dist/ReactToastify.css'
 
-import { FC } from 'react'
+import type { FC } from 'react'
 import { ToastContainer as ToastifyContainer } from 'react-toastify'
 
 interface ToastContainer {

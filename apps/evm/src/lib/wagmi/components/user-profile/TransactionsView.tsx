@@ -1,10 +1,8 @@
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
-import { Button } from '@sushiswap/ui'
-import { List } from '@sushiswap/ui'
+import { clearNotifications, useNotifications } from '@sushiswap/notifications'
+import { Button, IconButton, List } from '@sushiswap/ui'
 import React, { Dispatch, FC, SetStateAction } from 'react'
 
-import { useClearNotifications, useNotifications } from '@sushiswap/dexie'
-import { IconButton } from '@sushiswap/ui'
 import { NotificationGroup } from './NotificationGroup'
 import { ProfileView } from './ProfileView'
 
@@ -18,7 +16,6 @@ export const TransactionsView: FC<TransactionsProps> = ({
   address,
 }) => {
   const notifications = useNotifications({ account: address })
-  const clearNotifications = useClearNotifications({ account: address })
 
   return (
     <>
@@ -30,7 +27,7 @@ export const TransactionsView: FC<TransactionsProps> = ({
           name="Back"
         />
         <Button
-          onClick={() => clearNotifications()}
+          onClick={() => clearNotifications({ account: address })}
           variant="ghost"
           size="sm"
           className="!px-2"

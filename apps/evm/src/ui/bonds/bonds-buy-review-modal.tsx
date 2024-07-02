@@ -2,6 +2,7 @@ import { RefreshIcon } from '@heroicons/react-v1/solid'
 import { REFERRER_ADDRESS, getCliffTimestamp } from '@sushiswap/bonds-sdk'
 import { bondFixedTermTellerAbi } from '@sushiswap/bonds-sdk/abi'
 import { Bond } from '@sushiswap/client'
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import {
   Button,
   DialogConfirm,
@@ -16,8 +17,6 @@ import {
   List,
   SkeletonText,
   classNames,
-  createErrorToast,
-  createToast,
 } from '@sushiswap/ui'
 import { SendTransactionReturnType } from '@wagmi/core'
 import format from 'date-fns/format'

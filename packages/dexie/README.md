@@ -1,3 +1,0 @@
-# Dexie
-
-Dexie library

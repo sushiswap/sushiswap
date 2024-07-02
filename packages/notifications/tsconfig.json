@@ -19,11 +19,12 @@
       "ESNext",
       "DOM"
     ],
-    "module": "ES2020",
+    "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ESNext",
     "sourceMap": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "exactOptionalPropertyTypes": false
   }
 }

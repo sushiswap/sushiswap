@@ -1,9 +1,9 @@
-import type { ResolvedNotification } from '@sushiswap/dexie'
-import { FC } from 'react'
+import { Dots } from '@sushiswap/ui'
+import type { FC } from 'react'
 import { Chain } from 'sushi/chain'
 
-import { Dots } from '../dots'
-import { ToastContent } from './ToastContent'
+import type { ResolvedNotification } from '../../types'
+import { ToastContent } from './toast-content'
 
 interface ToastPending extends ResolvedNotification {
   onDismiss(): void

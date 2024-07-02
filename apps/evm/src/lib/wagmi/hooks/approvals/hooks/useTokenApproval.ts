@@ -1,6 +1,6 @@
 'use client'
 
-import { createErrorToast, createToast } from '@sushiswap/ui'
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import { useCallback, useMemo, useState } from 'react'
 // import * as Sentry from '@sentry/nextjs'
 import { Amount, Type } from 'sushi/currency'

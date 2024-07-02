@@ -12,7 +12,7 @@ import {
   PlusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
-import type { ResolvedNotification } from '@sushiswap/dexie'
+import type { ResolvedNotification } from '@sushiswap/notifications'
 import { classNames } from '@sushiswap/ui'
 import { Currency as UICurrency } from '@sushiswap/ui'
 import { LinkExternal } from '@sushiswap/ui'

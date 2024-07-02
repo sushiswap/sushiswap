@@ -1,8 +1,5 @@
-import classNames from 'classnames'
-import { FC } from 'react'
-
-import { Button } from '../button'
-import { LinkExternal } from '../link'
+import { Button, LinkExternal, classNames } from '@sushiswap/ui'
+import type { FC } from 'react'
 
 interface ToastButtons {
   href?: string

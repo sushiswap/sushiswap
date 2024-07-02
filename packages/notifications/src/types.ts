@@ -44,9 +44,9 @@ export type ResolvedNotification = BaseNotification & {
   summary: string
 }
 
-export type NotificationData = PromiseNotification | ResolvedNotification
+export type Notification = PromiseNotification | ResolvedNotification
 
-export const isPromise = (
+export const isPromiseNotification = (
   data: PromiseNotification | ResolvedNotification,
 ): data is PromiseNotification => {
   return (data as PromiseNotification).summary?.pending !== undefined

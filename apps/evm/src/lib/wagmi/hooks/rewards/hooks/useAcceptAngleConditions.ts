@@ -1,6 +1,6 @@
 'use client'
 
-import { createErrorToast, createToast } from '@sushiswap/ui'
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import { useCallback, useMemo, useState } from 'react'
 import { ChainId } from 'sushi/chain'
 import { SendTransactionReturnType, UserRejectedRequestError } from 'viem'

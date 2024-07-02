@@ -3,6 +3,7 @@
 import { bondFixedTermTellerAbi } from '@sushiswap/bonds-sdk/abi'
 import { BondPosition } from '@sushiswap/client'
 import { useIsMounted } from '@sushiswap/hooks'
+import { createErrorToast, createToast } from '@sushiswap/notifications'
 import {
   Badge,
   Button,
@@ -10,8 +11,6 @@ import {
   Dots,
   SkeletonText,
   classNames,
-  createErrorToast,
-  createToast,
 } from '@sushiswap/ui'
 import { NetworkIcon } from '@sushiswap/ui/icons/NetworkIcon'
 import { ColumnDef } from '@tanstack/react-table'

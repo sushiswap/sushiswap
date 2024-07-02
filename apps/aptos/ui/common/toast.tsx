@@ -1,5 +1,8 @@
-import { TOAST_OPTIONS } from '@sushiswap/ui'
-import { ToastButtons, ToastContent } from '@sushiswap/ui'
+import {
+  TOAST_OPTIONS,
+  ToastButtons,
+  ToastContent,
+} from '@sushiswap/notifications'
 import React from 'react'
 import { toast } from 'react-toastify'
 

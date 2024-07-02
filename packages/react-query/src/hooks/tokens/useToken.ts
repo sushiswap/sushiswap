@@ -1,4 +1,3 @@
-import { getToken, saveTokens } from '@sushiswap/dexie'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { ChainId } from 'sushi/chain'
@@ -70,17 +69,6 @@ export const useToken = <T extends boolean = false>({
   return useQuery({
     queryKey: ['token', { chainId, address }],
     queryFn: async () => {
-      // const customTokens = localStorage.getItem('sushi.customTokens')
-      // if (customTokens?.includes(`${chainId}:${address}`)) {
-      //     return JSON.parse(customTokens)[`${chainId}:${address}`] as Data
-      // }
-
-      // Try fetching from cache
-      const token = await getToken({ chainId, address })
-      if (token) {
-        return token as Data
-      }
-
       // Fallback to api
       const resp = await fetch(
         `https://tokens.sushi.com/v0/${chainId}/${address}`,
@@ -88,22 +76,7 @@ export const useToken = <T extends boolean = false>({
       if (resp.status === 200) {
         const { address, name, symbol, decimals, status, id }: Data =
           await resp.json()
-        const [chainId] = id.split(':')
 
-        // Save to cache
-        await saveTokens({
-          tokens: [
-            {
-              address: address.toLowerCase(),
-              chainId: Number(chainId),
-              name,
-              symbol,
-              decimals,
-              status,
-              id,
-            },
-          ],
-        })
         return { address, name, symbol, decimals, status, id }
       } else {
         throw Error(

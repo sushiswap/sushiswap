@@ -1,18 +1,14 @@
-import {
-  PromiseNotification,
-  ResolvedNotification,
-  createNotification,
-} from '@sushiswap/dexie'
 import { nanoid } from 'nanoid'
-import React from 'react'
-import { ToastOptions, toast } from 'react-toastify'
+import { type ToastOptions, toast } from 'react-toastify'
 
-import { ToastButtons } from './ToastButtons'
-import { ToastCompleted } from './ToastCompleted'
-import { ToastContent } from './ToastContent'
-import { ToastFailed } from './ToastFailed'
-import { ToastInfo } from './ToastInfo'
-import { ToastPending } from './ToastPending'
+import { addNotification } from '../../functions/addNotification'
+import type { PromiseNotification, ResolvedNotification } from '../../types'
+import { ToastButtons } from './toast-buttons'
+import { ToastCompleted } from './toast-completed'
+import { ToastContent } from './toast-content'
+import { ToastFailed } from './toast-failed'
+import { ToastInfo } from './toast-info'
+import { ToastPending } from './toast-pending'
 
 export const TOAST_OPTIONS: ToastOptions = {
   position: 'top-right',
@@ -21,7 +17,6 @@ export const TOAST_OPTIONS: ToastOptions = {
   closeOnClick: false,
   pauseOnHover: true,
   draggable: false,
-  progress: undefined,
   closeButton: false,
   icon: false,
 }
@@ -81,7 +76,7 @@ export const createToast = (props: PromiseNotification) => {
     },
   )
 
-  return createNotification(props)
+  return addNotification(props)
 }
 
 export const createErrorToast = (
@@ -114,7 +109,7 @@ export const createSuccessToast = (props: ResolvedNotification) => {
     },
   )
 
-  return createNotification(props)
+  return addNotification(props)
 }
 
 export const createFailedToast = (props: ResolvedNotification) => {
@@ -125,7 +120,7 @@ export const createFailedToast = (props: ResolvedNotification) => {
     autoClose: 8000,
   })
 
-  return createNotification(props)
+  return addNotification(props)
 }
 
 export const createInfoToast = (props: ResolvedNotification) => {
@@ -136,5 +131,5 @@ export const createInfoToast = (props: ResolvedNotification) => {
     autoClose: 8000,
   })
 
-  return createNotification(props)
+  return addNotification(props)
 }

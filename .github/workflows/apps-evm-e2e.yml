@@ -59,7 +59,8 @@ jobs:
         run: pnpm install --frozen-lockfile --prefer-offline
         
       - name: Install Playwright Browsers
-        run: npx playwright@1.37.0 install --with-deps chromium
+        run: pnpm playwright install --with-deps chromium
+        working-directory: ./apps/evm
 
       - name: Test
         run: pnpm exec turbo run test --filter evm

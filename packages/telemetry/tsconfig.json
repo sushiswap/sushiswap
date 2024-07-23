@@ -11,9 +11,6 @@
     "dist",
     ".turbo"
   ],
-  "types": [
-    "@types/gtag.js"
-  ],
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",

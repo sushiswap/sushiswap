@@ -41,9 +41,9 @@
     "test": "jest --passWithNoTests"
   },
   "devDependencies": {
+    "@amplitude/analytics-browser": "^2.9.3",
     "@tsconfig/esm": "1.0.4",
     "@tsconfig/strictest": "2.0.2",
-    "@types/gtag.js": "0.0.19",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
     "react": "18.2.0",

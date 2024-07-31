@@ -13,20 +13,54 @@ import {
 import { ShuffleIcon } from '@sushiswap/ui/icons/ShuffleIcon'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-
+import { useCallback, useEffect, useState } from 'react'
+import { useChainId} from "wagmi"
 import { PathnameButton } from '../pathname-button'
+
+const useIsTwapSupported = () => {
+  const chainId = useChainId()
+  const [isTwapSupported, setIsTwapSupported] = useState(false)
+
+  const validate = useCallback(async () => {
+    const isSupportedChain = await import(
+      /* webpackExports: "isSupportedChain" */ '@orbs-network/twap-ui-sushiswap'
+    ).then((m) => m.isSupportedChain)
+    setIsTwapSupported(isSupportedChain(chainId))
+  }, [chainId])
+  
+  useEffect(() => {
+    validate()
+  }, [validate])
+
+  return isTwapSupported
+}
 
 export const SwapModeButtons = () => {
   const [bannerMinimized] = useLocalStorage('xswap-banner-minimized', false)
   const isMounted = useIsMounted()
+  const isTwapSupported = useIsTwapSupported()
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 flex-wrap">
       <Link href="/swap">
         <PathnameButton pathname="/swap" size="sm">
           Swap
         </PathnameButton>
       </Link>
+      {isTwapSupported && (
+        <>
+          <Link href="/swap/limit">
+            <PathnameButton pathname="/swap/limit" size="sm">
+              Limit
+            </PathnameButton>
+          </Link>
+          <Link href="/swap/twap">
+            <PathnameButton pathname="/swap/twap" size="sm">
+              TWAP
+            </PathnameButton>
+          </Link>
+        </>
+      )}
       {bannerMinimized && isMounted ? (
         <HoverCard>
           <motion.div layoutId="container">

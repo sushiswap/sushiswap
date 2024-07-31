@@ -23,6 +23,7 @@
     "@layerzerolabs/scan-client": "0.0.6",
     "@next/bundle-analyzer": "^14.2.3",
     "@octokit/auth-app": "4.0.7",
+    "@orbs-network/twap-ui-sushiswap": "1.1.21",
     "@radix-ui/react-slot": "1.0.2",
     "@rainbow-me/rainbowkit": "2.1.2",
     "@sentry/nextjs": "8.13.0",

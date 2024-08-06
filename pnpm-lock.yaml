@@ -726,7 +726,7 @@ importers:
         specifier: 0.32.6
         version: 0.32.6
       strapi-sdk-js:
-        specifier: 2.3.3
+        specifier: ^2.3.3
         version: 2.3.3
       sushi:
         specifier: workspace:*
@@ -42153,7 +42153,7 @@ snapshots:
     dependencies:
       get-intrinsic: 1.2.1
       has: 1.0.3
-      side-channel: 1.0.4
+      side-channel: 1.0.6
 
   internal-slot@1.0.7:
     dependencies:
@@ -47120,7 +47120,7 @@ snapshots:
 
   qs@6.11.2:
     dependencies:
-      side-channel: 1.0.4
+      side-channel: 1.0.6
 
   qs@6.12.1:
     dependencies:

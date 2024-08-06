@@ -46,7 +46,7 @@ const defaultNextConfig = {
     if (config.plugins) {
       config.plugins.push(
         new webpack.IgnorePlugin({
-          resourceRegExp: /^(lokijs|pino-pretty|encoding)$/,
+          resourceRegExp: /^(lokijs|pino-pretty|encoding|keyv)$/,
         }),
       )
     }

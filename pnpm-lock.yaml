@@ -12,6 +12,9 @@ overrides:
   '@types/react-dom': 18.2.6
 
 patchedDependencies:
+  '@aptos-labs/aptos-client@0.1.0':
+    hash: t5ob2d47ycxvxflm53kwwzv4kq
+    path: patches/@aptos-labs__aptos-client@0.1.0.patch
   '@rainbow-me/rainbowkit@2.1.3':
     hash: kb2qto7toymzcybuekyapbgkh4
     path: patches/@rainbow-me__rainbowkit@2.1.3.patch
@@ -542,6 +545,9 @@ importers:
       '@octokit/auth-app':
         specifier: 4.0.7
         version: 4.0.7(encoding@0.1.13)
+      '@orbs-network/twap-ui-sushiswap':
+        specifier: 1.1.21
+        version: 1.1.21(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.7(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)(utf-8-validate@5.0.10)
       '@pontem/wallet-adapter-plugin':
         specifier: ^0.2.1
         version: 0.2.1
@@ -1167,7 +1173,7 @@ importers:
         version: 2.1.5(react@18.2.0)
       tsup:
         specifier: 7.2.0
-        version: 7.2.0(@swc/core@1.4.2)(postcss@8.4.31)(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))(typescript@5.4.5)
+        version: 7.2.0(@swc/core@1.4.2)(postcss@8.4.38)(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))(typescript@5.4.5)
       typescript:
         specifier: 5.4.5
         version: 5.4.5
@@ -2084,7 +2090,7 @@ importers:
         version: 10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5)
       tsup:
         specifier: 7.2.0
-        version: 7.2.0(@swc/core@1.4.2)(postcss@8.4.31)(ts-node@10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))(typescript@5.4.5)
+        version: 7.2.0(@swc/core@1.4.2)(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))(typescript@5.4.5)
       typescript:
         specifier: 5.4.5
         version: 5.4.5
@@ -3967,6 +3973,9 @@ packages:
     resolution: {integrity: sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==}
     engines: {node: '>=10'}
 
+  '@defi.org/web3-candies@5.0.0':
+    resolution: {integrity: sha512-I5CZ2rESrDo9rV63yrSVS1ILbkCTSC5AeR9rmPtE+ovmOcrPFRcf2xKlPSjKU2FE3vzzb7kB/IEbRACW85C9zg==}
+
   '@dependents/detective-less@4.1.0':
     resolution: {integrity: sha512-KrkT6qO5NxqNfy68sBl6CTSoJ4SNDIS5iQArkibhlbGU4LaDukZ3q2HIkh8aUKDio6o4itU4xDR7t82Y2eP1Bg==}
     engines: {node: '>=14'}
@@ -4069,11 +4078,20 @@ packages:
   '@emotion/is-prop-valid@0.8.8':
     resolution: {integrity: sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA==}
 
+  '@emotion/is-prop-valid@1.2.2':
+    resolution: {integrity: sha512-uNsoYd37AFmaCdXlg6EYD1KaPOaRWRByMCYzbKUX4+hhMfrxdVSelShywL4JVaAeM/eHUOSprYBQls+/neX3pw==}
+
   '@emotion/memoize@0.7.4':
     resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
 
+  '@emotion/memoize@0.8.1':
+    resolution: {integrity: sha512-W2P2c/VRW1/1tLox0mVUalvnWXxavmv/Oum2aPsRcoDJuob75FC3Y8FbpfLwUegRcxINtGUMPq0tFCvYNTBXNA==}
+
   '@emotion/unitless@0.7.5':
     resolution: {integrity: sha512-OWORNpfjMsSSUBVrRBVGECkhWcULOAJz9ZW8uK9qgxD+87M7jHRcvh/A96XXNhXTLmKcoYSQtBEX7lHMO7YRwg==}
+
+  '@emotion/unitless@0.8.1':
+    resolution: {integrity: sha512-KOEGMu6dmJZtpadb476IsZBclKvILjopjUii3V+7MnXIQCYh8W3NgNcgwo21n9LXZX6EDIKvqfjYxXebDwxKmQ==}
 
   '@emotion/use-insertion-effect-with-fallbacks@1.0.1':
     resolution: {integrity: sha512-jT/qyKZ9rzLErtrjGgdkMBn2OP8wl0G3sQlBb3YPryvKHsjvINUhVaPFfP+fpBcOkmrVOVEEHQFJ7nbj2TH2gw==}
@@ -6062,6 +6080,21 @@ packages:
   '@openzeppelin/contracts@4.9.3':
     resolution: {integrity: sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==}
 
+  '@orbs-network/twap-ui-sushiswap@1.1.21':
+    resolution: {integrity: sha512-cUopb8OZEMxM+doyNOKr77ZLAVUFAuq6R8tSoF9pJQCOZf3uSULWS3KFJtDlaZdisQBwBOkJFozh8orY6HiyeQ==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@orbs-network/twap-ui@1.1.21':
+    resolution: {integrity: sha512-l1aDCg6axMBx08hEVf1hQs2r+LuIdGv7/V1EBcGqPfH8/CVnd7RiNO+fAKR//2fnXPL0plpLN3IAUldVTGeMzA==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@orbs-network/twap@2.2.1':
+    resolution: {integrity: sha512-SN6L7mDZOFcJpeklcVrzkimNsyosjfXoooPORmZM+h8WTOpK0hnV25DndKmAX1PG3SwLq2LdtMdFBvkUKWDQ6w==}
+
   '@pancakeswap/v3-core@1.0.2':
     resolution: {integrity: sha512-9aZU8I1J6SbZOSW7NcNxuyaAC17tGkOaZJM9aJgvl6MMUOExpq0i0EC/jc3HxWbpC8sbZL+8eG544NEJs8CS+w==}
     engines: {node: '>=10'}
@@ -6999,6 +7032,11 @@ packages:
     resolution: {integrity: sha512-LdYnCL22pFI+LTs85Fi2OQHSKWkzIuHFgv8lA+wwuaPxLOEhWR5bzJ21iygUH9X4meeLVRZKEbfpYi3OWWD4GQ==}
     peerDependencies:
       react: '>=16.8'
+
+  '@react-icons/all-files@4.1.0':
+    resolution: {integrity: sha512-hxBI2UOuVaI3O/BhQfhtb4kcGn9ft12RWAFVMUeNjqqhLsHvFtzIkFaptBJpFDANTKoDfdVoHTKZDlwKCACbMQ==}
+    peerDependencies:
+      react: '*'
 
   '@react-native-community/cli-clean@12.3.6':
     resolution: {integrity: sha512-gUU29ep8xM0BbnZjwz9MyID74KKwutq9x5iv4BCr2im6nly4UMf1B1D+V225wR7VcDGzbgWjaezsJShLLhC5ig==}
@@ -8416,6 +8454,9 @@ packages:
   '@tanstack/query-core@4.27.0':
     resolution: {integrity: sha512-sm+QncWaPmM73IPwFlmWSKPqjdTXZeFf/7aEmWh00z7yl2FjqophPt0dE1EHW9P1giMC5rMviv7OUbSDmWzXXA==}
 
+  '@tanstack/query-core@4.36.1':
+    resolution: {integrity: sha512-DJSilV5+ytBP1FbFcEJovv4rnnm/CokuVvrBEtW/Va9DvuJ3HksbXUJEpI0aV1KtuL4ZoO9AVE6PyNLzF7tLeA==}
+
   '@tanstack/query-core@5.51.16':
     resolution: {integrity: sha512-zfV+WAtBGm1dUIbL0w/x8qTqVLKU1/Bo1p19J9LF02MmIc4FxzMImMXhFzYJQl5Hx8Wit6RiQ4tB/DvN8y9zaQ==}
 
@@ -8433,6 +8474,18 @@ packages:
     resolution: {integrity: sha512-xNpi3YdPOQIyYkKhByYDqTlyCeqICWFhV5PWkoVxYfzlRK6HYX4s+9Int407jEvhBz9cGC4OaL7rd6bynCFrYg==}
     peerDependencies:
       '@tanstack/react-query': 4.28.0
+
+  '@tanstack/react-query@4.36.1':
+    resolution: {integrity: sha512-y7ySVHFyyQblPl3J3eQBWpXZkliroki3ARnBKsdJchlgt7yJLRDUcf4B8soufgiYt3pEQIkBWBx1N9/ZPIeUWw==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
 
   '@tanstack/react-query@5.51.16':
     resolution: {integrity: sha512-NZnpJ30zkwaA2ZPhxJLs/qoMbd0yNAj6yyb3JTADJx9HjSdtvnNzOY1bDa3bU1B9CZTBBb7W9E1PpWlNXdgESg==}
@@ -9099,6 +9152,9 @@ packages:
 
   '@types/stack-utils@2.0.1':
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
+
+  '@types/stylis@4.2.5':
+    resolution: {integrity: sha512-1Xve+NMN7FWjY14vLoY5tL3BVEQ/n42YLwaqJIPYhotZ9uBHt87VceMwWQpzmdEt2TNXIorIFG+YeCUUW7RInw==}
 
   '@types/supports-color@8.1.1':
     resolution: {integrity: sha512-dPWnWsf+kzIG140B8z2w3fr5D03TLWbOAFQl45xUpI3vcizeXriNR5VYkWZ+WTMsUHqZ9Xlt3hrxGNANFyNQfw==}
@@ -11024,6 +11080,9 @@ packages:
     resolution: {integrity: sha512-xlx1yCK2Oc1APsPXDL2LdlNP6+uu8OCDdhOBSVT279M/S+y75O30C2VuD8T2ogdePBBl7PfPF4504tnLgX3zfw==}
     engines: {node: '>=14.16'}
 
+  camelize@1.0.1:
+    resolution: {integrity: sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ==}
+
   caniuse-api@3.0.0:
     resolution: {integrity: sha512-bsTwuIg/BZZK/vreVTYYbSWoe2F+71P7K5QGEX+pT250DZbfU1MQ5prOKpPR+LL6uWKK3KMwMCAS74QB3Um1uw==}
 
@@ -11702,6 +11761,10 @@ packages:
     peerDependencies:
       postcss: ^8.4
 
+  css-color-keywords@1.0.0:
+    resolution: {integrity: sha512-FyyrDHZKEjXDpNJYvVsV960FiqQyXc/LlYmsxl2BcdMb2WPx0OGRVgTg55rPSyLSNMqP52R9r8geSp7apN3Ofg==}
+    engines: {node: '>=4'}
+
   css-declaration-sorter@6.4.1:
     resolution: {integrity: sha512-rtdthzxKuyq6IzqX6jEcIzQF/YqccluefyCYheovBOLhFT/drQA9zj/UbRAa9J7C0o6EG6u3E6g+vKkay7/k3g==}
     engines: {node: ^10 || ^12 || >=14}
@@ -11761,6 +11824,9 @@ packages:
 
   css-select@5.1.0:
     resolution: {integrity: sha512-nwoRF1rvRRnnCqqY7updORDsuqKzqYJ28+oSMaJMMgOauh3fvwHqMS7EZpIPqK8GL+g9mKxF1vP/ZjSeNjEVHg==}
+
+  css-to-react-native@3.2.0:
+    resolution: {integrity: sha512-e8RKaLXMOFii+02mOlqwjbD00KSEKqblnpO9e++1aXS1fPQOpS1YoqdVHBqPjHNoxeF2mimzVqawm2KCbEdtHQ==}
 
   css-tree@1.0.0-alpha.37:
     resolution: {integrity: sha512-DMxWJg0rnz7UgxKT0Q1HU/L9BeJI0M6ksor0OgqOnF+aRCDWg/N2641HmVyU9KVIu0OVVWOb2IpC9A+BJRnejg==}
@@ -17096,6 +17162,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@3.3.7:
+    resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
   nanoid@4.0.0:
     resolution: {integrity: sha512-IgBP8piMxe/gf73RTQx7hmnhwz0aaEXYakvqZyE302IXW3HyVNhdNGC+O2MwMAVhLEnvXlvKtGbtJf6wvHihCg==}
     engines: {node: ^14 || ^16 || >=18}
@@ -18408,6 +18479,10 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
+  postcss@8.4.38:
+    resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}
+    engines: {node: ^10 || ^12 || >=14}
+
   postgres-array@2.0.0:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
     engines: {node: '>=4'}
@@ -19081,6 +19156,11 @@ packages:
       react: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1 || ^18.0.0
       react-dom: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1 || ^18.0.0
 
+  react-error-boundary@4.0.13:
+    resolution: {integrity: sha512-b6PwbdSv8XeOSYvjt8LpgpKrZ0yGdtZokYwkwV2wlcZbxgopHX/hgPl5VgpnoVOWd868n1hktM8Qm4b+02MiLQ==}
+    peerDependencies:
+      react: '>=16.13.1'
+
   react-error-overlay@6.0.11:
     resolution: {integrity: sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg==}
 
@@ -19140,6 +19220,12 @@ packages:
     hasBin: true
     peerDependencies:
       react: 18.2.0
+
+  react-number-format@5.4.0:
+    resolution: {integrity: sha512-NWdICrqLhI7rAS8yUeLVd6Wr4cN7UjJ9IBTS0f/a9i7UB4x4Ti70kGnksBtZ7o4Z7YRbvCMMR/jQmkoOBa/4fg==}
+    peerDependencies:
+      react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
 
   react-onclickoutside@6.13.0:
     resolution: {integrity: sha512-ty8So6tcUpIb+ZE+1HAhbLROvAIJYyJe/1vRrrcmW+jLsaM+/powDRqxzo6hSh9CuRZGSL1Q8mvcF5WRD93a0A==}
@@ -19276,12 +19362,25 @@ packages:
       react: '>=16.13'
       react-dom: '>=16.13'
 
+  react-virtualized-auto-sizer@1.0.24:
+    resolution: {integrity: sha512-3kCn7N9NEb3FlvJrSHWGQ4iVl+ydQObq2fHMn12i5wbtm74zHOPhz/i64OL3c1S1vi9i2GXtZqNqUJTQ+BnNfg==}
+    peerDependencies:
+      react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0
+      react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0
+
   react-virtualized-auto-sizer@1.0.7:
     resolution: {integrity: sha512-Mxi6lwOmjwIjC1X4gABXMJcKHsOo0xWl3E3ugOgufB8GJU+MqrtY35aBuvCYv/razQ1Vbp7h1gWJjGjoNN5pmA==}
     engines: {node: '>8.0.0'}
     peerDependencies:
       react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0-rc
       react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0-rc
+
+  react-window@1.8.10:
+    resolution: {integrity: sha512-Y0Cx+dnU6NLa5/EvoHukUD0BklJ8qITCtVEPY1C/nL8wwoZ0b5aEw8Ff1dOVHw7fCzMt55XfJDd8S8W8LCaUCg==}
+    engines: {node: '>8.0.0'}
+    peerDependencies:
+      react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
 
   react-window@1.8.7:
     resolution: {integrity: sha512-JHEZbPXBpKMmoNO1bNhoXOOLg/ujhL/BU4IqVU9r8eQPcy5KQnGHIHDRkJ0ns9IM5+Aq5LNwt3j8t3tIrePQzA==}
@@ -20084,6 +20183,9 @@ packages:
   shallow-equal@1.2.1:
     resolution: {integrity: sha512-S4vJDjHHMBaiZuT9NPb616CSmLf618jawtv3sufLl6ivK8WocjAo58cXwbRV1cgqxH0Qbv+iUt6m05eqEa2IRA==}
 
+  shallowequal@1.1.0:
+    resolution: {integrity: sha512-y0m1JoUZSlPAjXVtPPW70aZWfIL/dSP7AFkRnniLCrK/8MDKog3TySTBmckD+RObVxH0v4Tox67+F14PdED2oQ==}
+
   sharp@0.32.6:
     resolution: {integrity: sha512-KyLTWwgcR9Oe4d9HwCwNM2l7+J0dUQwn/yf7S0EnTtb0eVS4RxO0eUSvxPtzT4F3SY+C4K6fqdv/DO27sJ/v/w==}
     engines: {node: '>=14.15.0'}
@@ -20652,6 +20754,13 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
 
+  styled-components@6.1.12:
+    resolution: {integrity: sha512-n/O4PzRPhbYI0k1vKKayfti3C/IGcPf+DqcrOB7O/ab9x4u/zjqraneT5N45+sIe87cxrCApXM8Bna7NYxwoTA==}
+    engines: {node: '>= 16'}
+    peerDependencies:
+      react: '>= 16.8.0'
+      react-dom: '>= 16.8.0'
+
   styled-jsx@5.1.1:
     resolution: {integrity: sha512-pW7uC1l4mBZ8ugbiZrcIsiIvVx1UmTfw7UkC3Um2tmfUq9Bhk8IiyEIPl6F8agHgjzku6j0xQEZbfA5uSgSaCw==}
     engines: {node: '>= 12.0.0'}
@@ -20673,6 +20782,9 @@ packages:
 
   stylis@4.2.0:
     resolution: {integrity: sha512-Orov6g6BB1sDfYgzWfTHDOxamtX1bE/zo104Dh9e6fqJ3PooipYyfJ0pUmrZO2wAvO8YbEyeFrkV91XTsGMSrw==}
+
+  stylis@4.3.2:
+    resolution: {integrity: sha512-bhtUjWd/z6ltJiQwg0dUfxEJ+W+jdqQd8TbWLWyeIJHlnsqmGLRFFd8e5mA0AZi/zx90smXRlN66YMTcaSFifg==}
 
   stylus-lookup@5.0.1:
     resolution: {integrity: sha512-tLtJEd5AGvnVy4f9UHQMw4bkJJtaAcmo54N+ovQBjDY3DuWyK9Eltxzr5+KG0q4ew6v2EHyuWWNnHeiw/Eo7rQ==}
@@ -22901,7 +23013,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  '@aptos-labs/aptos-client@0.1.0':
+  '@aptos-labs/aptos-client@0.1.0(patch_hash=t5ob2d47ycxvxflm53kwwzv4kq)':
     dependencies:
       axios: 1.6.2
       got: 11.8.6
@@ -22922,7 +23034,7 @@ snapshots:
   '@aptos-labs/ts-sdk@1.14.0':
     dependencies:
       '@aptos-labs/aptos-cli': 0.1.2
-      '@aptos-labs/aptos-client': 0.1.0
+      '@aptos-labs/aptos-client': 0.1.0(patch_hash=t5ob2d47ycxvxflm53kwwzv4kq)
       '@noble/curves': 1.4.0
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
@@ -25974,6 +26086,16 @@ snapshots:
 
   '@ctrl/tinycolor@3.6.1': {}
 
+  '@defi.org/web3-candies@5.0.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)':
+    dependencies:
+      bignumber.js: 9.1.1
+      web3: 1.10.3(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+
   '@dependents/detective-less@4.1.0':
     dependencies:
       gonzales-pe: 4.3.0
@@ -26043,10 +26165,18 @@ snapshots:
       '@emotion/memoize': 0.7.4
     optional: true
 
+  '@emotion/is-prop-valid@1.2.2':
+    dependencies:
+      '@emotion/memoize': 0.8.1
+
   '@emotion/memoize@0.7.4':
     optional: true
 
+  '@emotion/memoize@0.8.1': {}
+
   '@emotion/unitless@0.7.5': {}
+
+  '@emotion/unitless@0.8.1': {}
 
   '@emotion/use-insertion-effect-with-fallbacks@1.0.1(react@18.2.0)':
     dependencies:
@@ -28882,6 +29012,46 @@ snapshots:
 
   '@openzeppelin/contracts@4.9.3': {}
 
+  '@orbs-network/twap-ui-sushiswap@1.1.21(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.7(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@orbs-network/twap': 2.2.1
+      '@orbs-network/twap-ui': 1.1.21(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.7(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)(utf-8-validate@5.0.10)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      web3: 1.10.3(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - react-native
+      - supports-color
+      - utf-8-validate
+
+  '@orbs-network/twap-ui@1.1.21(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.7(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@defi.org/web3-candies': 5.0.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+      '@orbs-network/twap': 2.2.1
+      '@react-icons/all-files': 4.1.0(react@18.2.0)
+      '@tanstack/react-query': 4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.73.7(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)
+      bignumber.js: 9.1.1
+      moment: 2.29.4
+      qrcode.react: 3.1.0(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-error-boundary: 4.0.13(react@18.2.0)
+      react-number-format: 5.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-virtualized-auto-sizer: 1.0.24(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-window: 1.8.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      styled-components: 6.1.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      web3: 1.10.3(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - react-native
+      - supports-color
+      - utf-8-validate
+
+  '@orbs-network/twap@2.2.1': {}
+
   '@pancakeswap/v3-core@1.0.2': {}
 
   '@pancakeswap/v3-periphery@1.0.2':
@@ -29929,6 +30099,10 @@ snapshots:
     dependencies:
       '@react-hook/event': 1.2.6(react@18.2.0)
       '@react-hook/throttle': 2.2.0(react@18.2.0)
+      react: 18.2.0
+
+  '@react-icons/all-files@4.1.0(react@18.2.0)':
+    dependencies:
       react: 18.2.0
 
   '@react-native-community/cli-clean@12.3.6(encoding@0.1.13)':
@@ -32515,6 +32689,8 @@ snapshots:
 
   '@tanstack/query-core@4.27.0': {}
 
+  '@tanstack/query-core@4.36.1': {}
+
   '@tanstack/query-core@5.51.16': {}
 
   '@tanstack/query-persist-client-core@4.27.0':
@@ -32534,6 +32710,15 @@ snapshots:
     dependencies:
       '@tanstack/query-persist-client-core': 4.27.0
       '@tanstack/react-query': 5.51.16(react@18.2.0)
+
+  '@tanstack/react-query@4.36.1(react-dom@18.2.0(react@18.2.0))(react-native@0.73.7(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)':
+    dependencies:
+      '@tanstack/query-core': 4.36.1
+      react: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    optionalDependencies:
+      react-dom: 18.2.0(react@18.2.0)
+      react-native: 0.73.7(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@5.0.10)
 
   '@tanstack/react-query@5.51.16(react@18.2.0)':
     dependencies:
@@ -33308,6 +33493,8 @@ snapshots:
       '@types/node': 20.12.7
 
   '@types/stack-utils@2.0.1': {}
+
+  '@types/stylis@4.2.5': {}
 
   '@types/supports-color@8.1.1': {}
 
@@ -35308,7 +35495,7 @@ snapshots:
 
   aptos@1.21.0:
     dependencies:
-      '@aptos-labs/aptos-client': 0.1.0
+      '@aptos-labs/aptos-client': 0.1.0(patch_hash=t5ob2d47ycxvxflm53kwwzv4kq)
       '@noble/hashes': 1.3.3
       '@scure/bip39': 1.2.1
       eventemitter3: 5.0.1
@@ -36939,6 +37126,8 @@ snapshots:
 
   camelcase@7.0.1: {}
 
+  camelize@1.0.1: {}
+
   caniuse-api@3.0.0:
     dependencies:
       browserslist: 4.23.0
@@ -37726,6 +37915,8 @@ snapshots:
       postcss: 8.4.23
       postcss-selector-parser: 6.0.13
 
+  css-color-keywords@1.0.0: {}
+
   css-declaration-sorter@6.4.1(postcss@8.4.23):
     dependencies:
       postcss: 8.4.23
@@ -37799,6 +37990,12 @@ snapshots:
       domhandler: 5.0.3
       domutils: 3.1.0
       nth-check: 2.1.1
+
+  css-to-react-native@3.2.0:
+    dependencies:
+      camelize: 1.0.1
+      css-color-keywords: 1.0.0
+      postcss-value-parser: 4.2.0
 
   css-tree@1.0.0-alpha.37:
     dependencies:
@@ -45378,6 +45575,8 @@ snapshots:
 
   nanoid@3.3.6: {}
 
+  nanoid@3.3.7: {}
+
   nanoid@4.0.0: {}
 
   nanomatch@1.2.13:
@@ -46442,7 +46641,7 @@ snapshots:
   postcss-load-config@4.0.1(postcss@8.4.23)(ts-node@10.9.2(@types/node@20.10.0)(typescript@5.4.5)):
     dependencies:
       lilconfig: 2.1.0
-      yaml: 2.4.1
+      yaml: 2.3.1
     optionalDependencies:
       postcss: 8.4.23
       ts-node: 10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5)
@@ -46450,25 +46649,25 @@ snapshots:
   postcss-load-config@4.0.1(postcss@8.4.23)(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.4.5)):
     dependencies:
       lilconfig: 2.1.0
-      yaml: 2.4.1
+      yaml: 2.3.1
     optionalDependencies:
       postcss: 8.4.23
       ts-node: 10.9.2(@types/node@20.12.7)(typescript@5.4.5)
 
-  postcss-load-config@4.0.1(postcss@8.4.31)(ts-node@10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5)):
+  postcss-load-config@4.0.1(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5)):
     dependencies:
       lilconfig: 2.1.0
-      yaml: 2.4.1
+      yaml: 2.3.1
     optionalDependencies:
-      postcss: 8.4.31
+      postcss: 8.4.38
       ts-node: 10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5)
 
-  postcss-load-config@4.0.1(postcss@8.4.31)(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5)):
+  postcss-load-config@4.0.1(postcss@8.4.38)(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5)):
     dependencies:
       lilconfig: 2.1.0
-      yaml: 2.4.1
+      yaml: 2.3.1
     optionalDependencies:
-      postcss: 8.4.31
+      postcss: 8.4.38
       ts-node: 10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5)
 
   postcss-loader@6.2.1(postcss@8.4.23)(webpack@5.91.0):
@@ -46767,6 +46966,12 @@ snapshots:
   postcss@8.4.31:
     dependencies:
       nanoid: 3.3.6
+      picocolors: 1.0.0
+      source-map-js: 1.2.0
+
+  postcss@8.4.38:
+    dependencies:
+      nanoid: 3.3.7
       picocolors: 1.0.0
       source-map-js: 1.2.0
 
@@ -47646,6 +47851,11 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
       react-is: 18.1.0
 
+  react-error-boundary@4.0.13(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.5
+      react: 18.2.0
+
   react-error-overlay@6.0.11: {}
 
   react-fast-compare@3.2.2: {}
@@ -47740,6 +47950,12 @@ snapshots:
       - encoding
       - supports-color
       - utf-8-validate
+
+  react-number-format@5.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   react-onclickoutside@6.13.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
@@ -47965,8 +48181,20 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
+  react-virtualized-auto-sizer@1.0.24(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
   react-virtualized-auto-sizer@1.0.7(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  react-window@1.8.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.5
+      memoize-one: 5.2.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -48898,6 +49126,8 @@ snapshots:
 
   shallow-equal@1.2.1: {}
 
+  shallowequal@1.1.0: {}
+
   sharp@0.32.6:
     dependencies:
       color: 4.2.3
@@ -49621,6 +49851,20 @@ snapshots:
     dependencies:
       webpack: 5.91.0
 
+  styled-components@6.1.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@emotion/is-prop-valid': 1.2.2
+      '@emotion/unitless': 0.8.1
+      '@types/stylis': 4.2.5
+      css-to-react-native: 3.2.0
+      csstype: 3.1.3
+      postcss: 8.4.38
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      shallowequal: 1.1.0
+      stylis: 4.3.2
+      tslib: 2.6.2
+
   styled-jsx@5.1.1(@babel/core@7.24.4)(babel-plugin-macros@3.1.0)(react@18.2.0):
     dependencies:
       client-only: 0.0.1
@@ -49636,6 +49880,8 @@ snapshots:
       postcss-selector-parser: 6.0.13
 
   stylis@4.2.0: {}
+
+  stylis@4.3.2: {}
 
   stylus-lookup@5.0.1:
     dependencies:
@@ -49847,7 +50093,7 @@ snapshots:
       fast-glob: 3.3.1
       glob-parent: 6.0.2
       is-glob: 4.0.3
-      jiti: 1.21.0
+      jiti: 1.19.1
       lilconfig: 2.1.0
       micromatch: 4.0.5
       normalize-path: 3.0.0
@@ -49860,7 +50106,7 @@ snapshots:
       postcss-nested: 6.0.1(postcss@8.4.23)
       postcss-selector-parser: 6.0.13
       postcss-value-parser: 4.2.0
-      resolve: 1.22.8
+      resolve: 1.22.4
       sucrase: 3.34.0
     transitivePeerDependencies:
       - ts-node
@@ -49875,7 +50121,7 @@ snapshots:
       fast-glob: 3.3.1
       glob-parent: 6.0.2
       is-glob: 4.0.3
-      jiti: 1.21.0
+      jiti: 1.19.1
       lilconfig: 2.1.0
       micromatch: 4.0.5
       normalize-path: 3.0.0
@@ -49888,7 +50134,7 @@ snapshots:
       postcss-nested: 6.0.1(postcss@8.4.23)
       postcss-selector-parser: 6.0.13
       postcss-value-parser: 4.2.0
-      resolve: 1.22.8
+      resolve: 1.22.4
       sucrase: 3.34.0
     transitivePeerDependencies:
       - ts-node
@@ -50464,7 +50710,7 @@ snapshots:
 
   tsort@0.0.1: {}
 
-  tsup@7.2.0(@swc/core@1.4.2)(postcss@8.4.31)(ts-node@10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))(typescript@5.4.5):
+  tsup@7.2.0(@swc/core@1.4.2)(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))(typescript@5.4.5):
     dependencies:
       bundle-require: 4.0.1(esbuild@0.18.20)
       cac: 6.7.14
@@ -50474,7 +50720,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.31)(ts-node@10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))
+      postcss-load-config: 4.0.1(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))
       resolve-from: 5.0.0
       rollup: 3.28.0
       source-map: 0.8.0-beta.0
@@ -50482,13 +50728,13 @@ snapshots:
       tree-kill: 1.2.2
     optionalDependencies:
       '@swc/core': 1.4.2(@swc/helpers@0.5.6)
-      postcss: 8.4.31
+      postcss: 8.4.38
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
       - ts-node
 
-  tsup@7.2.0(@swc/core@1.4.2)(postcss@8.4.31)(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))(typescript@5.4.5):
+  tsup@7.2.0(@swc/core@1.4.2)(postcss@8.4.38)(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))(typescript@5.4.5):
     dependencies:
       bundle-require: 4.0.1(esbuild@0.18.20)
       cac: 6.7.14
@@ -50498,7 +50744,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.31)(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))
+      postcss-load-config: 4.0.1(postcss@8.4.38)(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.0)(typescript@5.4.5))
       resolve-from: 5.0.0
       rollup: 3.28.0
       source-map: 0.8.0-beta.0
@@ -50506,7 +50752,7 @@ snapshots:
       tree-kill: 1.2.2
     optionalDependencies:
       '@swc/core': 1.4.2(@swc/helpers@0.5.6)
-      postcss: 8.4.31
+      postcss: 8.4.38
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color

@@ -32,6 +32,7 @@
     "@msafe/aptos-wallet-adapter": "^1.0.14",
     "@next/bundle-analyzer": "^14.2.3",
     "@octokit/auth-app": "4.0.7",
+    "@orbs-network/twap-ui-sushiswap": "1.1.21",
     "@pontem/wallet-adapter-plugin": "^0.2.1",
     "@radix-ui/react-slot": "1.0.2",
     "@rainbow-me/rainbowkit": "2.1.3",

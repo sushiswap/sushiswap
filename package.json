@@ -51,7 +51,8 @@
       "@types/react-dom": "18.2.6"
     },
     "patchedDependencies": {
-      "@rainbow-me/rainbowkit@2.1.3": "patches/@rainbow-me__rainbowkit@2.1.3.patch"
+      "@rainbow-me/rainbowkit@2.1.3": "patches/@rainbow-me__rainbowkit@2.1.3.patch",
+      "@aptos-labs/aptos-client@0.1.0": "patches/@aptos-labs__aptos-client@0.1.0.patch"
     }
   }
 }

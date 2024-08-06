@@ -1,0 +1,43 @@
+diff --git a/package.json b/package.json
+index 005480e64762fd5463966f97cc8798e9b974fb5b..3f1d5b05e0344ea94baee0568586606017403331 100644
+--- a/package.json
++++ b/package.json
+@@ -7,24 +7,15 @@
+     "node": ">=15.10.0"
+   },
+   "exports": {
+-    "browser": {
++    ".": {
+       "import": "./dist/browser/index.browser.mjs",
+       "require": "./dist/browser/index.browser.js",
+       "types": "./dist/browser/index.browser.d.ts"
+-    },
+-    "node": {
+-      "import": "./dist/node/index.node.mjs",
+-      "require": "./dist/node/index.node.js",
+-      "types": "./dist/node/index.node.d.ts"
+     }
+   },
+-  "browser": {
+-    "./dist/node/index.node.mjs": "./dist/browser/index.browser.mjs",
+-    "./dist/node/index.node.js": "./dist/browser/index.browser.js"
+-  },
+-  "main": "./dist/node/index.node.js",
+-  "module": "./dist/node/index.node.mjs",
+-  "types": "./dist/types/index.node.d.ts",
++  "main": "./dist/browser/index.browser.js",
++  "module": "./dist/browser/index.browser.mjs",
++  "types": "./dist/types/index.browser.d.ts",
+   "files": [
+     "./dist/"
+   ],
+@@ -53,8 +44,7 @@
+     "Aptos SDK"
+   ],
+   "dependencies": {
+-    "axios": "1.6.2",
+-    "got": "^11.8.6"
++    "axios": "1.6.2"
+   },
+   "devDependencies": {
+     "@types/node": "20.10.4",

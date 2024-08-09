@@ -1,0 +1,616 @@
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
+type Bucket {
+  id: ID!
+  date: Int!
+  volumeUSD: Float!
+  volumeUSDUntracked: Float!
+  liquidityUSD: Float!
+  feesUSD: Float!
+  txCount: Int!
+}
+
+type SushiDayBuckets {
+  v2: [Bucket!]!
+  v3: [Bucket!]!
+}
+
+type Query {
+  sushiDayBuckets(chainId: Int!): SushiDayBuckets!
+  topPools(chainId: String!): [TopPool!]!
+  v2Pool(address: String!, chainId: Int!): V2Pool!
+  v3Pool(address: String!, chainId: Int!): V3Pool!
+  v2PoolBuckets(address: String!, chainId: Int!): PoolBuckets!
+  v3PoolBuckets(address: String!, chainId: Int!): PoolBuckets!
+  v3PoolsByTokens(token0: String!, token1: String!, chainId: Int!): [V3BasePool!]!
+  v3Pools(chainId: Int!): [V3BasePool!]!
+  portfolioWallet(id: ID!): PortfolioWallet!
+  portfolioLiquidityPositions(id: ID!): PortfolioPositions!
+  portfolioClaimables(id: ID!): PortfolioClaimables!
+  portfolioHistory(id: ID!): [PortfolioTransaction!]!
+  smartPools(chainId: Int!): [BasicSmartPool!]!
+  vault(chainId: Int!, vaultAddress: String!): Vault!
+  vaults(chainId: Int!, poolAddress: String!): [Vault!]!
+  sushiBarStats: SushiBarStats!
+  sushiBarHistory: SushiBarHistory!
+  v2LiquidityPositions(user: String!, chainId: Int!): [V2LiquidityPosition!]!
+  v2Swaps(address: String!, chainId: Int!): [V2Swap!]!
+  v2Burns(address: String!, chainId: Int!): [V2Burn!]!
+  v2Mints(address: String!, chainId: Int!): [V2Mint!]!
+  v2Transactions(address: String!, chainId: Int!): [V2Transaction!]!
+  v3Swaps(address: String!, chainId: Int!): [V3Swap!]!
+  v3Burns(address: String!, chainId: Int!): [V3Burn!]!
+  v3Mints(address: String!, chainId: Int!): [V3Mint!]!
+  v3Collects(address: String!, chainId: Int!): [V3Collect!]!
+  v3Transactions(address: String!, chainId: Int!): [V3Transaction!]!
+}
+
+type Token {
+  id: ID!
+  chainId: Int!
+  address: String!
+  name: String!
+  symbol: String!
+  decimals: Int!
+}
+
+type V2Pool {
+  id: ID!
+  chainId: Int!
+  name: String!
+  address: String!
+  createdAt: String!
+  swapFee: Float!
+  protocol: String!
+  token0: Token!
+  token1: Token!
+  source: String!
+  reserve0: String!
+  reserve1: String!
+  liquidity: String!
+  volumeUSD: Float!
+  liquidityUSD: Float!
+  token0Price: Float!
+  token1Price: Float!
+  volumeUSD1d: Float!
+  feeUSD1d: Float!
+  txCount1d: Int!
+  feeApr1d: Float!
+  totalApr1d: Float!
+  volumeUSD1dChange: Float!
+  feeUSD1dChange: Float!
+  txCount1dChange: Float!
+  liquidityUSD1dChange: Float!
+  incentiveApr: Float!
+  isIncentivized: Boolean!
+  wasIncentivized: Boolean!
+  incentives: [Incentive!]!
+}
+
+type V3Pool {
+  id: ID!
+  chainId: Int!
+  name: String!
+  address: String!
+  createdAt: String!
+  swapFee: Float!
+  protocol: String!
+  token0: Token!
+  token1: Token!
+  source: String!
+  reserve0: String!
+  reserve1: String!
+  liquidity: String!
+  sqrtPrice: String!
+  tick: String!
+  observationIndex: String!
+  feeGrowthGlobal0X128: String!
+  feeGrowthGlobal1X128: String!
+  volumeUSD: Float!
+  liquidityUSD: Float!
+  token0Price: Float!
+  token1Price: Float!
+  volumeUSD1d: Float!
+  feeUSD1d: Float!
+  txCount1d: Int!
+  feeApr1d: Float!
+  totalApr1d: Float!
+  volumeUSD1dChange: Float!
+  feeUSD1dChange: Float!
+  txCount1dChange: Float!
+  liquidityUSD1dChange: Float!
+  incentiveApr: Float!
+  hadSmartPool: Boolean!
+  hasSmartPool: Boolean!
+  isIncentivized: Boolean!
+  wasIncentivized: Boolean!
+  incentives: [Incentive!]!
+  vaults: [String!]!
+}
+
+type V3BasePool {
+  id: ID!
+  address: String!
+  chainId: Int!
+  protocol: String!
+  isProtocolFeeEnabled: Boolean!
+  name: String!
+  createdAt: String!
+  swapFee: Float!
+  token0: Token!
+  token1: Token!
+  source: String!
+  reserve0: String!
+  reserve1: String!
+  liquidity: String!
+  token0Price: Float!
+  token1Price: Float!
+  sqrtPrice: String!
+  tick: String!
+  observationIndex: String!
+  feeGrowthGlobal0X128: String!
+  feeGrowthGlobal1X128: String!
+  volumeUSD: Float!
+  liquidityUSD: Float!
+  feesUSD: Float!
+  txCount: Int!
+}
+
+type Incentive {
+  id: ID!
+  chainId: Int!
+  chefType: String!
+  apr: Float!
+  rewardToken: Token!
+  rewardPerDay: Float!
+  poolAddress: String!
+  pid: Int!
+  rewarderAddress: String!
+  rewarderType: String!
+}
+
+type PoolBucket {
+  id: ID!
+  date: Int!
+  volumeUSD: Float!
+  liquidityUSD: Float!
+  txCount: Int!
+  feesUSD: Float!
+}
+
+type TopPool {
+  id: ID!
+  chainId: String!
+  name: String!
+  address: String!
+  createdAt: String!
+  swapFee: Float!
+  protocol: String!
+  token0Price: Float!
+  token1Price: Float!
+  token0Address: String!
+  token1Address: String!
+  token0PriceUSD: Float!
+  token1PriceUSD: Float!
+  liquidityUSD: Float!
+  txCount1h: Int!
+  txCount1d: Int!
+  feeUSD1h: Float!
+  feeUSD1d: Float!
+  volumeUSD1h: Float!
+  volumeUSD1d: Float!
+  feeApr1d: Float!
+  totalApr1d: Float!
+  incentiveApr: Float!
+  isSmartPool: Boolean!
+  isIncentivized: Boolean!
+  wasIncentivized: Boolean!
+  source: String!
+}
+
+type PoolBuckets {
+  hourBuckets: [PoolBucket!]!
+  dayBuckets: [PoolBucket!]!
+}
+
+type SimpleToken {
+  id: String!
+  chain: String!
+  chainId: Int!
+  name: String!
+  symbol: String
+  decimals: Int!
+  logoUrl: String
+  protocolId: String!
+  price: Float!
+  isVerified: Boolean!
+  isCore: Boolean!
+  isWallet: Boolean!
+  timeAt: Int
+  amount: Float!
+  amountUSD: Float!
+}
+
+type PortfolioToken {
+  id: String!
+  chain: String!
+  chainId: Int!
+  name: String!
+  symbol: String
+  decimals: Int!
+  logoUrl: String
+  protocolId: String!
+  price: Float!
+  price24hChange: Float
+  isVerified: Boolean!
+  isCore: Boolean!
+  isWallet: Boolean!
+  timeAt: Int
+  amount: Float!
+  rawAmount: Float!
+  amountUSD: Float!
+}
+
+type V2PortfolioPosition {
+  id: String!
+  chainId: Int!
+  chain: String!
+  protocol: String!
+  protocolId: String!
+  protocolLogoUrl: String!
+  address: String!
+  name: String!
+  swapFee: Float!
+  token0: SimpleToken!
+  token1: SimpleToken!
+  amountUSD: Float!
+  updatedAt: Int
+}
+
+enum RangeStatus {
+  IN_RANGE
+  OUT_OF_RANGE
+  UNKNOWN
+}
+
+type V3PortfolioPosition {
+  id: String!
+  chainId: Int!
+  chain: String!
+  protocol: String!
+  protocolId: String!
+  protocolLogoUrl: String!
+  address: String!
+  name: String!
+  swapFee: Float!
+  positionId: Int!
+  range: RangeStatus!
+  token0: SimpleToken!
+  token1: SimpleToken!
+  fees: [SimpleToken]!
+  amountUSD: Float!
+  updatedAt: Int
+}
+
+type PortfolioSmartPosition {
+  id: String!
+  chainId: Int!
+  chain: String!
+  protocol: String!
+  protocolId: String!
+  protocolLogoUrl: String!
+  address: String!
+  name: String!
+  vaultAddress: String!
+  swapFee: Float!
+  token0: SimpleToken!
+  token1: SimpleToken!
+  strategy: String!
+  amountUSD: Float!
+  updatedAt: Int
+}
+
+type FuroPosition {
+  id: String!
+  chainId: Int!
+  chain: String!
+  protocol: String!
+  protocolId: String!
+  protocolLogoUrl: String!
+  address: String!
+  name: String!
+  positionId: Int!
+  token: SimpleToken!
+  updatedAt: Int
+}
+
+type PortfolioPositions {
+  totalUSD: Float!
+  v2Positions: [V2PortfolioPosition]!
+  v3Positions: [V3PortfolioPosition]!
+  smartPositions: [PortfolioSmartPosition]!
+}
+
+type PortfolioClaimables {
+  totalUSD: Float!
+  v2PositionClaimables: [V2PoolClaim]!
+  v3PositionClaimables: [V3PoolClaim]!
+  smartPositionClaimables: [SmartPoolClaim]!
+  furoClaimables: [FuroClaim]!
+}
+
+type V2PoolClaim {
+  position: V2PortfolioPosition!
+  token: SimpleToken!
+}
+
+type V3PoolClaim {
+  position: V3PortfolioPosition!
+  token: SimpleToken!
+}
+
+type SmartPoolClaim {
+  position: PortfolioSmartPosition!
+  token: SimpleToken!
+}
+
+type FuroClaim {
+  position: FuroPosition!
+  token: SimpleToken!
+}
+
+type PortfolioWallet {
+  totalUSD: Float!
+  amountUSD24Change: Float!
+  percentageChange24h: Float!
+  tokens: [PortfolioToken]!
+}
+
+enum TransactionTokenType {
+  ERC20
+  NFT
+}
+
+type PortfolioTransactionToken {
+  id: String!
+  name: String!
+  symbol: String!
+  type: TransactionTokenType!
+  logoUrl: String
+  amount: Float!
+  isVerified: Boolean!
+  isCore: Boolean!
+  isSuspicious: Boolean!
+  isScam: Boolean!
+}
+
+enum PortfolioTransactionCategory {
+  SEND
+  RECEIVE
+  APPROVE
+  OTHER
+}
+
+type PortfolioTransaction {
+  chainId: Int
+  chain: String!
+  txHash: String!
+  timestamp: Int!
+  functionName: String!
+  projectName: String
+  protocolLogo: String
+  category: PortfolioTransactionCategory!
+  receives: [PortfolioTransactionToken]!
+  sends: [PortfolioTransactionToken]!
+  approve: PortfolioTransactionToken
+  gasFeeNative: Float!
+  gasFeeUSD: Float!
+}
+
+type BasicSmartPool {
+  id: ID!
+  chainId: Int!
+  address: String!
+  poolAddress: String!
+  swapFee: Float!
+  protocol: String!
+  token0: Token!
+  token1: Token!
+  strategy: String
+  liquidityUSD: Float!
+  vaultLiquidityUSD: Float!
+  feeUSD1d: Float!
+  feeApr1d: Float!
+  feeAndIncentiveApr1d: Float!
+  stakedApr1d: Float!
+  stakedAndIncentiveApr1d: Float!
+  incentiveApr: Float!
+  wasIncentivized: Boolean!
+  isIncentivized: Boolean!
+  lowerTick: Int!
+  upperTick: Int!
+  adjustmentFrequency: Int!
+  lastAdjustmentTimestamp: Int!
+  isEnabled: Boolean!
+  wasEnabled: Boolean!
+  isDeprecated: Boolean!
+}
+
+type Vault {
+  id: ID!
+  address: String!
+  chainId: Int!
+  poolAddress: String!
+  feeTier: Float!
+  performanceFee: Float!
+  token0: Token!
+  token1: Token!
+  adjustmentFrequency: Int!
+  lastAdjustmentTimestamp: Int!
+  strategy: String!
+  payloadHash: String!
+  lowerTick: Int!
+  upperTick: Int!
+  apr: Float!
+  apr1d: Float!
+  apr1w: Float!
+  reserve0: String!
+  reserve0USD: Float!
+  fees0: String!
+  fees0USD: Float!
+  reserve1: String!
+  reserve1USD: Float!
+  fees1: String!
+  fees1USD: Float!
+  reserveUSD: Float!
+  feesUSD: Float!
+  feeApr1d: Float!
+  feeAndIncentiveApr1d: Float!
+  stakedApr1d: Float!
+  stakedAndIncentiveApr1d: Float!
+  incentiveApr: Float!
+  wasIncentivized: Boolean!
+  isIncentivized: Boolean!
+  isEnabled: Boolean!
+  wasEnabled: Boolean!
+  isDeprecated: Boolean!
+}
+
+type SushiBarStats {
+  id: String!
+  sushiXsushiRatio: Float!
+  xSushiSushiRatio: Float!
+  sushiSupply: Float!
+  xSushiSupply: Float!
+  apr1m: Float!
+  apr3m: Float!
+  apr6m: Float!
+  apr12m: Float!
+}
+
+type SushiBarBucket {
+  id: String!
+  date: Int!
+  xSushiSupply: Float!
+  apr1m: Float!
+  apr3m: Float!
+  apr6m: Float!
+  apr12m: Float!
+}
+
+type SushiBarHistory {
+  hourSnapshots: [SushiBarBucket!]!
+  daySnapshots: [SushiBarBucket!]!
+  weekSnapshots: [SushiBarBucket!]!
+}
+
+type V2LiquidityPosition {
+  user: String!
+  stakedBalance: String!
+  unstakedBalance: String!
+  pool: V2Pool!
+}
+
+type V2Burn {
+  id: ID!
+  logIndex: String
+  amountUSD: String
+  amount1: String
+  amount0: String
+  liquidity: String!
+  sender: ID
+  transaction: V2Transaction!
+}
+
+type V2Mint {
+  id: ID!
+  logIndex: String
+  amountUSD: String
+  amount1: String
+  amount0: String
+  liquidity: String!
+  sender: ID
+  transaction: V2Transaction!
+}
+
+type V2Swap {
+  id: ID!
+  logIndex: String
+  amountUSD: String!
+  amount1Out: String!
+  amount0Out: String!
+  amount1In: String!
+  amount0In: String!
+  to: ID!
+  sender: ID!
+  transaction: V2Transaction!
+}
+
+type V2Transaction {
+  swaps: [V2Swap]
+  burns: [V2Burn]
+  mints: [V2Mint]
+  createdAtBlock: String!
+  createdAtTimestamp: String!
+  id: ID!
+}
+
+type V3Burn {
+  id: ID!
+  logIndex: String
+  amountUSD: String
+  amount1: String!
+  amount0: String!
+  amount: String!
+  origin: ID!
+  owner: ID
+  transaction: V3Transaction!
+}
+
+type V3Collect {
+  id: ID!
+  logIndex: String
+  amountUSD: String
+  amount1: String!
+  amount0: String!
+  owner: ID
+  transaction: V3Transaction!
+}
+
+type V3Mint {
+  id: ID!
+  logIndex: String
+  amountUSD: String
+  amount1: String!
+  amount0: String!
+  amount: String!
+  origin: ID!
+  sender: ID
+  owner: ID!
+  transaction: V3Transaction!
+}
+
+type V3Swap {
+  id: ID!
+  logIndex: String
+  amountUSD: String!
+  amount1: String!
+  amount0: String!
+  origin: ID!
+  recipient: ID!
+  sender: ID!
+  transaction: V3Transaction!
+}
+
+type V3Transaction {
+  id: ID!
+  blockNumber: String!
+  timestamp: String!
+  collects: [V3Collect]
+  swaps: [V3Swap]
+  burns: [V3Burn]
+  mints: [V3Mint]
+}

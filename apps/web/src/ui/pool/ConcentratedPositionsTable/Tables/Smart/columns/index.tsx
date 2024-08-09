@@ -14,6 +14,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { formatNumber, formatPercent } from 'sushi/format'
 
 import { SteerAccountPositionExtended } from 'src/lib/wagmi/hooks/steer/useSteerAccountPositionsExtended'
+import { SushiSwapProtocol } from 'sushi'
 import { unwrapToken } from 'sushi/currency'
 import { ProtocolBadge } from '../../../../PoolNameCell'
 import { SteerStrategyCell } from './SteerStrategyCell'
@@ -26,7 +27,6 @@ export const STEER_NAME_COLUMN: ColumnDef<
   header: 'Name',
   cell: ({ row: { original } }) => {
     const vault = original.vault
-    const pool = vault.pool
 
     return (
       <div className="flex items-center gap-5">
@@ -61,7 +61,7 @@ export const STEER_NAME_COLUMN: ColumnDef<
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  {ProtocolBadge[pool.protocol]}
+                  {ProtocolBadge[SushiSwapProtocol.SUSHISWAP_V3]}
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Protocol version</p>
@@ -72,7 +72,7 @@ export const STEER_NAME_COLUMN: ColumnDef<
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="bg-gray-200 text-gray-700 dark:bg-slate-800 dark:text-slate-300 text-[10px] px-2 rounded-full">
-                    {formatPercent(pool.swapFee)}
+                    {formatPercent(vault.swapFee)}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -80,7 +80,7 @@ export const STEER_NAME_COLUMN: ColumnDef<
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            {pool.isIncentivized && (
+            {vault.isIncentivized && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>

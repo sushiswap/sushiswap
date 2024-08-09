@@ -14,6 +14,50 @@ import {
   NavigationMenuTrigger,
 } from './navigation-menu'
 
+const COMPANY_NAVIGATION_LINKS: NavigationElementDropdown['items'] = [
+  {
+    title: 'Blog',
+    href: '/blog',
+    description:
+      'Stay up to date with the latest product developments at Sushi.',
+  },
+]
+
+const PROTOCOL_NAVIGATION_LINKS: NavigationElementDropdown['items'] = [
+  {
+    title: 'Forum',
+    href: 'https://forum.sushi.com',
+    description: 'View and discuss proposals for SushiSwap.',
+  },
+  {
+    title: 'Vote',
+    href: 'https://snapshot.org/#/sushigov.eth',
+    description:
+      'As a Sushi holder, you can vote on proposals to shape the future of SushiSwap.',
+  },
+]
+
+const PARTNER_NAVIGATION_LINKS: NavigationElementDropdown['items'] = [
+  {
+    title: 'Partner with Sushi',
+    href: '/partner',
+    description: 'Incentivize your token with Sushi rewards.',
+  },
+  {
+    title: 'List enquiry',
+    href: '/tokenlist-request',
+    description: 'Get your token on our default token list.',
+  },
+]
+
+const SUPPORT_NAVIGATION_LINKS: NavigationElementDropdown['items'] = [
+  {
+    title: 'Academy',
+    href: '/academy',
+    description: 'Everything you need to get up to speed with DeFi.',
+  },
+]
+
 const navigationContainerVariants = cva(
   'px-4 sticky flex items-center flex-grow gap-4 top-0 z-50 min-h-[56px] max-h-[56px] h-[56px]',
   {
@@ -41,7 +85,6 @@ const NavigationContainer: React.FC<NavContainerProps> = ({
 }) => {
   return (
     <div className={navigationContainerVariants({ variant })}>
-      <SushiIcon width={24} height={24} />
       <div className="flex items-center justify-between flex-grow gap-4">
         {children}
       </div>
@@ -95,7 +138,6 @@ export type NavigationElement =
 interface NavProps extends VariantProps<typeof navigationContainerVariants> {
   leftElements: NavigationElement[]
   rightElement?: React.ReactNode
-  chainId?: number
 }
 
 const Navigation: React.FC<NavProps> = ({
@@ -152,7 +194,7 @@ const Navigation: React.FC<NavProps> = ({
           return DropdownItem(el)
         case NavigationElementType.Custom:
           return (
-            <div className={navigationElementShowMap[el.show]}>el.item</div>
+            <div className={navigationElementShowMap[el.show]}>{el.item}</div>
           )
       }
     })
@@ -160,9 +202,80 @@ const Navigation: React.FC<NavProps> = ({
 
   return (
     <NavigationContainer variant={variant}>
-      <NavigationMenu>
-        <NavigationMenuList>{leftElements}</NavigationMenuList>
-      </NavigationMenu>
+      <div className="flex space-x-1">
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>
+                <SushiIcon width={24} height={24} />
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="w-[400px] flex flex-col gap-4 p-4">
+                  <div className="flex flex-col gap-2 pt-3">
+                    <span className="font-semibold px-3">Company</span>
+                    <div>
+                      {COMPANY_NAVIGATION_LINKS.map((component) => (
+                        <NavigationListItem
+                          key={component.title}
+                          title={component.title}
+                          href={component.href}
+                        >
+                          {component.description}
+                        </NavigationListItem>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="font-semibold px-3">Protocol</span>
+                    <div>
+                      {PROTOCOL_NAVIGATION_LINKS.map((component) => (
+                        <NavigationListItem
+                          key={component.title}
+                          title={component.title}
+                          href={component.href}
+                        >
+                          {component.description}
+                        </NavigationListItem>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="font-semibold px-3">Partnership</span>
+                    <div>
+                      {PARTNER_NAVIGATION_LINKS.map((component) => (
+                        <NavigationListItem
+                          key={component.title}
+                          title={component.title}
+                          href={component.href}
+                        >
+                          {component.description}
+                        </NavigationListItem>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="font-semibold px-3">Support</span>
+                    <div>
+                      {SUPPORT_NAVIGATION_LINKS.map((component) => (
+                        <NavigationListItem
+                          key={component.title}
+                          title={component.title}
+                          href={component.href}
+                        >
+                          {component.description}
+                        </NavigationListItem>
+                      ))}
+                    </div>
+                  </div>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+        <NavigationMenu>
+          <NavigationMenuList>{leftElements}</NavigationMenuList>
+        </NavigationMenu>
+      </div>
       <div className="flex items-center gap-2">
         {rightElement ? rightElement : null}
       </div>

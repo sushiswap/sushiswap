@@ -1,40 +1,32 @@
 'use client'
 
-import { getPool } from '@sushiswap/client'
+import { V3Pool } from '@sushiswap/graph-client/data-api'
 import { useConcentratedLiquidityPoolStats } from '@sushiswap/react-query'
-import { CardLabel, Separator, SkeletonText, classNames } from '@sushiswap/ui'
-import { Container, LinkInternal, Message } from '@sushiswap/ui'
 import {
   Card,
   CardContent,
   CardCurrencyAmountItem,
   CardDescription,
   CardHeader,
+  CardLabel,
   CardTitle,
+  Container,
+  LinkInternal,
+  Message,
+  Separator,
+  SkeletonText,
+  classNames,
 } from '@sushiswap/ui'
-import { Toggle } from '@sushiswap/ui'
-import React, { FC, useState } from 'react'
+import { FC } from 'react'
 import { useTokenAmountDollarValues } from 'src/lib/hooks'
-import { useConcentratedLiquidityPool } from 'src/lib/wagmi/hooks/pools/hooks/useConcentratedLiquidityPool'
 import { useConcentratedLiquidityPoolReserves } from 'src/lib/wagmi/hooks/pools/hooks/useConcentratedLiquidityPoolReserves'
-import { SushiSwapV3ChainId } from 'sushi/config'
 import { formatUSD } from 'sushi/format'
-import { Address } from 'viem'
 import { ConcentratedLiquidityProvider } from './ConcentratedLiquidityProvider'
-import { ConcentratedPositionsTable } from './ConcentratedPositionsTable'
 import { PoolRewardDistributionsCard } from './PoolRewardDistributionsCard'
 import { PoolTransactionsV3 } from './PoolTransactionsV3'
-import { PoolsFiltersProvider } from './PoolsFiltersProvider'
-import { StatisticsCharts } from './StatisticsChart'
+import { StatisticsChartsV3 } from './StatisticsChartV3'
 
-enum Granularity {
-  Day = 0,
-  Week = 1,
-}
-
-const PoolPageV3: FC<{ pool: Awaited<ReturnType<typeof getPool>> }> = ({
-  pool,
-}) => {
+const PoolPageV3: FC<{ pool: V3Pool }> = ({ pool }) => {
   return (
     <ConcentratedLiquidityProvider>
       <Pool pool={pool} />
@@ -42,26 +34,17 @@ const PoolPageV3: FC<{ pool: Awaited<ReturnType<typeof getPool>> }> = ({
   )
 }
 
-const Pool: FC<{ pool: Awaited<ReturnType<typeof getPool>> }> = ({ pool }) => {
-  const { id } = pool
-  const [_chainId, address] = id.split(':')
-  const chainId = +_chainId as SushiSwapV3ChainId
-  const [granularity, setGranularity] = useState<Granularity>(Granularity.Day)
+const Pool: FC<{ pool: V3Pool }> = ({ pool }) => {
+  const { chainId, address } = pool
 
   const { data: poolStats } = useConcentratedLiquidityPoolStats({
     chainId,
     address,
   })
-  const { data: cPool } = useConcentratedLiquidityPool({
-    chainId,
-    token0: poolStats?.token0,
-    token1: poolStats?.token1,
-    feeAmount: poolStats?.feeAmount,
-  })
 
   const { data: reserves, isLoading: isReservesLoading } =
     useConcentratedLiquidityPoolReserves({
-      pool: cPool,
+      pool,
       chainId,
     })
   const fiatValues = useTokenAmountDollarValues({ chainId, amounts: reserves })
@@ -79,25 +62,18 @@ const Pool: FC<{ pool: Awaited<ReturnType<typeof getPool>> }> = ({ pool }) => {
             To create a smart pool position, click{' '}
             <LinkInternal
               shallow={true}
-              href={`/pool/${pool.id}/smart`}
+              href={`/pool/${address}/smart`}
               className="underline"
             >
               here
             </LinkInternal>
           </Message>
         )}
-        <PoolsFiltersProvider>
-          <ConcentratedPositionsTable
-            chainId={pool.chainId as SushiSwapV3ChainId}
-            poolId={pool.address as Address}
-            hideNewSmartPositionButton={!pool.hasEnabledSteerVault}
-          />
-        </PoolsFiltersProvider>
         <div className="py-4">
           <Separator />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-[auto_400px] gap-6">
-          <StatisticsCharts address={address} chainId={chainId} />
+          <StatisticsChartsV3 address={address} chainId={chainId} pool={pool} />
           <div className="flex flex-col gap-6">
             <Card>
               <CardHeader>
@@ -124,24 +100,6 @@ const Pool: FC<{ pool: Awaited<ReturnType<typeof getPool>> }> = ({ pool }) => {
                 <CardTitle>
                   <div className="flex flex-col md:flex-row justify-between gap-y-4">
                     Statistics
-                    <div className="flex items-center gap-1">
-                      <Toggle
-                        variant="outline"
-                        size="xs"
-                        pressed={granularity === Granularity.Day}
-                        onClick={() => setGranularity(Granularity.Day)}
-                      >
-                        24H
-                      </Toggle>
-                      <Toggle
-                        variant="outline"
-                        size="xs"
-                        pressed={granularity === Granularity.Week}
-                        onClick={() => setGranularity(Granularity.Week)}
-                      >
-                        1W
-                      </Toggle>
-                    </div>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -151,29 +109,16 @@ const Pool: FC<{ pool: Awaited<ReturnType<typeof getPool>> }> = ({ pool }) => {
                     <CardLabel>Volume</CardLabel>
                     {poolStats ? (
                       <div className="text-xl font-semibold">
-                        {formatUSD(
-                          granularity === Granularity.Week
-                            ? poolStats.volumeUSD1w
-                            : poolStats.volumeUSD1d ?? 0,
-                        )}{' '}
+                        {formatUSD(poolStats.volumeUSD1d ?? 0)}{' '}
                         <span
                           className={classNames(
                             'text-xs',
-                            poolStats[
-                              granularity === Granularity.Week
-                                ? 'volumeUSD1wChange'
-                                : 'volumeUSD1dChange'
-                            ] > 0
+                            poolStats['volumeUSD1dChange'] > 0
                               ? 'text-green'
                               : 'text-red',
                           )}
                         >
-                          (
-                          {poolStats[
-                            granularity === Granularity.Week
-                              ? 'volumeUSD1wChange'
-                              : 'volumeUSD1dChange'
-                          ].toFixed(2)}
+                          ({poolStats['volumeUSD1dChange'].toFixed(2)}
                           %)
                         </span>
                       </div>
@@ -185,29 +130,16 @@ const Pool: FC<{ pool: Awaited<ReturnType<typeof getPool>> }> = ({ pool }) => {
                     <CardLabel>Fees</CardLabel>
                     {poolStats ? (
                       <div className="text-xl font-semibold">
-                        {formatUSD(
-                          granularity === Granularity.Week
-                            ? poolStats.feesUSD1w
-                            : poolStats.feesUSD1d ?? 0,
-                        )}{' '}
+                        {formatUSD(poolStats.feesUSD1d ?? 0)}{' '}
                         <span
                           className={classNames(
                             'text-xs',
-                            poolStats[
-                              granularity === Granularity.Week
-                                ? 'feesUSD1wChange'
-                                : 'feesUSD1dChange'
-                            ] > 0
+                            poolStats['feesUSD1dChange'] > 0
                               ? 'text-green'
                               : 'text-red',
                           )}
                         >
-                          (
-                          {poolStats[
-                            granularity === Granularity.Week
-                              ? 'feesUSD1wChange'
-                              : 'feesUSD1dChange'
-                          ].toFixed(2)}
+                          ({poolStats['feesUSD1dChange'].toFixed(2)}
                           %)
                         </span>
                       </div>
@@ -224,7 +156,7 @@ const Pool: FC<{ pool: Awaited<ReturnType<typeof getPool>> }> = ({ pool }) => {
           <Separator />
         </div>
         <PoolRewardDistributionsCard pool={pool} />
-        <PoolTransactionsV3 pool={pool} poolId={pool.address} />
+        <PoolTransactionsV3 pool={pool} poolId={address} />
       </div>
     </Container>
   )

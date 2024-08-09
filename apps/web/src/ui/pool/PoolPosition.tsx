@@ -1,6 +1,5 @@
 'use client'
 
-import { Pool } from '@sushiswap/client'
 import {
   Card,
   CardContent,
@@ -11,6 +10,7 @@ import {
 import { FC } from 'react'
 import { formatUSD } from 'sushi/format'
 
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import { SkeletonText } from '@sushiswap/ui'
 import { ConnectButton } from 'src/lib/wagmi/components/connect-button'
 import { useAccount } from 'wagmi'
@@ -20,7 +20,7 @@ import { PoolPositionStakedDesktop } from './PoolPositionStakedDesktop'
 import { usePoolPositionStaked } from './PoolPositionStakedProvider'
 
 interface PoolPositionProps {
-  pool: Pool
+  pool: V2Pool
 }
 
 const PoolPositionDisconnected: FC = () => {

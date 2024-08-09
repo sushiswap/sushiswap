@@ -280,30 +280,10 @@ input ComponentSharedTableOfContentsEntryFiltersInput {
   not: ComponentSharedTableOfContentsEntryFiltersInput
 }
 
-input ComponentSharedTableOfContentsEntryInput {
-  id: ID
-  key: String
-  text: String
-}
-
 type ComponentSharedTableOfContentsEntry {
   id: ID!
   key: String
   text: String
-}
-
-input ComponentSharedTableOfContentsFiltersInput {
-  entries: ComponentSharedTableOfContentsEntryFiltersInput
-  header: StringFilterInput
-  and: [ComponentSharedTableOfContentsFiltersInput]
-  or: [ComponentSharedTableOfContentsFiltersInput]
-  not: ComponentSharedTableOfContentsFiltersInput
-}
-
-input ComponentSharedTableOfContentsInput {
-  id: ID
-  entries: [ComponentSharedTableOfContentsEntryInput]
-  header: String
 }
 
 type ComponentSharedTableOfContents {
@@ -684,26 +664,15 @@ type AboutEntityResponse {
   data: AboutEntity
 }
 
-enum ENUM_ARTICLE_ARTICLETYPE {
-  blog
-  academy
-}
-
-union ArticleBlocksDynamicZone = ComponentSharedDivider | ComponentSharedMedia | ComponentSharedRichText | ComponentSharedSlider | ComponentSharedTableOfContents | Error
-
-scalar ArticleBlocksDynamicZoneInput
-
 input ArticleFiltersInput {
   id: IDFilterInput
   title: StringFilterInput
   description: StringFilterInput
   ghostSlug: StringFilterInput
   customDate: DateTimeFilterInput
-  articleType: StringFilterInput
   slug: StringFilterInput
   authors: AuthorFiltersInput
   categories: CategoryFiltersInput
-  staticTableOfContents: ComponentSharedTableOfContentsFiltersInput
   difficulty: DifficultyFiltersInput
   topics: TopicFiltersInput
   products: ProductFiltersInput
@@ -723,13 +692,10 @@ input ArticleInput {
   description: String
   ghostSlug: String
   customDate: DateTime
-  articleType: ENUM_ARTICLE_ARTICLETYPE
   slug: String
   cover: ID
   authors: [ID]
   categories: [ID]
-  blocks: [ArticleBlocksDynamicZoneInput!]
-  staticTableOfContents: ComponentSharedTableOfContentsInput
   difficulty: ID
   topics: [ID]
   products: [ID]
@@ -742,16 +708,13 @@ type Article {
   description: String!
   ghostSlug: String
   customDate: DateTime
-  articleType: ENUM_ARTICLE_ARTICLETYPE!
   slug: String!
   cover: UploadFileEntityResponse!
   authors(filters: AuthorFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): AuthorRelationResponseCollection
   categories(filters: CategoryFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): CategoryRelationResponseCollection
-  blocks: [ArticleBlocksDynamicZone]
-  staticTableOfContents: ComponentSharedTableOfContents
   difficulty: DifficultyEntityResponse
-  topics(filters: TopicFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): TopicRelationResponseCollection
-  products(filters: ProductFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): ProductRelationResponseCollection
+  topics(filters: TopicFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], publicationState: PublicationState = LIVE): TopicRelationResponseCollection
+  products(filters: ProductFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], publicationState: PublicationState = LIVE): ProductRelationResponseCollection
   articleTypes(filters: ArticleTypeFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], publicationState: PublicationState = LIVE): ArticleTypeRelationResponseCollection
   createdAt: DateTime
   updatedAt: DateTime
@@ -1317,6 +1280,7 @@ input ProductFiltersInput {
   relevantArticleIds: JSONFilterInput
   createdAt: DateTimeFilterInput
   updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
   localizations: ProductFiltersInput
   locale: StringFilterInput
   and: [ProductFiltersInput]
@@ -1334,6 +1298,7 @@ input ProductInput {
   url: String
   relevantArticleIds: JSON
   shareImage: ID
+  publishedAt: DateTime
 }
 
 type Product {
@@ -1348,7 +1313,8 @@ type Product {
   shareImage: UploadFileEntityResponse
   createdAt: DateTime
   updatedAt: DateTime
-  localizations(filters: ProductFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): ProductRelationResponseCollection
+  publishedAt: DateTime
+  localizations(filters: ProductFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], publicationState: PublicationState = LIVE): ProductRelationResponseCollection
   locale: String
 }
 
@@ -1377,6 +1343,7 @@ input TopicFiltersInput {
   articles: ArticleFiltersInput
   createdAt: DateTimeFilterInput
   updatedAt: DateTimeFilterInput
+  publishedAt: DateTimeFilterInput
   localizations: TopicFiltersInput
   locale: StringFilterInput
   and: [TopicFiltersInput]
@@ -1388,6 +1355,7 @@ input TopicInput {
   name: String
   slug: String
   articles: [ID]
+  publishedAt: DateTime
 }
 
 type Topic {
@@ -1396,7 +1364,8 @@ type Topic {
   articles(filters: ArticleFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], publicationState: PublicationState = LIVE): ArticleRelationResponseCollection
   createdAt: DateTime
   updatedAt: DateTime
-  localizations(filters: TopicFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): TopicRelationResponseCollection
+  publishedAt: DateTime
+  localizations(filters: TopicFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], publicationState: PublicationState = LIVE): TopicRelationResponseCollection
   locale: String
 }
 
@@ -1542,9 +1511,9 @@ type Query {
   global: GlobalEntityResponse
   globalAcademy: GlobalAcademyEntityResponse
   product(id: ID, locale: I18NLocaleCode): ProductEntityResponse
-  products(filters: ProductFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): ProductEntityResponseCollection!
+  products(filters: ProductFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], publicationState: PublicationState = LIVE): ProductEntityResponseCollection!
   topic(id: ID, locale: I18NLocaleCode): TopicEntityResponse
-  topics(filters: TopicFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): TopicEntityResponseCollection!
+  topics(filters: TopicFiltersInput, pagination: PaginationArg = {}, sort: [String] = [], publicationState: PublicationState = LIVE): TopicEntityResponseCollection!
   trendingSearch: TrendingSearchEntityResponse
   me: UsersPermissionsMe
 }

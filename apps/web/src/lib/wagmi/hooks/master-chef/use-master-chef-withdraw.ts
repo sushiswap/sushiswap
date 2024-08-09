@@ -1,9 +1,8 @@
 'use client'
 
-import { ChefType } from '@sushiswap/client'
 import { createErrorToast, createToast } from '@sushiswap/notifications'
 import { useCallback, useMemo } from 'react'
-import { ChainId } from 'sushi'
+import { ChainId, ChefType } from 'sushi'
 import { masterChefV1Abi, masterChefV2Abi, miniChefV2Abi } from 'sushi/abi'
 import { Amount, Token } from 'sushi/currency'
 import { UserRejectedRequestError } from 'viem'

@@ -6,7 +6,7 @@ import React, { FC, memo } from 'react'
 import { ChainId, chainName } from 'sushi/chain'
 
 interface SelectNetworkWidgetProps {
-  networks: ChainId[]
+  networks: readonly ChainId[]
   selectedNetwork: ChainId
   onSelect(chainId: ChainId): void
   title?: string

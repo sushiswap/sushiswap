@@ -4,19 +4,11 @@ import { buildClientSchema, getIntrospectionQuery, printSchema } from 'graphql'
 import fs from 'fs'
 
 const schemas = {
-  blocks: 'api.studio.thegraph.com/query/72545/ethereum-blocks/v0.0.2',
   bonds: BONDS_SUBGRAPH_URL[1],
   bentobox: 'api.studio.thegraph.com/query/32073/bentobox-ethereum/v0.0.1',
   strapi: 'sushi-strapi-cms.herokuapp.com/graphql',
   furo: 'api.studio.thegraph.com/query/32073/furo-ethereum/v0.0.1',
-  'master-chef-v1': 'api.studio.thegraph.com/query/32073/masterchef/v0.0.1',
-  'master-chef-v2': 'api.studio.thegraph.com/query/32073/master-chefv2/v0.0.1',
-  'mini-chef':
-    'api.studio.thegraph.com/query/32073/minichef-arbitrum/version/latest',
-  steer: 'api.thegraph.com/subgraphs/name/steerprotocol/steer-protocol-polygon',
-  'sushi-bar': 'api.studio.thegraph.com/query/32073/xsushi/v0.0.1',
-  'sushi-v2': 'api.studio.thegraph.com/query/32073/v2-arbitrum/v0.0.5',
-  'sushi-v3': 'api.studio.thegraph.com/query/32073/v3-arbitrum/v0.0.1',
+  'data-api': 'data-api-production-acb1.up.railway.app/graphql',
 } as const satisfies Record<string, string>
 
 async function updateSchema(schema: keyof typeof schemas) {

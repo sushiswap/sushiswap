@@ -1,6 +1,5 @@
 'use client'
 
-import { ChefType } from '@sushiswap/client'
 import { FC, ReactNode, createContext, useContext, useMemo } from 'react'
 import { incentiveRewardToToken } from 'src/lib/functions'
 import { useTokenAmountDollarValues, useTokensFromPool } from 'src/lib/hooks'
@@ -11,7 +10,12 @@ import {
 } from 'src/lib/wagmi/hooks/master-chef/use-rewarder'
 import { ChainId } from 'sushi/chain'
 import { Amount, Token } from 'sushi/currency'
-import type { Incentive, PoolBase, PoolWithIncentives } from 'sushi/types'
+import type {
+  ChefType,
+  Incentive,
+  PoolBase,
+  PoolWithIncentives,
+} from 'sushi/types'
 import { useAccount } from 'wagmi'
 
 interface PoolPositionRewardsContext {

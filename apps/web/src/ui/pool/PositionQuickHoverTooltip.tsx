@@ -1,21 +1,15 @@
 import { ArrowDownIcon, MinusIcon, PlusIcon } from '@heroicons/react-v1/solid'
+import { V2Pool, V3Pool } from '@sushiswap/graph-client/data-api'
 import { Button } from '@sushiswap/ui'
 import { Currency } from '@sushiswap/ui'
 import { LinkInternal } from '@sushiswap/ui'
 import { List } from '@sushiswap/ui'
 import React, { FC, useCallback } from 'react'
+import { ChainId } from 'sushi/chain'
 import { formatPercent, formatUSD } from 'sushi/format'
 import { ZERO } from 'sushi/math'
-
-import type {
-  PoolBase,
-  PoolWithAprs,
-  PoolWithIncentives,
-  SushiPositionStaked,
-  SushiPositionWithPool,
-} from 'sushi'
-import { ChainId } from 'sushi/chain'
 import { useAccount, useSwitchChain } from 'wagmi'
+
 import { PoolPositionProvider, usePoolPosition } from './PoolPositionProvider'
 import {
   PoolPositionRewardsProvider,
@@ -27,19 +21,17 @@ import {
 } from './PoolPositionStakedProvider'
 
 interface PositionQuickHoverTooltipProps {
-  row: SushiPositionStaked<
-    SushiPositionWithPool<PoolWithAprs<PoolWithIncentives<PoolBase>>>
-  >
+  pool: NonNullable<V2Pool | V3Pool>
 }
 
 export const PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
-  row,
+  pool,
 }) => {
   return (
-    <PoolPositionProvider pool={row.pool}>
-      <PoolPositionStakedProvider watch={false} pool={row.pool}>
-        <PoolPositionRewardsProvider pool={row.pool}>
-          <_PositionQuickHoverTooltip row={row} />
+    <PoolPositionProvider pool={pool}>
+      <PoolPositionStakedProvider watch={false} pool={pool}>
+        <PoolPositionRewardsProvider pool={pool}>
+          <_PositionQuickHoverTooltip pool={pool} />
         </PoolPositionRewardsProvider>
       </PoolPositionStakedProvider>
     </PoolPositionProvider>
@@ -47,7 +39,7 @@ export const PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
 }
 
 const _PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
-  row,
+  pool,
 }) => {
   const { switchChain } = useSwitchChain()
   const { chain } = useAccount()
@@ -63,12 +55,12 @@ const _PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
     usePoolPositionRewards()
 
   const _harvest = useCallback(() => {
-    if (row.pool.chainId !== chain?.id) {
-      switchChain?.({ chainId: row.pool.chainId as ChainId })
+    if (pool.chainId !== chain?.id) {
+      switchChain?.({ chainId: pool.chainId as ChainId })
     } else if (harvest) {
       harvest()
     }
-  }, [chain?.id, harvest, row.pool.chainId, switchChain])
+  }, [chain?.id, harvest, pool.chainId, switchChain])
 
   return (
     <div className="flex flex-col gap-3 p-2">
@@ -80,21 +72,18 @@ const _PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
           • Rewards + Fees
         </span>
         <span className="text-3xl font-medium text-gray-900 dark:text-slate-50">
-          {formatPercent(row.pool.totalApr1d)}{' '}
+          {formatPercent(pool.totalApr1d)}{' '}
           <span className="text-[10px] text-gray-500 dark:text-slate-500">
-            {formatPercent(row.pool.incentiveApr)} +{' '}
-            {formatPercent(row.pool.feeApr1d)}
+            {formatPercent(pool.incentiveApr)} + {formatPercent(pool.feeApr1d)}
           </span>
         </span>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button icon={PlusIcon} asChild size="sm" variant="secondary">
-          <LinkInternal href={`/pools/${row.pool.id}/add`}>
-            Deposit
-          </LinkInternal>
+          <LinkInternal href={`/pools/${pool.id}/add`}>Deposit</LinkInternal>
         </Button>
         <Button icon={MinusIcon} asChild size="sm" variant="secondary">
-          <LinkInternal href={`/pools/${row.pool.id}/remove`}>
+          <LinkInternal href={`/pools/${pool.id}/remove`}>
             Withdraw
           </LinkInternal>
         </Button>
@@ -108,7 +97,7 @@ const _PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
         </Button>
       </div>
 
-      {row.pool.incentives && pendingRewards.length > 0 && (
+      {pool.incentives && pendingRewards.length > 0 && (
         <>
           <List className="!pt-5">
             <List.Label>Pending rewards</List.Label>
@@ -184,7 +173,7 @@ const _PositionQuickHoverTooltip: FC<PositionQuickHoverTooltipProps> = ({
         </List.Control>
       </List>
 
-      {row.pool.incentives &&
+      {pool.incentives &&
         stakedUnderlying0?.greaterThan(ZERO) &&
         stakedUnderlying1?.greaterThan(ZERO) && (
           <List className="!pt-5">

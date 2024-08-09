@@ -3,6 +3,7 @@ import type { PoolId } from './pool-id.js'
 import { SushiSwapProtocol, type SushiSwapV3Protocol } from './protocol.js'
 
 type Extension = {
+  isProtocolFeeEnabled?: boolean
   sqrtPrice: bigint
   tick: bigint
   observationIndex: bigint

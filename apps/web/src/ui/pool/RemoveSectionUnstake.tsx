@@ -1,7 +1,5 @@
 'use client'
 
-import { ChefType, Pool } from '@sushiswap/client'
-import { usePool } from '@sushiswap/client/hooks'
 import { useIsMounted } from '@sushiswap/hooks'
 import {
   Card,
@@ -20,23 +18,23 @@ import { Dots } from '@sushiswap/ui'
 import { FC, useMemo, useState } from 'react'
 import { ChainId } from 'sushi/chain'
 import { ZERO } from 'sushi/math'
-import { useSWRConfig } from 'swr'
 
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import { useMasterChefWithdraw } from 'src/lib/wagmi/hooks/master-chef/use-master-chef-withdraw'
 import { Checker } from 'src/lib/wagmi/systems/Checker'
 import { withCheckerRoot } from 'src/lib/wagmi/systems/Checker/Provider'
+import { ChefType } from 'sushi'
 import { usePoolPositionStaked } from './PoolPositionStakedProvider'
 
 interface AddSectionStakeProps {
   chainId: ChainId
-  pool: Pool
+  pool: V2Pool
   chefType: ChefType
   farmId: number
 }
 
-export const RemoveSectionUnstake: FC<{ poolId: string }> = ({ poolId }) => {
+export const RemoveSectionUnstake: FC<{ pool: V2Pool }> = ({ pool }) => {
   const isMounted = useIsMounted()
-  const { data: pool } = usePool({ args: poolId, swrConfig: useSWRConfig() })
 
   if (!pool) return <></>
 
@@ -45,7 +43,7 @@ export const RemoveSectionUnstake: FC<{ poolId: string }> = ({ poolId }) => {
 
   return (
     <_RemoveSectionUnstake
-      chainId={pool.chainId as ChainId}
+      chainId={pool.chainId}
       pool={pool}
       chefType={pool.incentives[0].chefType}
       farmId={Number(pool.incentives[0].pid)}

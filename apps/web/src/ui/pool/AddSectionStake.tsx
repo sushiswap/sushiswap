@@ -1,18 +1,15 @@
 'use client'
 
-import { ChefType, Pool } from '@sushiswap/client'
-import { usePool } from '@sushiswap/client/hooks'
 import { useIsMounted } from '@sushiswap/hooks'
-import { Button } from '@sushiswap/ui'
-import { Dots } from '@sushiswap/ui'
+import { Button, Dots } from '@sushiswap/ui'
 import { FC, useMemo, useState } from 'react'
 import { APPROVE_TAG_STAKE } from 'src/lib/constants'
-import { useGraphPool } from 'src/lib/hooks'
+import { useV2Pool } from 'src/lib/hooks'
 import { ChainId } from 'sushi/chain'
 import { tryParseAmount } from 'sushi/currency'
 import { ZERO } from 'sushi/math'
-import { useSWRConfig } from 'swr'
 
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import { getMasterChefContractConfig } from 'src/lib/wagmi/hooks/master-chef/use-master-chef-contract'
 import { useMasterChefDeposit } from 'src/lib/wagmi/hooks/master-chef/use-master-chef-deposit'
 import { Checker } from 'src/lib/wagmi/systems/Checker'
@@ -20,22 +17,21 @@ import {
   useApproved,
   withCheckerRoot,
 } from 'src/lib/wagmi/systems/Checker/Provider'
+import { ChefType } from 'sushi'
 import { AddSectionStakeWidget } from './AddSectionStakeWidget'
 
 interface AddSectionStakeProps {
-  pool: Pool
+  pool: V2Pool
   chefType: ChefType
   title?: string
   farmId: number
 }
 
-export const AddSectionStake: FC<{ poolId: string; title?: string }> = ({
-  poolId,
-  title,
-}) => {
+export const AddSectionStake: FC<{
+  pool: V2Pool
+  title?: string
+}> = ({ pool, title }) => {
   const isMounted = useIsMounted()
-  const { data: pool } = usePool({ args: poolId, swrConfig: useSWRConfig() })
-
   if (!pool) return <></>
 
   if (!pool?.incentives || pool.incentives.length === 0 || !isMounted)
@@ -57,7 +53,7 @@ const _AddSectionStake: FC<AddSectionStakeProps> = withCheckerRoot(
     const [value, setValue] = useState('')
     const {
       data: { reserve1, reserve0, liquidityToken },
-    } = useGraphPool(pool)
+    } = useV2Pool(pool)
 
     const amounts = useMemo(() => {
       return [tryParseAmount(value, liquidityToken)]

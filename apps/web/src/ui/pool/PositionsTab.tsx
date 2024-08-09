@@ -9,8 +9,9 @@ import {
   TabsList,
   TabsTrigger,
 } from '@sushiswap/ui'
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 
+import { ChainId } from 'sushi/chain'
 import { ConcentratedPositionsTable } from './ConcentratedPositionsTable/ConcentratedPositionsTable'
 import { PositionsTable } from './PositionsTable'
 import { SmartPositionsTable } from './SmartPositionsTable'
@@ -52,7 +53,7 @@ const ITEMS: { id: string; value: string; children: React.ReactNode }[] = [
   },
 ]
 
-export const PositionsTab = () => {
+export const PositionsTab: FC<{ chainId: ChainId }> = ({ chainId }) => {
   const [tab, setTab] = useState('v3')
 
   return (
@@ -86,13 +87,19 @@ export const PositionsTab = () => {
           </TabsList>
         </div>
         <TabsContent value="v3">
-          <ConcentratedPositionsTable hideNewPositionButton={true} />
+          <ConcentratedPositionsTable
+            chainId={chainId}
+            hideNewPositionButton={true}
+          />
         </TabsContent>
         <TabsContent value="v2">
-          <PositionsTable rowLink={(row) => `/pool/${row.pool.id}`} />
+          <PositionsTable
+            chainId={chainId}
+            rowLink={(row) => `/pool/${row.pool.id}`}
+          />
         </TabsContent>
         <TabsContent value="smart">
-          <SmartPositionsTable />
+          <SmartPositionsTable chainId={chainId} />
         </TabsContent>
       </Tabs>
     </div>

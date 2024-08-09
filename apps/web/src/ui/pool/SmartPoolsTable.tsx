@@ -10,7 +10,7 @@ import {
   MinusIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline'
-import { SteerVaults } from '@sushiswap/client'
+import { SmartPoolsV1 } from '@sushiswap/graph-client/data-api'
 import {
   Badge,
   Button,
@@ -45,13 +45,12 @@ import {
   SortingState,
   TableState,
 } from '@tanstack/react-table'
-import React, { useMemo, useState } from 'react'
+import Link from 'next/link'
+import React, { FC, useMemo, useState } from 'react'
+import { isAngleEnabledChainId } from 'sushi/config'
 import { Native, Token, unwrapToken } from 'sushi/currency'
 import { formatPercent, formatUSD } from 'sushi/format'
-
-import { useSteerVaults } from '@sushiswap/client/hooks'
-import Link from 'next/link'
-import { isAngleEnabledChainId } from 'sushi/config'
+import { SushiSwapProtocol } from 'sushi/types'
 import { APRHoverCard } from './APRHoverCard'
 import { ProtocolBadge } from './PoolNameCell'
 import { usePoolFilters } from './PoolsFiltersProvider'
@@ -112,7 +111,7 @@ const COLUMNS = [
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    {ProtocolBadge[original.pool.protocol]}
+                    {ProtocolBadge[original.protocol as SushiSwapProtocol]}
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Protocol version</p>
@@ -123,7 +122,7 @@ const COLUMNS = [
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="bg-gray-200 text-gray-700 dark:bg-slate-800 dark:text-slate-300 text-[10px] px-2 rounded-full">
-                      {formatPercent(original.pool.swapFee)}
+                      {formatPercent(original.swapFee)}
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -131,7 +130,7 @@ const COLUMNS = [
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              {original.pool.isIncentivized && (
+              {original.isIncentivized && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -206,21 +205,21 @@ const COLUMNS = [
   {
     id: 'liquidityUSD',
     header: 'TVL',
-    accessorFn: (row) => row.reserveUSD,
+    accessorFn: (row) => row.vaultLiquidityUSD,
     cell: ({ row: { original } }) => (
       <span className="flex gap-2">
         <span className="text-muted-foreground">
-          {formatUSD(original.pool.liquidityUSD).includes('NaN')
+          {formatUSD(original.liquidityUSD).includes('NaN')
             ? '$0.00'
-            : formatUSD(original.pool.liquidityUSD)}
+            : formatUSD(original.liquidityUSD)}
         </span>
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <span className="underline decoration-dotted underline-offset-2">
-                {formatUSD(original.reserveUSD).includes('NaN')
+                {formatUSD(original.vaultLiquidityUSD).includes('NaN')
                   ? '$0.00'
-                  : formatUSD(original.reserveUSD)}
+                  : formatUSD(original.vaultLiquidityUSD)}
               </span>
             </TooltipTrigger>
             <TooltipContent>
@@ -237,11 +236,11 @@ const COLUMNS = [
   {
     id: 'fees1d',
     header: 'Fees (24h)',
-    accessorFn: (row) => row.pool.feesUSD1d,
+    accessorFn: (row) => row.feeUSD1d,
     cell: (props) =>
-      formatUSD(props.row.original.pool.feesUSD1d).includes('NaN')
+      formatUSD(props.row.original.feeUSD1d).includes('NaN')
         ? '$0.00'
-        : formatUSD(props.row.original.pool.feesUSD1d),
+        : formatUSD(props.row.original.feeUSD1d),
     meta: {
       skeleton: <SkeletonText fontSize="lg" />,
     },
@@ -249,18 +248,15 @@ const COLUMNS = [
   {
     id: 'totalApr1d',
     header: 'APR (24h)',
-    accessorFn: (row) => (row.apr1d + row.pool.incentiveApr) * 100,
+    accessorFn: (row) => (row.feeApr1d + row.incentiveApr) * 100,
     cell: (props) => {
-      const totalAPR =
-        (props.row.original.apr1d + props.row.original.pool.incentiveApr) * 100
-
       return (
         <div className="flex gap-1">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="line-through text-muted-foreground">
-                  {formatPercent(props.row.original.pool.totalApr1d)}
+                  {formatPercent(props.row.original.feeAndIncentiveApr1d)}
                 </span>
               </TooltipTrigger>
               <TooltipContent>
@@ -269,11 +265,20 @@ const COLUMNS = [
             </Tooltip>
           </TooltipProvider>
           <APRHoverCard
-            pool={props.row.original.pool}
-            smartPoolAPR={props.row.original.apr1d}
+            pool={{
+              id: props.row.original.id,
+              address: props.row.original.poolAddress as `0x${string}`,
+              chainId: props.row.original.chainId,
+              protocol: SushiSwapProtocol.SUSHISWAP_V3,
+              feeApr1d: props.row.original.feeApr1d,
+              incentiveApr: props.row.original.incentiveApr,
+              isIncentivized: props.row.original.isIncentivized,
+              wasIncentivized: props.row.original.wasIncentivized,
+            }}
+            smartPoolAPR={props.row.original.stakedApr1d}
           >
             <span className="underline decoration-dotted underline-offset-2">
-              {formatPercent(totalAPR / 100)}
+              {formatPercent(props.row.original.stakedAndIncentiveApr1d)}
             </span>
           </APRHoverCard>
         </div>
@@ -286,7 +291,7 @@ const COLUMNS = [
   {
     id: 'actions',
     cell: ({ row }) =>
-      row.original.pool.protocol === 'SUSHISWAP_V3' ? (
+      row.original.protocol === 'SUSHISWAP_V3' ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button icon={EllipsisHorizontalIcon} variant="ghost" size="sm">
@@ -307,7 +312,7 @@ const COLUMNS = [
                   onClick={(e) => e.stopPropagation()}
                   shallow={true}
                   className="flex items-center"
-                  href={`/pool/${row.original.pool.id}`}
+                  href={`/${row.original.chainId}/pool/v3/${row.original.poolAddress}`}
                 >
                   <ArrowDownRightIcon width={16} height={16} className="mr-2" />
                   Pool details
@@ -318,7 +323,7 @@ const COLUMNS = [
                   onClick={(e) => e.stopPropagation()}
                   shallow={true}
                   className="flex items-center"
-                  href={`/pool/${row.original.pool.id}/positions/create`}
+                  href={`/${row.original.chainId}/pool/v3/${row.original.poolAddress}/positions/create`}
                 >
                   <PlusIcon width={16} height={16} className="mr-2" />
                   Create position
@@ -332,7 +337,7 @@ const COLUMNS = [
                         onClick={(e) => e.stopPropagation()}
                         shallow={true}
                         className="flex items-center"
-                        href={`/pool/${row.original.pool.id}/smart/${row.original.id}`}
+                        href={`/${row.original.chainId}/pool/v3/${row.original.poolAddress}/smart/${row.original.id}`}
                       >
                         <span className="relative">
                           <LightBulbIcon
@@ -362,35 +367,30 @@ const COLUMNS = [
               <TooltipProvider>
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger
-                    asChild={isAngleEnabledChainId(row.original.pool.chainId)}
+                    asChild={isAngleEnabledChainId(row.original.chainId)}
                   >
                     <DropdownMenuItem
                       asChild
-                      disabled={
-                        !isAngleEnabledChainId(row.original.pool.chainId)
-                      }
+                      disabled={!isAngleEnabledChainId(row.original.chainId)}
                     >
+                      {/* FIX */}
                       <Link
                         onClick={(e) => e.stopPropagation()}
                         shallow={true}
                         className="flex items-center"
                         href={`/pool/incentivize?chainId=${
-                          row.original.pool.chainId
+                          row.original.chainId
                         }&fromCurrency=${
                           row.original.token0.address ===
-                          Native.onChain(row.original.pool.chainId).wrapped
-                            .address
+                          Native.onChain(row.original.chainId).wrapped.address
                             ? 'NATIVE'
                             : row.original.token0.address
                         }&toCurrency=${
                           row.original.token1.address ===
-                          Native.onChain(row.original.pool.chainId).wrapped
-                            .address
+                          Native.onChain(row.original.chainId).wrapped.address
                             ? 'NATIVE'
                             : row.original.token1.address
-                        }&feeAmount=${
-                          row.original.pool.swapFee * 10_000 * 100
-                        }`}
+                        }&feeAmount=${row.original.swapFee * 10_000 * 100}`}
                       >
                         <GiftIcon width={16} height={16} className="mr-2" />
                         Add incentive
@@ -399,7 +399,7 @@ const COLUMNS = [
                   </TooltipTrigger>
                   <TooltipContent side="left" className="max-w-[240px]">
                     <p>
-                      {!isAngleEnabledChainId(row.original.pool.chainId)
+                      {!isAngleEnabledChainId(row.original.chainId)
                         ? 'Not available on this network'
                         : 'Add rewards to a pool to incentivize liquidity providers joining in.'}
                     </p>
@@ -419,7 +419,7 @@ const COLUMNS = [
           <DropdownMenuContent align="end" className="w-fit">
             <DropdownMenuLabel>
               {row.original.token0.symbol} / {row.original.token1.symbol}
-              {row.original.pool.protocol === 'SUSHISWAP_V2' && (
+              {row.original.protocol === 'SUSHISWAP_V2' && (
                 <Chip variant="pink" className="ml-2">
                   SushiSwap V2
                 </Chip>
@@ -455,10 +455,10 @@ const COLUMNS = [
               <DropdownMenuGroupLabel>Farm rewards</DropdownMenuGroupLabel>
               <TooltipProvider>
                 <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild={row.original.pool.isIncentivized}>
+                  <TooltipTrigger asChild={row.original.isIncentivized}>
                     <DropdownMenuItem
                       asChild
-                      disabled={!row.original.pool.isIncentivized}
+                      disabled={!row.original.isIncentivized}
                     >
                       <Link
                         onClick={(e) => e.stopPropagation()}
@@ -473,17 +473,14 @@ const COLUMNS = [
                   </TooltipTrigger>
                   <TooltipContent side="left" className="max-w-[240px]">
                     <p>
-                      {!row.original.pool.isIncentivized
+                      {!row.original.isIncentivized
                         ? 'No rewards available on this pool'
                         : 'After adding liquidity, stake your liquidity tokens to benefit from extra rewards'}
                     </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <DropdownMenuItem
-                asChild
-                disabled={!row.original.pool.isIncentivized}
-              >
+              <DropdownMenuItem asChild disabled={!row.original.isIncentivized}>
                 <Link
                   onClick={(e) => e.stopPropagation()}
                   shallow={true}
@@ -503,26 +500,18 @@ const COLUMNS = [
       skeleton: <SkeletonText fontSize="lg" />,
     },
   },
-] satisfies ColumnDef<SteerVaults[number], unknown>[]
+] satisfies ColumnDef<SmartPoolsV1[number], unknown>[]
 
-export const SmartPoolsTable = () => {
-  const { tokenSymbols, chainIds, protocols, farmsOnly } = usePoolFilters()
+export const SmartPoolsTable: FC<{ smartPools: SmartPoolsV1 }> = ({
+  smartPools,
+}) => {
+  const { tokenSymbols, protocols, farmsOnly } = usePoolFilters()
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'liquidityUSD', desc: true },
   ])
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
-  })
-
-  const { data: vaults, isValidating: isValidatingVaults } = useSteerVaults({
-    args: {
-      chainIds: chainIds,
-      orderBy: 'reserveUSD',
-      orderDir: 'desc',
-      onlyEnabled: true,
-      tokenSymbols,
-    },
   })
 
   const state: Partial<TableState> = useMemo(() => {
@@ -532,18 +521,31 @@ export const SmartPoolsTable = () => {
     }
   }, [sorting, pagination])
 
-  const _vaults = useMemo(
+  const vaults = useMemo(
     () =>
-      vaults
-        ? vaults
-            .filter((el) => (farmsOnly ? el.pool.isIncentivized : true))
-            .filter((el) =>
-              protocols.length > 0
-                ? protocols.includes(el.pool.protocol)
-                : true,
-            )
-        : [],
-    [protocols, farmsOnly, vaults],
+      smartPools?.filter((smartPool) => {
+        if (
+          tokenSymbols.length &&
+          !tokenSymbols.some((tokenSymbol) =>
+            [
+              smartPool.token0.symbol.toLowerCase(),
+              smartPool.token1.symbol.toLowerCase(),
+            ].includes(tokenSymbol.toLowerCase()),
+          )
+        )
+          return false
+
+        if (
+          protocols.length &&
+          !protocols.some((protocol) => smartPool.protocol === protocol)
+        )
+          return false
+
+        if (farmsOnly && !smartPool.isIncentivized) return false
+
+        return true
+      }) ?? [],
+    [smartPools, tokenSymbols, protocols, farmsOnly],
   )
 
   return (
@@ -551,9 +553,9 @@ export const SmartPoolsTable = () => {
       <CardHeader>
         <CardTitle>
           Smart Pools{' '}
-          {_vaults?.length ? (
+          {vaults?.length ? (
             <span className="text-gray-400 dark:text-slate-500">
-              ({_vaults.length})
+              ({vaults.length})
             </span>
           ) : null}
         </CardTitle>
@@ -576,11 +578,13 @@ export const SmartPoolsTable = () => {
         onPaginationChange={setPagination}
         pagination={true}
         state={state}
-        linkFormatter={(row) => `/pool/${row.pool.id}/smart/${row.id}`}
+        linkFormatter={(row) =>
+          `/${row.chainId}/pool/v3/${row.poolAddress}/smart/${row.address}`
+        }
         onSortingChange={setSorting}
-        loading={!vaults && isValidatingVaults}
+        loading={!vaults}
         columns={COLUMNS}
-        data={_vaults}
+        data={vaults}
       />
     </Card>
   )

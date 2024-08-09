@@ -1,6 +1,5 @@
 'use client'
 
-import { Pool } from '@sushiswap/client'
 import { useIsMounted } from '@sushiswap/hooks'
 import { Button } from '@sushiswap/ui'
 import { FC, useCallback, useMemo, useState } from 'react'
@@ -10,6 +9,7 @@ import { SushiSwapV2ChainId } from 'sushi/config'
 import { tryParseAmount } from 'sushi/currency'
 import { useTokensFromPool } from '../../lib/hooks'
 
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import { getSushiSwapRouterContractConfig } from 'src/lib/wagmi/hooks/contracts/useSushiSwapRouter'
 import {
   SushiSwapV2PoolState,
@@ -20,7 +20,7 @@ import { CheckerProvider } from 'src/lib/wagmi/systems/Checker/Provider'
 import { AddSectionReviewModalLegacy } from './AddSectionReviewModalLegacy'
 import { AddSectionWidget } from './AddSectionWidget'
 
-export const AddSectionLegacy: FC<{ pool: Pool }> = ({ pool: _pool }) => {
+export const AddSectionLegacy: FC<{ pool: V2Pool }> = ({ pool: _pool }) => {
   const chainId = _pool.chainId as SushiSwapV2ChainId
   const isMounted = useIsMounted()
   const { token0, token1 } = useTokensFromPool(_pool)

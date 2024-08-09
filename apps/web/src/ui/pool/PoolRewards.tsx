@@ -1,21 +1,22 @@
 'use client'
 
-import { Pool } from '@sushiswap/client'
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import {
+  Card,
   CardContent,
   CardCurrencyAmountItem,
+  CardDescription,
   CardGroup,
   CardHeader,
   CardLabel,
   CardTitle,
 } from '@sushiswap/ui'
-import { Card, CardDescription } from '@sushiswap/ui'
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { incentiveRewardToToken } from 'src/lib/functions'
 import { ChainId } from 'sushi/chain'
 import { tryParseAmount } from 'sushi/currency'
 
-export const PoolRewards: FC<{ pool: Pool }> = ({ pool }) => {
+export const PoolRewards: FC<{ pool: V2Pool }> = ({ pool }) => {
   const incentives = pool.incentives.filter(
     (incentive) => incentive.rewardPerDay > 0,
   )

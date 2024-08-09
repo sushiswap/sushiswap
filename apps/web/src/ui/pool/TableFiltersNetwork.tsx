@@ -1,13 +1,7 @@
 'use client'
 
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
-import {
-  Chip,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Separator,
-} from '@sushiswap/ui'
+import { Chip, Popover, PopoverContent, PopoverTrigger } from '@sushiswap/ui'
 import { Button } from '@sushiswap/ui'
 import {
   Command,
@@ -18,46 +12,24 @@ import {
 } from '@sushiswap/ui'
 import { CheckIcon } from '@sushiswap/ui/icons/CheckIcon'
 import { NetworkIcon } from '@sushiswap/ui/icons/NetworkIcon'
-import React, { FC, useCallback, useState, useTransition } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import React, { FC, useCallback, useState } from 'react'
 import { SUPPORTED_CHAIN_IDS } from 'src/config'
-import { Chain } from 'sushi/chain'
+import { Chain, ChainId } from 'sushi/chain'
 
-import { usePoolFilters, useSetPoolFilters } from './PoolsFiltersProvider'
-
-const isAllThenNone = (chainIds: number[]) =>
-  SUPPORTED_CHAIN_IDS.length === chainIds.length ? [] : chainIds
-
-export const TableFiltersNetwork: FC = () => {
-  const [pending, startTransition] = useTransition()
+export const TableFiltersNetwork: FC<{ chainId: ChainId }> = ({ chainId }) => {
   const [open, setOpen] = useState(false)
-  const { chainIds } = usePoolFilters()
-  const setFilters = useSetPoolFilters()
-  const [localValue, setValues] = useState<number[]>(isAllThenNone(chainIds))
 
-  const values = pending ? localValue : isAllThenNone(chainIds)
+  const router = useRouter()
+  const pathname = usePathname()
 
   const onClick = useCallback(
-    (chainId: (typeof chainIds)[number]) => {
-      let _newValues: number[]
-      if (localValue.includes(chainId)) {
-        _newValues = localValue.filter((el) => el !== chainId)
-      } else {
-        _newValues = [...(localValue ?? []), chainId]
-      }
-      setValues(_newValues)
-
-      startTransition(() => {
-        setFilters((prev) => {
-          if (prev.chainIds?.includes(chainId)) {
-            const chains = prev.chainIds!.filter((el) => el !== chainId)
-            return { ...prev, chainIds: chains }
-          } else {
-            return { ...prev, chainIds: [...(prev.chainIds ?? []), chainId] }
-          }
-        })
-      })
+    (chainId: string) => {
+      const pathSegments = pathname.split('/')
+      pathSegments[1] = chainId
+      router.push(pathSegments.join('/'))
     },
-    [setFilters, localValue],
+    [pathname, router],
   )
 
   return (
@@ -72,27 +44,7 @@ export const TableFiltersNetwork: FC = () => {
           className="!border-dashed"
         >
           <span>Networks</span>
-          {values?.length > 0 && (
-            <>
-              <Separator orientation="vertical" className="m-1 !h-4" />
-              <Chip variant="secondary" className="lg:hidden">
-                {values.length}
-              </Chip>
-              <div className="hidden lg:flex gap-1">
-                {values.length > 2 ? (
-                  <Chip variant="secondary">{values.length} selected</Chip>
-                ) : (
-                  SUPPORTED_CHAIN_IDS.filter((option) =>
-                    values.includes(option),
-                  ).map((option) => (
-                    <Chip variant="secondary" key={option}>
-                      {Chain.from(option)?.name}
-                    </Chip>
-                  ))
-                )}
-              </div>
-            </>
-          )}
+          <Chip variant="secondary">{Chain.from(chainId)?.name}</Chip>
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -106,16 +58,14 @@ export const TableFiltersNetwork: FC = () => {
           />
           <CommandEmpty>No network found.</CommandEmpty>
           <CommandGroup>
-            {SUPPORTED_CHAIN_IDS.map((chainId) => (
+            {SUPPORTED_CHAIN_IDS.map((_chainId) => (
               <CommandItem
-                key={chainId}
-                value={`${Chain.from(chainId)?.name}__${chainId}`}
-                onSelect={(value) =>
-                  onClick(+value.split('__')[1] as (typeof chainIds)[number])
-                }
+                key={_chainId}
+                value={_chainId.toString()}
+                onSelect={onClick}
                 className="py-2 pl-8 pr-2"
               >
-                {values.includes(chainId) ? (
+                {chainId === _chainId ? (
                   <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
                     <CheckIcon
                       strokeWidth={3}
@@ -126,12 +76,12 @@ export const TableFiltersNetwork: FC = () => {
                   </span>
                 ) : null}
                 <NetworkIcon
-                  chainId={chainId}
+                  chainId={_chainId}
                   width={20}
                   height={20}
                   className="mr-2"
                 />
-                {Chain.from(chainId)?.name}
+                {Chain.from(_chainId)?.name}
               </CommandItem>
             ))}
           </CommandGroup>

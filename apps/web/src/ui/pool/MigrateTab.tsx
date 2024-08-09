@@ -2,7 +2,7 @@
 
 import { CogIcon } from '@heroicons/react-v1/outline'
 import { SwitchHorizontalIcon } from '@heroicons/react-v1/solid'
-import { Pool } from '@sushiswap/client'
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import { SlippageToleranceStorageKey, TTLStorageKey } from '@sushiswap/hooks'
 import {
   Card,
@@ -41,7 +41,7 @@ import {
   Bound,
   Field,
 } from 'src/lib/constants'
-import { useGraphPool, useTokenAmountDollarValues } from 'src/lib/hooks'
+import { useTokenAmountDollarValues, useV2Pool } from 'src/lib/hooks'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'
 import { getMasterChefContractConfig } from 'src/lib/wagmi/hooks/master-chef/use-master-chef-contract'
 import { useMasterChefWithdraw } from 'src/lib/wagmi/hooks/master-chef/use-master-chef-withdraw'
@@ -84,7 +84,7 @@ import { usePoolPositionStaked } from './PoolPositionStakedProvider'
 import { SelectFeeConcentratedWidget } from './SelectFeeConcentratedWidget'
 import { SelectPricesWidget } from './SelectPricesWidget'
 
-function MigrateUnstakeCard({ pool }: { pool: Pool }) {
+function MigrateUnstakeCard({ pool }: { pool: V2Pool }) {
   const {
     value0: stakedValue0,
     value1: stakedValue1,
@@ -195,7 +195,7 @@ function MigrateUnstakeCard({ pool }: { pool: Pool }) {
 
 export const MODAL_MIGRATE_ID = 'migrate-modal'
 
-export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
+export const MigrateTab: FC<{ pool: V2Pool }> = withCheckerRoot(({ pool }) => {
   const { address } = useAccount()
   const [feeAmount, setFeeAmount] = useState<SushiSwapV3FeeAmount>(
     SushiSwapV3FeeAmount.LOWEST,
@@ -208,7 +208,7 @@ export const MigrateTab: FC<{ pool: Pool }> = withCheckerRoot(({ pool }) => {
 
   const {
     data: { token0: _token0, token1: _token1, liquidityToken },
-  } = useGraphPool(pool)
+  } = useV2Pool(pool)
 
   const {
     value0: _value0,

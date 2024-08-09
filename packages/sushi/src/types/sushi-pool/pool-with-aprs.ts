@@ -10,15 +10,15 @@ export type PoolWithIncentiveApr<T extends PoolId = PoolId> = T & {
 }
 
 export type PoolWithFeeAprs<T extends PoolId = PoolId> = T & {
-  feeApr1h: number
+  // feeApr1h: number
   feeApr1d: number
-  feeApr1w: number
-  feeApr1m: number
+  // feeApr1w: number
+  // feeApr1m: number
 }
 
 export type PoolWithTotalAprs<T extends PoolId = PoolId> = T & {
-  totalApr1h: number
+  // totalApr1h: number
   totalApr1d: number
-  totalApr1w: number
-  totalApr1m: number
+  // totalApr1w: number
+  // totalApr1m: number
 }

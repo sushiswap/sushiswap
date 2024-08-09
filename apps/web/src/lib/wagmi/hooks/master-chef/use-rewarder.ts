@@ -1,8 +1,8 @@
 'use client'
 
-import { ChefType } from '@sushiswap/client'
 import { keepPreviousData, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
+import { ChefType } from 'sushi'
 import { ChainId } from 'sushi/chain'
 import { Amount, Token } from 'sushi/currency'
 import { Address } from 'viem'

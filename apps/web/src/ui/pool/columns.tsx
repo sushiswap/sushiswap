@@ -1,4 +1,4 @@
-import { SushiV2StakedUnstakedPosition } from '@sushiswap/graph-client/composite/sushi-v2-staked-unstaked-positions'
+import { V2Position } from '@sushiswap/graph-client/data-api'
 import { AngleRewardsPool } from '@sushiswap/react-query'
 import { PoolHasSteerVaults } from '@sushiswap/steer-sdk'
 import {
@@ -253,7 +253,7 @@ export const NETWORK_COLUMN = {
   meta: {
     skeleton: <SkeletonCircle radius={26} />,
   },
-} as const satisfies ColumnDef<SushiV2StakedUnstakedPosition, unknown>
+} as const satisfies ColumnDef<V2Position, unknown>
 
 export const APR_COLUMN = {
   id: 'totalApr1d',
@@ -399,8 +399,8 @@ export const TX_AMOUNT_IN_V2_COLUMN = (
               }
             />{' '}
             {row.original.amount0In !== '0'
-              ? row.original.pool.token0.symbol
-              : row.original.pool.token1.symbol}
+              ? row.original.symbol0
+              : row.original.symbol1}
           </span>
         )
       case TransactionType.Mint:
@@ -408,7 +408,7 @@ export const TX_AMOUNT_IN_V2_COLUMN = (
         return (
           <span>
             <FormattedNumber number={row.original.amount0.toPrecision(6)} />{' '}
-            {row.original.pool.token0.symbol}
+            {row.original.symbol0}
           </span>
         )
     }
@@ -436,8 +436,8 @@ export const TX_AMOUNT_OUT_V2_COLUMN = (
               ).toPrecision(2)}
             />{' '}
             {row.original.amount0Out !== '0'
-              ? row.original.pool.token0.symbol
-              : row.original.pool.token1.symbol}
+              ? row.original.symbol0
+              : row.original.symbol1}
           </span>
         )
       case TransactionType.Mint:
@@ -445,7 +445,7 @@ export const TX_AMOUNT_OUT_V2_COLUMN = (
         return (
           <span>
             <FormattedNumber number={row.original.amount1.toPrecision(2)} />{' '}
-            {row.original.pool.token1.symbol}
+            {row.original.symbol1}
           </span>
         )
     }

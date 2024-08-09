@@ -1,6 +1,6 @@
 'use client'
 
-import { Pool } from '@sushiswap/client'
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import {
   Card,
   CardContent,
@@ -9,22 +9,14 @@ import {
   CardTitle,
   classNames,
 } from '@sushiswap/ui'
-import { SkeletonText } from '@sushiswap/ui'
 import { FC } from 'react'
-import { usePoolGraphData } from 'src/lib/hooks'
-import { SushiSwapV2ChainId } from 'sushi/config'
 import { formatNumber, formatPercent, formatUSD } from 'sushi/format'
 
 interface PoolStats {
-  pool: Pool
+  pool: V2Pool
 }
 
 export const PoolStats: FC<PoolStats> = ({ pool }) => {
-  const { data, isLoading } = usePoolGraphData({
-    poolAddress: pool.address,
-    chainId: pool.chainId as SushiSwapV2ChainId,
-  })
-
   return (
     <Card>
       <CardHeader>
@@ -34,78 +26,70 @@ export const PoolStats: FC<PoolStats> = ({ pool }) => {
         <div className="grid grid-cols-1 gap-3">
           <div>
             <CardLabel>Liquidity</CardLabel>
-            {isLoading ? (
-              <SkeletonText />
-            ) : data ? (
+            {pool ? (
               <div className="text-xl font-semibold">
-                {formatUSD(data.liquidityUSD ?? 0)}{' '}
+                {formatUSD(pool.liquidityUSD ?? 0)}{' '}
                 <span
                   className={classNames(
                     'text-xs',
-                    data.liquidity1dChange > 0 ? 'text-green' : 'text-red',
+                    pool.liquidityUSD1dChange > 0 ? 'text-green' : 'text-red',
                   )}
                 >
-                  {data.liquidity1dChange > 0 ? '+' : '-'}
-                  {formatPercent(Math.abs(data.liquidity1dChange))}
+                  {pool.liquidityUSD1dChange > 0 ? '+' : '-'}
+                  {formatPercent(Math.abs(pool.liquidityUSD1dChange))}
                 </span>
               </div>
             ) : null}
           </div>
           <div>
             <CardLabel>Volume (24h)</CardLabel>
-            {data ? (
+            {pool ? (
               <div className="text-xl font-semibold">
-                {formatUSD(data.volume1d ?? 0)}{' '}
+                {formatUSD(pool.volumeUSD1d ?? 0)}{' '}
                 <span
                   className={classNames(
                     'text-xs',
-                    data.volume1dChange > 0 ? 'text-green' : 'text-red',
+                    pool.volumeUSD1dChange > 0 ? 'text-green' : 'text-red',
                   )}
                 >
-                  {data.volume1dChange > 0 ? '+' : '-'}
-                  {formatPercent(Math.abs(data.volume1dChange))}
+                  {pool.volumeUSD1dChange > 0 ? '+' : '-'}
+                  {formatPercent(Math.abs(pool.volumeUSD1dChange))}
                 </span>
               </div>
-            ) : isLoading ? (
-              <SkeletonText />
             ) : null}
           </div>
           <div>
             <CardLabel>Fees (24h)</CardLabel>
-            {data ? (
+            {pool ? (
               <div className="text-xl font-semibold">
-                {formatUSD(data.fees1d ?? 0)}{' '}
+                {formatUSD(pool.feesUSD1d ?? 0)}{' '}
                 <span
                   className={classNames(
                     'text-xs',
-                    data.fees1dChange > 0 ? 'text-green' : 'text-red',
+                    pool.feesUSD1dChange > 0 ? 'text-green' : 'text-red',
                   )}
                 >
-                  {data.fees1dChange > 0 ? '+' : '-'}
-                  {formatPercent(Math.abs(data.fees1dChange))}
+                  {pool.feesUSD1dChange > 0 ? '+' : '-'}
+                  {formatPercent(Math.abs(pool.feesUSD1dChange))}
                 </span>
               </div>
-            ) : isLoading ? (
-              <SkeletonText />
             ) : null}
           </div>
           <div>
             <CardLabel>Transactions (24h)</CardLabel>
-            {data ? (
+            {pool ? (
               <div className="text-xl font-semibold">
-                {formatNumber(data.txCount1d).replace('.00', '')}{' '}
+                {formatNumber(pool.txCount1d).replace('.00', '')}{' '}
                 <span
                   className={classNames(
                     'text-xs',
-                    data.txCount1dChange > 0 ? 'text-green' : 'text-red',
+                    pool.txCount1dChange > 0 ? 'text-green' : 'text-red',
                   )}
                 >
-                  {data.txCount1dChange > 0 ? '+' : '-'}
-                  {formatPercent(Math.abs(data.txCount1dChange))}
+                  {pool.txCount1dChange > 0 ? '+' : '-'}
+                  {formatPercent(Math.abs(pool.txCount1dChange))}
                 </span>
               </div>
-            ) : isLoading ? (
-              <SkeletonText />
             ) : null}
           </div>
         </div>

@@ -56,26 +56,35 @@ const sheetVariants = cva(
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+    VariantProps<typeof sheetVariants> {
+  hideClose?: boolean
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = 'right', className, children, ...props }, ref) => (
-  <SheetPortal>
-    <SheetOverlay />
-    <SheetPrimitive.Content
-      ref={ref}
-      className={classNames(sheetVariants({ side }), className)}
-      {...props}
-    >
-      {children}
-      <SheetPrimitive.Close asChild className="absolute right-4 top-4">
-        <IconButton icon={XMarkIcon} name="Close" />
-      </SheetPrimitive.Close>
-    </SheetPrimitive.Content>
-  </SheetPortal>
-))
+>(
+  (
+    { side = 'right', hideClose = false, className, children, ...props },
+    ref,
+  ) => (
+    <SheetPortal>
+      <SheetOverlay />
+      <SheetPrimitive.Content
+        ref={ref}
+        className={classNames(sheetVariants({ side }), className)}
+        {...props}
+      >
+        {children}
+        {hideClose ? null : (
+          <SheetPrimitive.Close asChild className="absolute right-4 top-4">
+            <IconButton icon={XMarkIcon} name="Close" />
+          </SheetPrimitive.Close>
+        )}
+      </SheetPrimitive.Content>
+    </SheetPortal>
+  ),
+)
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({

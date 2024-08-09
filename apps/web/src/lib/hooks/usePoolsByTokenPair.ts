@@ -9,10 +9,7 @@ function usePoolsByTokenPair(tokenId0?: string, tokenId1?: string) {
     queryFn: () => {
       if (!tokenId0 || !tokenId1) return []
 
-      return getV3PoolsByTokenPair(
-        tokenId0.toLowerCase(),
-        tokenId1.toLowerCase(),
-      )
+      return getV3PoolsByTokenPair(tokenId0, tokenId1)
     },
     enabled: !!tokenId0 && !!tokenId1,
   })

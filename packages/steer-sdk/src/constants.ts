@@ -75,3 +75,23 @@ export const STEER_SUBGRAPH_URL: Record<SteerChainId, string> = {
   [ChainId.ROOTSTOCK]:
     'api.goldsky.com/api/public/project_clohj3ta78ok12nzs5m8yag0b/subgraphs/steer-protocol-rootstock/1.1.1/gn',
 }
+
+export enum SteerStrategy {
+  SuperWide = 'SuperWide',
+  DeltaNeutralStables = 'DeltaNeutralStables',
+  StableExpansion = 'StableExpansion',
+  ElasticExpansion = 'ElasticExpansion',
+  MovingVolatilityChannel = 'MovingVolatilityChannel',
+  MovingVolatilityChannelMedium = 'MovingVolatilityChannelMedium',
+  HighLowChannel = 'HighLowChannel',
+  StaticStable = 'StaticStable',
+  ClassicRebalance = 'ClassicRebalance',
+  ChannelMultiplier = 'ChannelMultiplier',
+  PriceMultiplier = 'PriceMultiplier',
+  FixedPercentage = 'FixedPercentage',
+  KeltnerAlgo = 'KeltnerAlgo',
+  BollingerAlgo = 'BollingerAlgo',
+}
+
+export const isSteerStrategy = (strategy: string): strategy is SteerStrategy =>
+  Object.values(SteerStrategy).includes(strategy as SteerStrategy)

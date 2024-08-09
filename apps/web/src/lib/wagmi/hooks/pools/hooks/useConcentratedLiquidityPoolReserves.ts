@@ -1,11 +1,11 @@
+import { V3Pool } from '@sushiswap/graph-client/data-api'
 import { useQuery } from '@tanstack/react-query'
 import { SushiSwapV3ChainId } from 'sushi/config'
-import { SushiSwapV3Pool } from 'sushi/pool/sushiswap-v3'
 import { useConfig } from 'wagmi'
 import { getConcentratedLiquidityPoolReserves } from '../actions/getConcentratedLiquidityPoolReserves'
 
 interface UseConcentratedLiquidityPoolReserves {
-  pool: SushiSwapV3Pool | null | undefined
+  pool: V3Pool | null | undefined
   chainId: SushiSwapV3ChainId
   enabled?: boolean
 }
@@ -23,7 +23,7 @@ export const useConcentratedLiquidityPoolReserves = ({
       {
         token0: pool?.token0,
         token1: pool?.token1,
-        feeAmount: pool?.fee,
+        feeAmount: pool?.swapFee,
         chainId,
       },
     ],
@@ -31,7 +31,6 @@ export const useConcentratedLiquidityPoolReserves = ({
       if (pool) {
         return getConcentratedLiquidityPoolReserves({
           pool,
-          chainId,
           config,
         })
       }

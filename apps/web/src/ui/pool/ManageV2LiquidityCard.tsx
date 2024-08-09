@@ -1,6 +1,5 @@
 'use client'
 
-import { Pool } from '@sushiswap/client'
 import {
   Card,
   CardContent,
@@ -17,6 +16,7 @@ import {
 import Link from 'next/link'
 import { FC } from 'react'
 
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import { AddSectionLegacy } from './AddSectionLegacy'
 import { AddSectionStake } from './AddSectionStake'
 import { PoolPositionProvider } from './PoolPositionProvider'
@@ -26,7 +26,7 @@ import { RemoveSectionLegacy } from './RemoveSectionLegacy'
 import { RemoveSectionUnstake } from './RemoveSectionUnstake'
 
 interface ManageV2LiquidityCardProps {
-  pool: Pool
+  pool: V2Pool
   tab?: 'stake' | 'unstake' | 'add' | 'remove'
 }
 
@@ -129,7 +129,7 @@ export const ManageV2LiquidityCard: FC<ManageV2LiquidityCardProps> = ({
               <TabsContent value="stake">
                 <CardContent>
                   {isFarm ? (
-                    <AddSectionStake poolId={pool.id} />
+                    <AddSectionStake pool={pool} />
                   ) : (
                     <Message
                       variant="warning"
@@ -144,7 +144,7 @@ export const ManageV2LiquidityCard: FC<ManageV2LiquidityCardProps> = ({
               <TabsContent value="unstake">
                 <CardContent>
                   {isFarm ? (
-                    <RemoveSectionUnstake poolId={pool.id} />
+                    <RemoveSectionUnstake pool={pool} />
                   ) : (
                     <Message
                       variant="warning"

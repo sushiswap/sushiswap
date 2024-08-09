@@ -1,16 +1,18 @@
 import { PlusIcon, UserCircleIcon } from '@heroicons/react-v1/solid'
-import { Pool, Protocol } from '@sushiswap/client'
+import { V2Pool, V3Pool } from '@sushiswap/graph-client/data-api'
+
 import { LinkInternal } from '@sushiswap/ui'
 import { Button } from '@sushiswap/ui'
 import { Currency } from '@sushiswap/ui'
 import { List } from '@sushiswap/ui'
 import React, { FC } from 'react'
 import { incentiveRewardToToken } from 'src/lib/functions'
+import { SushiSwapProtocol } from 'sushi'
 import { ChainId } from 'sushi/chain'
 import { formatNumber, formatPercent } from 'sushi/format'
 
 interface PoolQuickHoverTooltipProps {
-  row: Pool
+  row: V2Pool | V3Pool
 }
 
 export const PoolQuickHoverTooltip: FC<PoolQuickHoverTooltipProps> = ({
@@ -36,7 +38,7 @@ export const PoolQuickHoverTooltip: FC<PoolQuickHoverTooltipProps> = ({
         <Button icon={PlusIcon} asChild size="sm" variant="secondary">
           <LinkInternal
             href={
-              row.protocol === Protocol.SUSHISWAP_V3
+              row.protocol === SushiSwapProtocol.SUSHISWAP_V3
                 ? `/${row.id}`
                 : `/${row.id}/add`
             }
@@ -44,7 +46,7 @@ export const PoolQuickHoverTooltip: FC<PoolQuickHoverTooltipProps> = ({
             Deposit
           </LinkInternal>
         </Button>
-        {row.protocol === Protocol.SUSHISWAP_V3 && (
+        {row.protocol === SushiSwapProtocol.SUSHISWAP_V3 && (
           <Button icon={UserCircleIcon} asChild size="sm" variant="secondary">
             <LinkInternal href={`/pools/${row.id}`}>My Positions</LinkInternal>
           </Button>

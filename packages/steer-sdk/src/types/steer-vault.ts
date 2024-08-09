@@ -1,4 +1,4 @@
-import type { SteerStrategy } from '@sushiswap/database'
+import { SteerStrategy } from '@sushiswap/steer-sdk'
 import type { Token } from 'sushi/types'
 import type { SteerVaultId } from './steer-vault-id'
 

@@ -58,6 +58,7 @@ interface DataTableProps<TData, TValue> {
   onSortingChange?: OnChangeFn<SortingState>
   onPaginationChange?: OnChangeFn<PaginationState>
   rowRenderer?: (row: Row<TData>, value: ReactNode) => ReactNode
+  showColumnHeaders?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -73,6 +74,7 @@ export function DataTable<TData, TValue>({
   onSortingChange,
   onPaginationChange,
   rowRenderer,
+  showColumnHeaders = true,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -113,33 +115,36 @@ export function DataTable<TData, TValue>({
     <div className="space-y-4 border-t border-secondary">
       {toolbar ? toolbar(table) : null}
       <Table className={pagination ? 'border-b border-secondary' : ''}>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead
-                    style={{ width: header.getSize() }}
-                    key={header.id}
-                    className={classNames(
-                      header.column.getCanSort() ? 'px-2' : 'px-4',
-                    )}
-                  >
-                    {header.isPlaceholder ? null : (
-                      <DataTableColumnHeader
-                        description={
-                          header.column.columnDef?.meta?.headerDescription
-                        }
-                        column={header.column}
-                        title={header.column.columnDef.header as string}
-                      />
-                    )}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
+        {showColumnHeaders ? (
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      style={{ width: header.getSize() }}
+                      key={header.id}
+                      className={classNames(
+                        header.column.getCanSort() ? 'px-2' : 'px-4',
+                      )}
+                    >
+                      {header.isPlaceholder ? null : (
+                        <DataTableColumnHeader
+                          description={
+                            header.column.columnDef?.meta?.headerDescription
+                          }
+                          column={header.column}
+                          title={header.column.columnDef.header as string}
+                        />
+                      )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+        ) : null}
+
         <TableBody>
           {loading ? (
             Array.from({ length: 3 })

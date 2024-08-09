@@ -1,4 +1,3 @@
-import { Pool } from '@sushiswap/client'
 import { classNames } from '@sushiswap/ui'
 import { Currency as UICurrency } from '@sushiswap/ui'
 import React, { FC } from 'react'
@@ -6,10 +5,11 @@ import { incentiveRewardToToken } from 'src/lib/functions'
 import { ChainId } from 'sushi/chain'
 import { formatPercent } from 'sushi/format'
 
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import { AddSectionMyPositionStaked } from './AddSectionMyPositionStaked'
 import { AddSectionMyPositionUnstaked } from './AddSectionMyPositionUnstaked'
 
-export const AddSectionMyPosition: FC<{ pool: Pool }> = ({ pool }) => {
+export const AddSectionMyPosition: FC<{ pool: V2Pool }> = ({ pool }) => {
   return (
     <div className="flex flex-col bg-white dark:bg-opacity-[0.04] rounded-2xl">
       <div className="flex flex-col gap-4 p-5">

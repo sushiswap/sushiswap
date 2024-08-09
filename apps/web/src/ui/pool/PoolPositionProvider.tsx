@@ -1,15 +1,15 @@
 'use client'
 
+import { V2Pool, V3Pool } from '@sushiswap/graph-client/data-api'
 import { FC, ReactNode, createContext, useContext, useMemo } from 'react'
 import {
-  useGraphPool,
+  getTokensFromPool,
   useTokenAmountDollarValues,
   useUnderlyingTokenBalanceFromPool,
 } from 'src/lib/hooks'
 import { useBalanceWeb3 } from 'src/lib/wagmi/hooks/balances/useBalanceWeb3'
 import { ChainId } from 'sushi/chain'
 import { Amount, Type } from 'sushi/currency'
-import type { PoolId } from 'sushi/types'
 import { useAccount } from 'wagmi'
 
 interface PoolPositionContext {
@@ -25,15 +25,34 @@ interface PoolPositionContext {
 const Context = createContext<PoolPositionContext | undefined>(undefined)
 
 export const PoolPositionProvider: FC<{
-  pool: PoolId
+  pool: NonNullable<V2Pool | V3Pool>
   children: ReactNode
   watch?: boolean
 }> = ({ pool, children }) => {
   const { address: account } = useAccount()
 
-  const {
-    data: { reserve0, reserve1, totalSupply, liquidityToken },
-  } = useGraphPool(pool)
+  const { liquidityToken, reserve0, reserve1, totalSupply } = useMemo(() => {
+    if (!pool)
+      return {
+        token0: undefined,
+        token1: undefined,
+        liquidityToken: undefined,
+      }
+
+    const { token0, token1, liquidityToken } = getTokensFromPool(pool)
+
+    return {
+      liquidityToken,
+      reserve0:
+        token0 && pool ? Amount.fromRawAmount(token0, pool.reserve0) : null,
+      reserve1:
+        token1 && pool ? Amount.fromRawAmount(token1, pool.reserve1) : null,
+      totalSupply:
+        liquidityToken && pool
+          ? Amount.fromRawAmount(liquidityToken, pool.liquidity)
+          : null,
+    }
+  }, [pool])
 
   const {
     data: balance,

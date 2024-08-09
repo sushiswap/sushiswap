@@ -126,12 +126,14 @@ const DialogContent = React.forwardRef<
         {...props}
       >
         {children}
-        <DialogPrimitive.Close
-          asChild
-          className={dialogCloseVariants({ variant })}
-        >
-          <IconButton icon={XMarkIcon} name="Close" />
-        </DialogPrimitive.Close>
+        {_hideClose ? null : (
+          <DialogPrimitive.Close
+            asChild
+            className={dialogCloseVariants({ variant })}
+          >
+            <IconButton icon={XMarkIcon} name="Close" />
+          </DialogPrimitive.Close>
+        )}
       </DialogPrimitive.Content>
     </DialogPortal>
   ),

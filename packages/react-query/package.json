@@ -55,6 +55,7 @@
     "@sentry/nextjs": "7.110.0",
     "@sushiswap/client": "workspace:*",
     "@sushiswap/database": "workspace:*",
+    "@sushiswap/graph-client": "workspace:*",
     "@sushiswap/jest-config": "workspace:*",
     "@tsconfig/node20": "20.1.4",
     "@tsconfig/strictest": "2.0.2",

@@ -1,6 +1,5 @@
 'use client'
 
-import { Pool } from '@sushiswap/client'
 import {
   SlippageToleranceStorageKey,
   TTLStorageKey,
@@ -29,6 +28,7 @@ import { Amount, Native } from 'sushi/currency'
 import { Percent } from 'sushi/math'
 import { SendTransactionReturnType, encodeFunctionData } from 'viem'
 
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import {
   PermitInfo,
   PermitType,
@@ -66,7 +66,7 @@ const REMOVE_V2_LIQUIDITY_PERMIT_INFO: PermitInfo = {
 }
 
 interface RemoveSectionLegacyProps {
-  pool: Pool
+  pool: V2Pool
 }
 
 export const RemoveSectionLegacy: FC<RemoveSectionLegacyProps> =

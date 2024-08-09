@@ -1,6 +1,5 @@
 'use client'
 
-import { ChefType } from '@sushiswap/client'
 import { createErrorToast, createToast } from '@sushiswap/notifications'
 import { useCallback, useMemo } from 'react'
 import { masterChefV1Abi, masterChefV2Abi } from 'sushi/abi'
@@ -15,7 +14,7 @@ import {
 } from 'wagmi'
 import { SendTransactionReturnType } from 'wagmi/actions'
 
-import { ChainId } from 'sushi'
+import { ChainId, ChefType } from 'sushi'
 import { useMasterChefContract } from './use-master-chef-contract'
 
 interface UseMasterChefDepositParams {

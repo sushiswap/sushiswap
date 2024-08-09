@@ -17,8 +17,8 @@
     "preinstall": "npx -y only-allow pnpm",
     "lint": "biome check .",
     "lint:fix": "biome check . --apply",
-    "sort": "sort-package-json 'package.json' 'apis/*/package.json' 'apps/*/package.json' 'config/*/package.json' 'jobs/*/package.json' 'packages/*/package.json' 'protocols/*/package.json'",
-    "sort-check": "sort-package-json 'package.json' 'apis/*/package.json' 'apps/*/package.json' 'config/*/package.json' 'jobs/*/package.json' 'packages/*/package.json' 'protocols/*/package.json' --check",
+    "sort": "sort-package-json 'package.json' 'apis/*/package.json' 'apps/*/package.json' 'config/*/package.json' 'packages/*/package.json' 'protocols/*/package.json'",
+    "sort-check": "sort-package-json 'package.json' 'apis/*/package.json' 'apps/*/package.json' 'config/*/package.json' 'packages/*/package.json' 'protocols/*/package.json' --check",
     "test": "dotenv -- turbo run test --parallel",
     "test-web-app": "dotenv -- turbo run test --filter=web",
     "web": "pnpm exec turbo run dev --filter web"

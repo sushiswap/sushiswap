@@ -4,6 +4,7 @@ import { usePrices } from '@sushiswap/react-query'
 import { SteerVault, getTokenRatios } from '@sushiswap/steer-sdk'
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
+import { stringify } from 'sushi/bigint-serializer'
 
 interface SteerTokenDistributionBarProps {
   vault: SteerVault
@@ -14,7 +15,7 @@ export function SteerTokenDistributionBar({
 }: SteerTokenDistributionBarProps) {
   const { data: prices } = usePrices({ chainId: vault.chainId })
   const { data: tokenRatios } = useQuery({
-    queryKey: ['tokenRatios', JSON.stringify(vault), prices],
+    queryKey: ['tokenRatios', vault, prices],
     queryFn: async () => {
       if (!prices) return
 
@@ -38,6 +39,7 @@ export function SteerTokenDistributionBar({
       }
     },
     enabled: !!prices,
+    queryKeyHashFn: stringify,
   })
 
   return (

@@ -40,7 +40,7 @@ export async function Header() {
   const navData: NavigationElement[] = [
     {
       title: 'Explore',
-      items: EXPLORE_NAVIGATION_LINKS,
+      items: EXPLORE_NAVIGATION_LINKS(),
       show: 'everywhere',
       type: NavigationElementType.Dropdown,
     },

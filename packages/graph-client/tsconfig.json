@@ -18,12 +18,6 @@
         "name": "@0no-co/graphqlsp", 
         "schemas": [
           {
-            "name": "blocks",
-            "schema": "./src/subgraphs/blocks/schema.graphql",
-            "tadaOutputLocation": "./src/subgraphs/blocks/blocks-env.d.ts",
-            "tadaTurboLocation": "./src/subgraphs/blocks/blocks-cache.d.ts"
-          },
-          {
             "name": "bonds",
             "schema": "./src/subgraphs/bonds/schema.graphql",
             "tadaOutputLocation": "./src/subgraphs/bonds/bonds-env.d.ts",
@@ -48,47 +42,11 @@
             "tadaTurboLocation": "./src/subgraphs/furo/furo-cache.d.ts"
           },
           {
-            "name": "master-chef-v1",
-            "schema": "./src/subgraphs/master-chef-v1/schema.graphql",
-            "tadaOutputLocation": "./src/subgraphs/master-chef-v1/master-chef-v1-env.d.ts",
-            "tadaTurboLocation": "./src/subgraphs/master-chef-v1/master-chef-v1-cache.d.ts"
-          },
-          {
-            "name": "master-chef-v2",
-            "schema": "./src/subgraphs/master-chef-v2/schema.graphql",
-            "tadaOutputLocation": "./src/subgraphs/master-chef-v2/master-chef-v2-env.d.ts",
-            "tadaTurboLocation": "./src/subgraphs/master-chef-v2/master-chef-v2-cache.d.ts"
-          },
-          {
-            "name": "mini-chef",
-            "schema": "./src/subgraphs/mini-chef/schema.graphql",
-            "tadaOutputLocation": "./src/subgraphs/mini-chef/mini-chef-env.d.ts",
-            "tadaTurboLocation": "./src/subgraphs/mini-chef/mini-chef-cache.d.ts"
-          },
-          {
-            "name": "steer",
-            "schema": "./src/subgraphs/steer/schema.graphql",
-            "tadaOutputLocation": "./src/subgraphs/steer/steer-env.d.ts",
-            "tadaTurboLocation": "./src/subgraphs/steer/steer-cache.d.ts"
-          },
-          {
-            "name": "sushi-bar",
-            "schema": "./src/subgraphs/sushi-bar/schema.graphql",
-            "tadaOutputLocation": "./src/subgraphs/sushi-bar/sushi-bar-env.d.ts",
-            "tadaTurboLocation": "./src/subgraphs/sushi-bar/sushi-bar-cache.d.ts"
-          },
-          {
-            "name": "sushi-v2",
-            "schema": "./src/subgraphs/sushi-v2/schema.graphql",
-            "tadaOutputLocation": "./src/subgraphs/sushi-v2/sushi-v2-env.d.ts",
-            "tadaTurboLocation": "./src/subgraphs/sushi-v2/sushi-v2-cache.d.ts"
-          },
-          {
-            "name": "sushi-v3",
-            "schema": "./src/subgraphs/sushi-v3/schema.graphql",
-            "tadaOutputLocation": "./src/subgraphs/sushi-v3/sushi-v3-env.d.ts",
-            "tadaTurboLocation": "./src/subgraphs/sushi-v3/sushi-v3-cache.d.ts"
-          },
+            "name": "data-api",
+            "schema": "./src/subgraphs/data-api/schema.graphql",
+            "tadaOutputLocation": "./src/subgraphs/data-api/data-api-env.d.ts",
+            "tadaTurboLocation": "./src/subgraphs/data-api/data-api-cache.d.ts"
+          }
         ]
       } 
     ] 

@@ -1,11 +1,7 @@
 'use client'
 
 import { createErrorToast, createToast } from '@sushiswap/notifications'
-import {
-  STEER_PERIPHERY_ADDRESS,
-  SteerVault,
-  isSteerChainId,
-} from '@sushiswap/steer-sdk'
+import { STEER_PERIPHERY_ADDRESS, isSteerChainId } from '@sushiswap/steer-sdk'
 import { steerPeripheryAbi } from '@sushiswap/steer-sdk/abi'
 import {
   Button,
@@ -31,6 +27,7 @@ import {
   UserRejectedRequestError,
 } from 'viem'
 
+import { VaultV1 } from '@sushiswap/graph-client/data-api'
 import { SlippageToleranceStorageKey } from '@sushiswap/hooks'
 import { APPROVE_TAG_STEER } from 'src/lib/constants'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'
@@ -47,7 +44,7 @@ import { SteerStrategyConfig } from '../../constants'
 import { useSteerPositionAddDerivedInfo } from './SteerPositionAddProvider'
 
 interface SteerPositionAddReviewModalProps {
-  vault: SteerVault
+  vault: VaultV1
   onSuccess: () => void
   successLink?: string
   children: ReactNode

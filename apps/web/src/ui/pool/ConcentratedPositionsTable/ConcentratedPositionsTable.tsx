@@ -15,9 +15,10 @@ import { ColumnDef, PaginationState, Row } from '@tanstack/react-table'
 import React, { FC, ReactNode, useCallback, useMemo, useState } from 'react'
 import { useConcentratedLiquidityPositions } from 'src/lib/wagmi/hooks/positions/hooks/useConcentratedLiquidityPositions'
 import { ConcentratedLiquidityPositionWithV3Pool } from 'src/lib/wagmi/hooks/positions/types'
+import { ChainId } from 'sushi'
 import {
   SUSHISWAP_V3_SUPPORTED_CHAIN_IDS,
-  SushiSwapV3ChainId,
+  isSushiSwapV3ChainId,
 } from 'sushi/config'
 import { useAccount } from 'wagmi'
 import { usePoolFilters } from '../PoolsFiltersProvider'
@@ -38,7 +39,7 @@ const COLUMNS = [
 const tableState = { sorting: [{ id: 'positionSize', desc: true }] }
 
 interface ConcentratedPositionsTableProps {
-  chainId?: SushiSwapV3ChainId
+  chainId?: ChainId
   poolId?: string
   onRowClick?(row: ConcentratedLiquidityPositionWithV3Pool): void
   hideNewSmartPositionButton?: boolean
@@ -54,11 +55,13 @@ export const ConcentratedPositionsTable: FC<ConcentratedPositionsTableProps> =
     hideNewPositionButton = false,
   }) => {
     const { address } = useAccount()
-    const { chainIds: filterChainIds, tokenSymbols } = usePoolFilters()
+    const { tokenSymbols } = usePoolFilters()
     const [hide, setHide] = useState(true)
 
     const chainIds = useMemo(() => {
-      if (chainId) return [chainId] as SushiSwapV3ChainId[]
+      if (chainId) {
+        return isSushiSwapV3ChainId(chainId) ? [chainId] : []
+      }
       return [...SUSHISWAP_V3_SUPPORTED_CHAIN_IDS]
     }, [chainId])
 
@@ -76,11 +79,6 @@ export const ConcentratedPositionsTable: FC<ConcentratedPositionsTableProps> =
     const _positions = useMemo(() => {
       const _tokenSymbols = tokenSymbols?.filter((el) => el !== '') || []
       return (positions || [])
-        ?.filter((el) =>
-          filterChainIds.includes(
-            el.chainId as (typeof filterChainIds)[number],
-          ),
-        )
         .filter((el) =>
           _tokenSymbols.length > 0
             ? _tokenSymbols.some((symbol) => {
@@ -97,7 +95,7 @@ export const ConcentratedPositionsTable: FC<ConcentratedPositionsTableProps> =
             (poolId ? el.address.toLowerCase() === poolId.toLowerCase() : true)
           )
         })
-    }, [tokenSymbols, positions, filterChainIds, hide, poolId])
+    }, [tokenSymbols, positions, hide, poolId])
 
     const rowRenderer = useCallback(
       (

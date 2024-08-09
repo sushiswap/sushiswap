@@ -35,7 +35,7 @@ const COLUMNS = [
 
 export const RewardsSection: FC = () => {
   const { address } = useAccount()
-  const { chainIds, tokenSymbols } = usePoolFilters()
+  const { tokenSymbols } = usePoolFilters()
   const { data, isInitialLoading } = useAngleRewardsMultipleChains({
     chainIds: ANGLE_SUPPORTED_CHAIN_IDS,
     account: address,
@@ -58,28 +58,24 @@ export const RewardsSection: FC = () => {
 
   const positions = useMemo(() => {
     const _tokenSymbols = tokenSymbols?.filter((el) => el !== '') || []
-    return (data ?? [])
-      .filter((el) =>
-        chainIds.includes(el.chainId as (typeof chainIds)[number]),
-      )
-      .flatMap((el) => {
-        return Object.values(el.pools ?? {})
-          .filter(
-            (el) =>
-              (el?.userBalanceToken0 ?? 0) + (el?.userBalanceToken1 ?? 0) > 0 ||
-              Object.keys(el.rewardsPerToken).length > 0,
-          )
-          .filter((el) =>
-            _tokenSymbols.length > 0
-              ? _tokenSymbols.some((symbol) => {
-                  return [el.token0.symbol, el.token1.symbol].includes(
-                    symbol.toUpperCase(),
-                  )
-                })
-              : true,
-          )
-      })
-  }, [chainIds, tokenSymbols, data])
+    return (data ?? []).flatMap((el) => {
+      return Object.values(el.pools ?? {})
+        .filter(
+          (el) =>
+            (el?.userBalanceToken0 ?? 0) + (el?.userBalanceToken1 ?? 0) > 0 ||
+            Object.keys(el.rewardsPerToken).length > 0,
+        )
+        .filter((el) =>
+          _tokenSymbols.length > 0
+            ? _tokenSymbols.some((symbol) => {
+                return [el.token0.symbol, el.token1.symbol].includes(
+                  symbol.toUpperCase(),
+                )
+              })
+            : true,
+        )
+    })
+  }, [tokenSymbols, data])
 
   const rowLink = useCallback((row: AngleRewardsPool) => {
     return `/pool/${row.id}`

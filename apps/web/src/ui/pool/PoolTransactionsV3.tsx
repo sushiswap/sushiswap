@@ -1,17 +1,16 @@
 'use client'
 
-import { Pool } from '@sushiswap/client'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   DataTable,
+  Toggle,
 } from '@sushiswap/ui'
-import { Toggle } from '@sushiswap/ui'
 import { useQuery } from '@tanstack/react-query'
 import { PaginationState } from '@tanstack/react-table'
-import React, { FC, useMemo, useState } from 'react'
+import { FC, useMemo, useState } from 'react'
 import { Chain, ChainId } from 'sushi/chain'
 import { SushiSwapV3ChainId, isSushiSwapV3ChainId } from 'sushi/config'
 
@@ -20,8 +19,9 @@ import {
   getSushiV3Collects,
   getSushiV3Mints,
   getSushiV3Swaps,
-  getSushiV3Transactions,
-} from '@sushiswap/graph-client/sushi-v3'
+} from '@sushiswap/graph-client/data-api'
+
+import { V3Pool } from '@sushiswap/graph-client/data-api'
 import {
   TX_AMOUNT_IN_V3_COLUMN,
   TX_AMOUNT_OUT_V3_COLUMN,
@@ -44,58 +44,10 @@ interface UseTransactionsV3Opts {
   skip?: number
 }
 
-const fetchAll = async (
-  poolId: string,
-  chainId: SushiSwapV3ChainId,
-  opts: UseTransactionsV3Opts,
-) => {
-  const transactions = await getSushiV3Transactions({
-    chainId,
-    first: opts.first,
-    skip: opts?.skip ?? 0,
-    where: {
-      or: [
-        {
-          mints_: {
-            pool: poolId.toLowerCase(),
-          },
-        },
-        {
-          burns_: {
-            pool: poolId.toLowerCase(),
-          },
-        },
-        {
-          swaps_: {
-            pool: poolId.toLowerCase(),
-          },
-        },
-        {
-          collects_: {
-            pool: poolId.toLowerCase(),
-          },
-        },
-      ],
-    },
-    orderBy: 'timestamp',
-    orderDirection: 'desc',
-  })
-
-  return transactions
-}
-
-const fetchMints = async (
-  poolId: string,
-  chainId: SushiSwapV3ChainId,
-  opts: UseTransactionsV3Opts,
-) => {
+const fetchMints = async (address: string, chainId: SushiSwapV3ChainId) => {
   const mints = await getSushiV3Mints({
+    address,
     chainId,
-    first: opts.first,
-    skip: opts?.skip ?? 0,
-    where: { pool: poolId.toLowerCase() },
-    orderBy: 'timestamp',
-    orderDirection: 'desc',
   })
 
   return mints.map((mint) => ({
@@ -107,18 +59,10 @@ const fetchMints = async (
   }))
 }
 
-const fetchBurns = async (
-  poolId: string,
-  chainId: SushiSwapV3ChainId,
-  opts: UseTransactionsV3Opts,
-) => {
+const fetchBurns = async (address: string, chainId: SushiSwapV3ChainId) => {
   const burns = await getSushiV3Burns({
     chainId,
-    first: opts.first,
-    skip: opts?.skip ?? 0,
-    where: { pool: poolId.toLowerCase() },
-    orderBy: 'timestamp',
-    orderDirection: 'desc',
+    address,
   })
 
   return burns.map((burn) => ({
@@ -130,18 +74,10 @@ const fetchBurns = async (
   }))
 }
 
-const fetchSwaps = async (
-  poolId: string,
-  chainId: SushiSwapV3ChainId,
-  opts: UseTransactionsV3Opts,
-) => {
+const fetchSwaps = async (address: string, chainId: SushiSwapV3ChainId) => {
   const swaps = await getSushiV3Swaps({
     chainId,
-    first: opts.first,
-    skip: opts?.skip ?? 0,
-    where: { pool: poolId.toLowerCase() },
-    orderBy: 'timestamp',
-    orderDirection: 'desc',
+    address,
   })
 
   return swaps.map((swap) => ({
@@ -153,18 +89,10 @@ const fetchSwaps = async (
   }))
 }
 
-const fetchCollects = async (
-  poolId: string,
-  chainId: SushiSwapV3ChainId,
-  opts: UseTransactionsV3Opts,
-) => {
+const fetchCollects = async (address: string, chainId: SushiSwapV3ChainId) => {
   const collects = await getSushiV3Collects({
     chainId,
-    first: opts.first,
-    skip: opts?.skip ?? 0,
-    where: { pool: poolId.toLowerCase() },
-    orderBy: 'timestamp',
-    orderDirection: 'desc',
+    address,
   })
 
   return collects.map((collect) => ({
@@ -179,7 +107,7 @@ const fetchCollects = async (
 // Will only support the last 1k txs
 // The fact that there are different subtransactions aggregated under one transaction makes paging a bit difficult
 function useTransactionsV3(
-  pool: Pool | undefined | null,
+  pool: V3Pool | undefined | null,
   poolId: string,
   opts: UseTransactionsV3Opts,
 ) {
@@ -190,26 +118,23 @@ function useTransactionsV3(
 
       if (!pool || !isSushiSwapV3ChainId(chainId)) return []
 
-      let transactions: Awaited<ReturnType<typeof fetchAll>> = []
+      let transactions = []
 
       switch (opts.type) {
-        case 'All':
-          transactions = await fetchAll(poolId, chainId, opts)
-          break
         case TransactionTypeV3.Mint:
-          transactions = await fetchMints(poolId, chainId, opts)
+          transactions = await fetchMints(poolId, chainId)
           break
         case TransactionTypeV3.Burn:
-          transactions = await fetchBurns(poolId, chainId, opts)
+          transactions = await fetchBurns(poolId, chainId)
           break
         case TransactionTypeV3.Swap:
-          transactions = await fetchSwaps(poolId, chainId, opts)
+          transactions = await fetchSwaps(poolId, chainId)
           break
         case TransactionTypeV3.Collect:
-          transactions = await fetchCollects(poolId, chainId, opts)
+          transactions = await fetchCollects(poolId, chainId)
           break
         default:
-          transactions = await fetchAll(poolId, chainId, opts)
+          transactions = await fetchSwaps(poolId, chainId)
       }
 
       if (!transactions.length) return []
@@ -278,7 +203,7 @@ type TransactionV3 = NonNullable<
 >[0]
 
 interface PoolTransactionsV3Props {
-  pool: Pool | undefined | null
+  pool: V3Pool | undefined | null
   poolId: string
 }
 

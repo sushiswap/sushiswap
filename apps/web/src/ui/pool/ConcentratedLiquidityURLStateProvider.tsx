@@ -10,22 +10,13 @@ import {
   SushiSwapV3FeeAmount,
   currencyFromShortCurrencyName,
   isShortCurrencyName,
-  isSushiSwapV3ChainId,
   isWNativeSupported,
 } from 'sushi/config'
 import { Native, Token, Type } from 'sushi/currency'
 import { isAddress } from 'viem'
-import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 export const queryParamsSchema = z.object({
-  chainId: z.coerce
-    .number()
-    .int()
-    .gte(0)
-    .lte(2 ** 256)
-    .optional()
-    .transform((chainId) => chainId as SushiSwapV3ChainId | undefined),
   fromCurrency: z.nullable(z.string()).transform((value) => value ?? 'NATIVE'),
   toCurrency: z.nullable(z.string()).transform((value) => value ?? 'SUSHI'),
   feeAmount: z.coerce
@@ -48,7 +39,6 @@ type State = {
   token1: Type | undefined
   tokensLoading: boolean
   feeAmount: SushiSwapV3FeeAmount
-  setNetwork(chainId: SushiSwapV3ChainId): void
   setToken0(currency: Type): void
   setToken1(currency: Type): void
   setFeeAmount(feeAmount: SushiSwapV3FeeAmount): void
@@ -61,6 +51,7 @@ export const ConcentratedLiquidityUrlStateContext = createContext<State>(
 
 interface ConcentratedLiquidityURLStateProvider {
   children: ReactNode | ((state: State) => ReactNode)
+  chainId: SushiSwapV3ChainId
   supportedNetworks?: ChainId[]
 }
 
@@ -83,43 +74,24 @@ const getTokenFromUrl = (
   }
 }
 
-const getChainIdFromUrl = (
-  urlChainId: ChainId | undefined,
-  connectedChainId: ChainId | undefined,
-): SushiSwapV3ChainId => {
-  let chainId: SushiSwapV3ChainId = ChainId.ETHEREUM
-  if (urlChainId && isSushiSwapV3ChainId(urlChainId)) {
-    chainId = urlChainId
-  } else if (connectedChainId && isSushiSwapV3ChainId(connectedChainId)) {
-    chainId = connectedChainId
-  }
-  return chainId
-}
-
 export const ConcentratedLiquidityURLStateProvider: FC<
   ConcentratedLiquidityURLStateProvider
-> = ({ children, supportedNetworks = SUPPORTED_CHAIN_IDS }) => {
+> = ({ children, chainId, supportedNetworks = SUPPORTED_CHAIN_IDS }) => {
   const { push } = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()!
 
-  const {
-    chainId: chainIdFromUrl,
-    fromCurrency,
-    toCurrency,
-    feeAmount,
-    tokenId,
-  } = queryParamsSchema.parse({
-    chainId: searchParams.get('chainId'),
-    fromCurrency: searchParams.get('fromCurrency'),
-    toCurrency: searchParams.get('toCurrency'),
-    feeAmount: searchParams.get('feeAmount'),
-    tokenId: searchParams.get('tokenId'),
-  })
-  const chainId = useChainId()
+  const { fromCurrency, toCurrency, feeAmount, tokenId } =
+    queryParamsSchema.parse({
+      fromCurrency: searchParams.get('fromCurrency'),
+      toCurrency: searchParams.get('toCurrency'),
+      feeAmount: searchParams.get('feeAmount'),
+      tokenId: searchParams.get('tokenId'),
+    })
 
-  const tmp = getChainIdFromUrl(chainIdFromUrl, chainId as ChainId)
-  const _chainId = supportedNetworks?.includes(tmp) ? tmp : ChainId.ETHEREUM
+  const _chainId = supportedNetworks?.includes(chainId)
+    ? chainId
+    : ChainId.ETHEREUM
 
   const { data: tokenFrom, isInitialLoading: isTokenFromLoading } =
     useTokenWithCache({
@@ -156,29 +128,6 @@ export const ConcentratedLiquidityURLStateProvider: FC<
       token1 = undefined
     }
 
-    const setNetwork = (chainId: SushiSwapV3ChainId) => {
-      const fromCurrency =
-        state.token0?.chainId === chainId
-          ? state.token0.isNative
-            ? 'NATIVE'
-            : state.token0.wrapped.address
-          : 'NATIVE'
-      const toCurrency =
-        state.token1?.chainId === chainId
-          ? state.token1.isNative
-            ? 'NATIVE'
-            : state.token1.wrapped.address
-          : undefined
-
-      const _searchParams = new URLSearchParams(
-        Array.from(searchParams.entries()),
-      )
-      _searchParams.set('chainId', chainId.toString())
-      _searchParams.set('fromCurrency', fromCurrency)
-      if (toCurrency) _searchParams.set('toCurrency', toCurrency)
-      void push(`${pathname}?${_searchParams.toString()}`, { scroll: false })
-    }
-
     const setToken0 = (currency: Type) => {
       const same = currency.wrapped.address === token1?.wrapped.address
       const _fromCurrency = currency.isNative
@@ -187,7 +136,6 @@ export const ConcentratedLiquidityURLStateProvider: FC<
       const _searchParams = new URLSearchParams(
         Array.from(searchParams.entries()),
       )
-      _searchParams.set('chainId', currency.chainId.toString())
       _searchParams.set('fromCurrency', _fromCurrency)
       if (toCurrency) {
         _searchParams.set(
@@ -205,7 +153,6 @@ export const ConcentratedLiquidityURLStateProvider: FC<
       const _searchParams = new URLSearchParams(
         Array.from(searchParams.entries()),
       )
-      _searchParams.set('chainId', currency.chainId.toString())
       _searchParams.set('toCurrency', _toCurrency)
       if (fromCurrency) {
         _searchParams.set(
@@ -246,7 +193,6 @@ export const ConcentratedLiquidityURLStateProvider: FC<
       tokensLoading: isTokenFromLoading || isTokenToLoading,
       setToken0,
       setToken1,
-      setNetwork,
       setFeeAmount,
       switchTokens,
     }

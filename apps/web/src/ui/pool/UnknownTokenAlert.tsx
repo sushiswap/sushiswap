@@ -1,6 +1,6 @@
 'use client'
 
-import { Pool } from '@sushiswap/client'
+import { V2Pool } from '@sushiswap/graph-client/data-api'
 import { useCustomTokens } from '@sushiswap/hooks'
 import { Message } from '@sushiswap/ui'
 import { FC, useMemo } from 'react'
@@ -9,10 +9,10 @@ import { ChainId } from 'sushi/chain'
 import { shortenAddress } from 'sushi/format'
 
 interface UnknownTokenAlert {
-  pool: Pool
+  pool: V2Pool
 }
 
-const tokenName = (token: Pool['token0']) =>
+const tokenName = (token: V2Pool['token0']) =>
   token.name ? `${token.name} (${token.symbol})` : shortenAddress(token.address)
 
 export const UnknownTokenAlert: FC<UnknownTokenAlert> = ({ pool }) => {

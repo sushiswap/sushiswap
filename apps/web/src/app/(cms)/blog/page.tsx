@@ -6,6 +6,8 @@ import { CategoryFilter } from './components/category-filter/category-filter'
 import { Hero } from './components/hero'
 import { SearchFilter } from './components/search-filter'
 
+export const fetchCache = 'default-no-store'
+
 export default function Page() {
   return (
     <Suspense>

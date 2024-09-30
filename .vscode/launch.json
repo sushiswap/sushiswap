@@ -5,8 +5,8 @@
       "name": "Next.js: debug server-side",
       "type": "node-terminal",
       "request": "launch",
-      "cwd": "${workspaceFolder}/apps/web",
-      "command": "npm run dev"
+      "command": "pnpm exec turbo run dev --filter web",
+      "cwd": "${workspaceFolder}/apps/web"
     },
     {
       "name": "Next.js: debug client-side",
@@ -18,8 +18,8 @@
       "name": "Next.js: debug full stack",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceFolder}/apps/web",
       "program": "${workspaceFolder}/node_modules/.bin/next",
+      "cwd": "${workspaceFolder}/apps/web",
       "runtimeArgs": ["--inspect"],
       "skipFiles": ["<node_internals>/**"],
       "serverReadyAction": {

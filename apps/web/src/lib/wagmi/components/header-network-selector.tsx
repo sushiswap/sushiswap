@@ -42,7 +42,7 @@ export const HeaderNetworkSelector: FC<{
 
   return (
     <NetworkSelector
-      showAptos
+      showNonEvm
       selected={chainId}
       onSelect={onSwitchNetwork}
       networks={networks}

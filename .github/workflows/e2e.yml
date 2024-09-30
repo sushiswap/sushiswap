@@ -54,6 +54,10 @@ jobs:
           NEXT_PUBLIC_APP_ENV: 'test'
           NEXT_PUBLIC_CHAIN_ID: ${{ matrix.chain-id }}
           NEXT_TELEMETRY_DISABLED: 1
+          # Tron
+          NEXT_PUBLIC_TRON_PRO_API_KEY: ${{ secrets.NEXT_PUBLIC_TRON_PRO_API_KEY }}
+          BITQUERY_API_KEY: ${{ secrets.BITQUERY_API_KEY }}
+          BITQUERY_BEARER_TOKEN: ${{ secrets.BITQUERY_BEARER_TOKEN }}
 
       - name: Upload test results
         if: always()

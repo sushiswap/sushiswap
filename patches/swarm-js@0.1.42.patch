@@ -1,0 +1,14 @@
+diff --git a/package.json b/package.json
+index 6a37782739e88700467b7e583c15c8e89980c27e..e8b910fb572ac424855daf9bc1bb6048b01ecce9 100644
+--- a/package.json
++++ b/package.json
+@@ -2,8 +2,7 @@
+   "name": "swarm-js",
+   "version": "0.1.42",
+   "description": "Swarm tools for JavaScript.",
+-  "main": "lib/api-node.js",
+-  "browser": "lib/api-browser.js",
++  "main": "lib/api-browser.js",
+   "scripts": {
+     "build": "npm run babel",
+     "babel": "babel src --out-dir=lib",

@@ -5,6 +5,7 @@ import { Chain, ChainId } from 'sushi/chain'
 
 import Link from 'next/link'
 import { NetworkIcon } from '../icons/NetworkIcon'
+// import { TronCircle } from '../icons/network/circle/TronCircle'
 import { AptosCircle } from '../icons/network/circle/AptosCircle'
 import {
   Command,
@@ -52,7 +53,7 @@ const PREFERRED_CHAINID_ORDER: ChainId[] = [
 ]
 
 export interface NetworkSelectorProps<T extends number = ChainId> {
-  showAptos?: boolean
+  showNonEvm?: boolean
   hideNetworkName?: boolean
   networks: readonly T[]
   selected: T
@@ -65,8 +66,34 @@ const NEW_CHAINS: number[] = [
   ChainId.MANTLE,
 ] satisfies ChainId[]
 
+function Aptos() {
+  return (
+    <Link href="/aptos/swap" rel="noopener noreferrer">
+      <CommandItem className="cursor-pointer">
+        <div className="flex items-center gap-2">
+          <AptosCircle width={22} height={22} />
+          Aptos
+        </div>
+      </CommandItem>
+    </Link>
+  )
+}
+
+// function Tron() {
+//   return (
+//     <Link href="/tron/swap" rel="noopener noreferrer">
+//       <CommandItem className="cursor-pointer">
+//         <div className="flex items-center gap-2">
+//           <TronCircle width={22} height={22} />
+//           Tron
+//         </div>
+//       </CommandItem>
+//     </Link>
+//   )
+// }
+
 const NetworkSelector = <T extends number>({
-  showAptos = false,
+  showNonEvm = false,
   onSelect,
   networks = [],
   children,
@@ -91,19 +118,11 @@ const NetworkSelector = <T extends number>({
           />
           <CommandEmpty>No network found.</CommandEmpty>
           <CommandGroup>
-            {showAptos ? (
-              <Link
-                href="https://aptos.sushi.com"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <CommandItem className="cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <AptosCircle width={22} height={22} />
-                    Aptos
-                  </div>
-                </CommandItem>
-              </Link>
+            {showNonEvm ? (
+              <>
+                <Aptos />
+                {/* <Tron /> */}
+              </>
             ) : null}
             {_networks
               .sort((a) => (NEW_CHAINS.includes(a) ? -1 : 0))

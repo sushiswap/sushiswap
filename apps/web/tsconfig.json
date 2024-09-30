@@ -5,6 +5,7 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "paths": {
       "~aptos/*": ["src/app/(non-evm)/aptos/*"],
+      "~tron/*": ["src/app/(non-evm)/tron/*"],
       "~evm/*": ["src/app/(evm)/*"],
     },
     "allowJs": true,

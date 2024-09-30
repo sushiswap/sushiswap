@@ -3,7 +3,7 @@ import {
   SlippageToleranceStorageKey,
   useSlippageTolerance,
 } from '@sushiswap/hooks'
-import { classNames } from '@sushiswap/ui'
+import { Button } from '@sushiswap/ui'
 import { Dots } from '@sushiswap/ui'
 import { Provider } from 'aptos'
 import React, { useMemo, useState } from 'react'
@@ -12,8 +12,8 @@ import { networkNameToNetwork } from '~aptos/(common)/config/chains'
 import { formatNumberWithDecimals } from '~aptos/(common)/lib/common/format-number-with-decimals'
 import { useNetwork } from '~aptos/(common)/lib/common/use-network'
 import { Token } from '~aptos/(common)/lib/types/token'
+import { Checker } from '~aptos/(common)/ui/checker'
 import { createToast } from '~aptos/(common)/ui/toast'
-import { UserProfile } from '~aptos/(common)/ui/user-profile/user-profile'
 import { Pool } from '~aptos/pool/lib/convert-pool-to-sushi-pool'
 import { RemoveSectionWidget } from './RemoveSectionWidget'
 
@@ -60,7 +60,7 @@ export const RemoveSectionLegacy = ({
   const [percentage, setPercentage] = useState<string>('0')
   const [isTransactionPending, setisTransactionPending] =
     useState<boolean>(false)
-  const { account, signAndSubmitTransaction, connected } = useWallet()
+  const { account, signAndSubmitTransaction } = useWallet()
 
   const currencyAToRemove = useMemo(() => {
     return token0
@@ -160,30 +160,22 @@ export const RemoveSectionLegacy = ({
         token1.decimals,
       )}
     >
-      <>
-        {connected ? (
-          <button
-            className={classNames(
-              'btn w-full flex items-center justify-center gap-2 cursor-pointer transition-all bg-blue hover:bg-blue-600 active:bg-blue-700 text-white px-6 h-[52px] rounded-xl text-base font-semibold',
-              (Number(percentage) <= 0 || isTransactionPending) &&
-                'pointer-events-none relative opacity-[0.4] overflow-hidden',
-            )}
-            type="button"
-            disabled={Number(percentage) <= 0 || isTransactionPending}
-            onClick={removeLiquidityHandler}
-          >
-            {isTransactionPending ? (
-              <Dots>Confirm transaction</Dots>
-            ) : Number(percentage) > 0 ? (
-              <>Remove Liquidity</>
-            ) : (
-              <>Enter Amount</>
-            )}
-          </button>
-        ) : (
-          <UserProfile />
-        )}
-      </>
+      <Checker.Connect variant="outline" fullWidth>
+        <Button
+          variant="outline"
+          fullWidth
+          disabled={Number(percentage) <= 0 || isTransactionPending}
+          onClick={removeLiquidityHandler}
+        >
+          {isTransactionPending ? (
+            <Dots>Confirm transaction</Dots>
+          ) : Number(percentage) > 0 ? (
+            <>Remove Liquidity</>
+          ) : (
+            <>Enter Amount</>
+          )}
+        </Button>
+      </Checker.Connect>
     </RemoveSectionWidget>
   )
 }

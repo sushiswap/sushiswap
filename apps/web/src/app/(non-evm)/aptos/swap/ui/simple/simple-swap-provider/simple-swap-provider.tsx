@@ -74,11 +74,16 @@ export const SimpleSwapProvider: FC<SimpleSwapProvider> = ({ children }) => {
   const reducer = (state: State, action: Actions) => {
     switch (action.type) {
       case 'setToken0':
-        return { ...state, token0: action.value }
+        return { ...state, token0: action.value, amount: '' }
       case 'setToken1':
         return { ...state, token1: action.value }
       case 'swapTokens':
-        return { ...state, token0: state.token1, token1: state.token0 }
+        return {
+          ...state,
+          token0: state.token1,
+          token1: state.token0,
+          amount: '',
+        }
       case 'setAmount':
         return { ...state, amount: action.value }
       case 'setSlippageAmount':

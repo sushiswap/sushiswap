@@ -1,0 +1,111 @@
+export const TRON_MULTICALL_ABI = [
+  {
+    inputs: [
+      {
+        components: [
+          { internalType: 'address', name: 'target', type: 'address' },
+          { internalType: 'bytes', name: 'callData', type: 'bytes' },
+        ],
+        internalType: 'struct TronMulticall.Call[]',
+        name: 'calls',
+        type: 'tuple[]',
+      },
+    ],
+    name: 'aggregate',
+    outputs: [
+      { internalType: 'uint256', name: 'blockNumber', type: 'uint256' },
+      { internalType: 'bytes[]', name: 'returnData', type: 'bytes[]' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getBasefee',
+    outputs: [{ internalType: 'uint256', name: 'basefee', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'uint256', name: 'blockNumber', type: 'uint256' }],
+    name: 'getBlockHash',
+    outputs: [{ internalType: 'bytes32', name: 'blockHash', type: 'bytes32' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getBlockNumber',
+    outputs: [
+      { internalType: 'uint256', name: 'blockNumber', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getChainId',
+    outputs: [{ internalType: 'uint256', name: 'chainid', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getCurrentBlockCoinbase',
+    outputs: [{ internalType: 'address', name: 'coinbase', type: 'address' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getCurrentBlockDifficulty',
+    outputs: [{ internalType: 'uint256', name: 'difficulty', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getCurrentBlockTimestamp',
+    outputs: [{ internalType: 'uint256', name: 'timestamp', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
+    name: 'getEthBalance',
+    outputs: [{ internalType: 'uint256', name: 'balance', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getLastBlockHash',
+    outputs: [{ internalType: 'bytes32', name: 'blockHash', type: 'bytes32' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: 'accountAddress', type: 'address' },
+      { internalType: 'trcToken', name: 'id', type: 'trcToken' },
+    ],
+    name: 'getTokenBalance',
+    outputs: [{ internalType: 'uint256', name: 'balance', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
+    name: 'isContract',
+    outputs: [{ internalType: 'bool', name: 'result', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'bytes[]', name: 'data', type: 'bytes[]' }],
+    name: 'multicall',
+    outputs: [{ internalType: 'bytes[]', name: 'results', type: 'bytes[]' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+]

@@ -1,14 +1,10 @@
 {
   "recommendations": [
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
     "heybourn.headwind",
     "bradlc.vscode-tailwindcss",
-    "NomicFoundation.hardhat-solidity",
     "VisualStudioExptTeam.vscodeintellicode",
-    "wix.vscode-import-cost",
     "GraphQL.vscode-graphql",
-    "bierner.markdown-mermaid",
     "biomejs.biome"
   ]
 }

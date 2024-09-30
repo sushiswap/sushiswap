@@ -169,8 +169,8 @@ export const RemoveSectionWidget: FC<RemoveSectionWidgetProps> = ({
             </CardGroup>
           </Card>
         </div>
-        <WidgetFooter>{children}</WidgetFooter>
       </div>
+      <WidgetFooter>{children}</WidgetFooter>
     </Widget>
   )
 }

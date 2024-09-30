@@ -46,7 +46,8 @@
     "patchedDependencies": {
       "@aptos-labs/aptos-client@0.1.0": "patches/@aptos-labs__aptos-client@0.1.0.patch",
       "@msafe/aptos-wallet-adapter@1.1.3": "patches/@msafe__aptos-wallet-adapter@1.1.3.patch",
-      "@walletconnect/logger@2.1.2": "patches/@walletconnect__logger@2.1.2.patch"
+      "@walletconnect/logger@2.1.2": "patches/@walletconnect__logger@2.1.2.patch",
+      "swarm-js@0.1.42": "patches/swarm-js@0.1.42.patch"
     }
   }
 }

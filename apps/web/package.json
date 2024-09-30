@@ -113,7 +113,6 @@
     "@viem/anvil": "0.0.10",
     "autoprefixer": "10.4.14",
     "core-js": "3.38.1",
-    "knip": "^5.30.6",
     "postcss": "8.4.23",
     "schema-dts": "1.1.2",
     "tsx": "4.19.0",

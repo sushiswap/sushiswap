@@ -39,9 +39,9 @@ export async function HelpByProducts() {
   const products = await getFaqProducts()
 
   return (
-    <div className="md:space-y-12">
+    <div className="md:space-y-12 space-y-8">
       <div className="text-2xl font-medium">Help By Products</div>
-      <div className="lg:grid-cols-4 md:grid-cols-3 grid gap-x-5 md:gap-y-8 gap-y-4">
+      <div className="lg:grid-cols-4 xs:grid-cols-2 md:grid-cols-3 grid gap-x-5 md:gap-y-8 gap-y-4">
         {products.map((product, i) => (
           <Block key={i} {...product} />
         ))}

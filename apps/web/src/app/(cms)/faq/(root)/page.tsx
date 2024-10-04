@@ -24,7 +24,7 @@ export default async function Page() {
           <SearchBox />
         </div>
       </div>
-      <div className="max-w-6xl lg:px-[120px] md:px-[80px] w-full px-5 space-y-20 md:space-y-28">
+      <div className="max-w-6xl lg:px-[120px] md:px-[80px] w-full px-5 space-y-12 md:space-y-28">
         <MostSearchedQuestions />
         <HelpByCategories />
         <HelpByProducts />

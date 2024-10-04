@@ -21,7 +21,7 @@ function SidebarEntry({ entry, isActive }: SidebarEntry) {
   return (
     <div
       className={classNames(
-        'font-medium w-[160px] max-w-fit',
+        'font-medium max-w-fit',
         isActive
           ? 'dark:text-gray-100'
           : 'dark:text-gray-400 text-[#7F7F7F] dark:hover:text-gray-300',
@@ -74,7 +74,7 @@ export function SidebarMobile({ entries, param }: Sidebar) {
           'transition-[grid-template-rows] grid [&>*]:overflow-hidden',
         )}
       >
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="h-3" />
           {entries.map((entry) => (
             <div

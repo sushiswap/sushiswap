@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
       <Header />
-      <div>{children}</div>
+      <div className="h-full">{children}</div>
     </Providers>
   )
 }

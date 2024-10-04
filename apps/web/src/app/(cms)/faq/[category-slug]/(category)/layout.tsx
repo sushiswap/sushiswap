@@ -22,7 +22,7 @@ export default async function Layout({
   }
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       <div className="dark:bg-[#19202F] bg-[#414a6c05]">
         <Container maxWidth="4xl" className="px-5 md:px-8 pb-14 space-y-6">
           <Breadcrumb replace={{ '-': ' ' }} truncate={false} />
@@ -33,6 +33,6 @@ export default async function Layout({
       </div>
       <div className="h-[0.5px] bg-accent w-full" />
       <CategoryLayout>{children}</CategoryLayout>
-    </>
+    </div>
   )
 }

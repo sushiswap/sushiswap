@@ -25,9 +25,9 @@ export async function HelpByCategories() {
   const categories = await getFaqCategories({ sort: ['id'] })
 
   return (
-    <div className="md:space-y-12">
+    <div className="md:space-y-12 space-y-8">
       <div className="text-2xl font-medium">Help By Categories</div>
-      <div className="flex flex-wrap gap-x-6 gap-y-4">
+      <div className="flex flex-wrap gap-x-3 md:gap-x-6 gap-y-3 md:gap-y-4">
         {categories.map((topic) => (
           <Block key={topic.slug} {...topic} />
         ))}

@@ -21,7 +21,7 @@ export default async function AnswerPage({
 
   return (
     <div
-      className="prose dark:!prose-invert prose-slate"
+      className="prose dark:!prose-invert"
       dangerouslySetInnerHTML={{
         __html: body || '',
       }}

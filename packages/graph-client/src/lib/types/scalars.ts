@@ -9,12 +9,20 @@ import type {
   SushiSwapV3ChainId,
 } from 'sushi/config'
 
+type JSONValue = string | number | boolean | null | JSONArray | JSONObject
+
+export interface JSONObject {
+  [key: string]: JSONValue
+}
+
+interface JSONArray extends Array<JSONValue> {}
+
 export type Scalars = {
   BigInt: string
   BigDecimal: string
   Bytes: `0x${string}`
   DateTime: string
-  JSON: object
+  JSON: JSONObject
 
   ChainId: ChainId
 

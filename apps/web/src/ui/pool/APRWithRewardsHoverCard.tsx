@@ -104,7 +104,9 @@ export const APRWithRewardsHoverCard: FC<APRWithRewardsHoverCardProps> = ({
     <>
       <div className="hidden sm:block">
         <HoverCard openDelay={300} closeDelay={0}>
-          <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+          <HoverCardTrigger asChild className="cursor-pointer">
+            {children}
+          </HoverCardTrigger>
           <HoverCardContent side="right" className="!p-0 max-w-[320px]">
             {card}
           </HoverCardContent>
@@ -112,7 +114,11 @@ export const APRWithRewardsHoverCard: FC<APRWithRewardsHoverCardProps> = ({
       </div>
       <div className="block sm:hidden">
         <Popover>
-          <PopoverTrigger onClick={(e) => e.stopPropagation()} asChild>
+          <PopoverTrigger
+            onClick={(e) => e.stopPropagation()}
+            asChild
+            className="cursor-pointer"
+          >
             {children}
           </PopoverTrigger>
           <PopoverContent side="right" className="!p-0 max-w-[320px]">

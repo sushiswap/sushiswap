@@ -45,7 +45,7 @@ const PARTNER_NAVIGATION_LINKS: NavigationElementDropdown['items'] = [
     description: 'Incentivize your token with Sushi rewards.',
   },
   {
-    title: 'List enquiry',
+    title: 'Token Listing',
     href: '/tokenlist-request',
     description: 'Get your token on our default token list.',
   },
@@ -225,7 +225,7 @@ const Navigation: React.FC<NavProps> = ({
               <NavigationMenuContent>
                 <ul className="w-[200px] flex flex-col gap-6 p-4">
                   <div className="flex flex-col gap-1 pt-2">
-                    <span className="font-semibold px-2">Company</span>
+                    <span className="px-2 font-semibold">Company</span>
                     <div>
                       {COMPANY_NAVIGATION_LINKS.map((component) => (
                         <li key={component.title}>
@@ -247,7 +247,7 @@ const Navigation: React.FC<NavProps> = ({
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="font-semibold px-2">Protocol</span>
+                    <span className="px-2 font-semibold">Protocol</span>
                     <div>
                       {PROTOCOL_NAVIGATION_LINKS.map((component) => (
                         <li key={component.title}>
@@ -269,7 +269,7 @@ const Navigation: React.FC<NavProps> = ({
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="font-semibold px-2">Partnership</span>
+                    <span className="px-2 font-semibold">Partnership</span>
                     <div>
                       {PARTNER_NAVIGATION_LINKS.map((component) => (
                         <li key={component.title}>
@@ -291,7 +291,7 @@ const Navigation: React.FC<NavProps> = ({
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="font-semibold px-2">Support</span>
+                    <span className="px-2 font-semibold">Support</span>
                     <div>
                       {SUPPORT_NAVIGATION_LINKS.map((component) => (
                         <li key={component.title}>

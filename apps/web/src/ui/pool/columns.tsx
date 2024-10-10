@@ -413,6 +413,7 @@ export const APR_WITH_REWARDS_COLUMN: ColumnDef<Pool, unknown> = {
   ),
   meta: {
     skeleton: <SkeletonText fontSize="lg" />,
+    disableLink: true,
   },
 }
 

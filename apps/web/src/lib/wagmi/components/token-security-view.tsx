@@ -77,8 +77,8 @@ export const TokenSecurityView = ({
   }, [tokenSecurityResponse, token])
 
   return (
-    <List className="!pt-0">
-      <List.Control>
+    <List className="!pt-0 overflow-hidden">
+      <List.Control className="!overflow-y-auto">
         <List.Item
           className="justify-between items-center !cursor-default outline-none"
           iconProps={{ width: undefined, height: undefined }}

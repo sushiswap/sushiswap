@@ -63,6 +63,7 @@ import {
 } from 'wagmi'
 import { useAccount } from 'wagmi'
 import { usePublicClient } from 'wagmi'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 import { useTokenAmountDollarValues } from '../../lib/hooks'
 
 interface ConcentratedLiquidityRemoveWidget {
@@ -110,6 +111,8 @@ export const ConcentratedLiquidityRemoveWidget: FC<
 
   const trace = useTrace()
 
+  const { refetchChain: refetchBalances } = useRefetchBalances()
+
   const onSuccess = useCallback(
     (hash: SendTransactionReturnType) => {
       setValue('0')
@@ -128,13 +131,18 @@ export const ConcentratedLiquidityRemoveWidget: FC<
         ...trace,
       })
 
+      const receipt = client.waitForTransactionReceipt({ hash })
+      receipt.then(() => {
+        refetchBalances(chainId)
+      })
+
       const ts = new Date().getTime()
       void createToast({
         account,
         type: 'burn',
         chainId,
         txHash: hash,
-        promise: client.waitForTransactionReceipt({ hash }),
+        promise: receipt,
         summary: {
           pending: `Removing liquidity from the ${position.amount0.currency.symbol}/${position.amount1.currency.symbol} pair`,
           completed: `Successfully removed liquidity from the ${position.amount0.currency.symbol}/${position.amount1.currency.symbol} pair`,
@@ -144,7 +152,7 @@ export const ConcentratedLiquidityRemoveWidget: FC<
         groupTimestamp: ts,
       })
     },
-    [client, position, account, chainId, trace],
+    [refetchBalances, client, position, account, chainId, trace],
   )
 
   const onError = useCallback((e: Error) => {

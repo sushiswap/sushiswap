@@ -17,6 +17,7 @@ import {
   useWriteContract,
 } from 'wagmi'
 
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 import { V3Migrator } from '../abis/V3Migrator'
 import { V3MigrateAddress } from '../constants'
 import { V3MigrateChainId } from '../types'
@@ -165,6 +166,8 @@ export const useV3Migrate = ({
       },
     })
 
+  const { refetchChain: refetchBalances } = useRefetchBalances()
+
   const simulation = migrateSimulation || multicallSimulation
   const isError = isMigrateError || isMulticallError
 
@@ -176,6 +179,11 @@ export const useV3Migrate = ({
         action: `${LiquiditySource.V2}->${LiquiditySource.V3}`,
         label: `${args.token0?.symbol}/${args.token1?.symbol}`,
         ...trace,
+      })
+
+      const receipt = client.waitForTransactionReceipt({ hash: data })
+      receipt.then(() => {
+        refetchBalances(chainId)
       })
 
       const ts = new Date().getTime()
@@ -194,7 +202,15 @@ export const useV3Migrate = ({
         groupTimestamp: ts,
       })
     },
-    [account, chainId, client, trace, args.token0, args.token1],
+    [
+      refetchBalances,
+      account,
+      chainId,
+      client,
+      trace,
+      args.token0,
+      args.token1,
+    ],
   )
 
   const onError = useCallback((e: Error) => {

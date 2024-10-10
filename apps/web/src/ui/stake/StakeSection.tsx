@@ -50,7 +50,7 @@ const _StakeSection = () => {
             size="xl"
             fullWidth
             chainId={ChainId.ETHEREUM}
-            amounts={[parsedInput]}
+            amount={parsedInput}
           >
             <Checker.ApproveERC20
               size="xl"

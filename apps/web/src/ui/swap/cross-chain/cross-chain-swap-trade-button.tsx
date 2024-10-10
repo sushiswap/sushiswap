@@ -39,11 +39,7 @@ export const CrossChainSwapTradeButton: FC = () => {
         >
           <Checker.Connect fullWidth>
             <Checker.Network fullWidth chainId={chainId0}>
-              <Checker.Amounts
-                fullWidth
-                chainId={chainId0}
-                amounts={[swapAmount]}
-              >
+              <Checker.Amounts fullWidth chainId={chainId0} amount={swapAmount}>
                 <Checker.ApproveERC20
                   id="approve-erc20"
                   fullWidth

@@ -7,10 +7,8 @@ import {
   useTokenAmountDollarValues,
   useUnderlyingTokenBalanceFromPool,
 } from 'src/lib/hooks'
-import { useBalanceWeb3 } from 'src/lib/wagmi/hooks/balances/useBalanceWeb3'
-import { ChainId } from 'sushi/chain'
 import { Amount, Type } from 'sushi/currency'
-import { useAccount } from 'wagmi'
+import { useAmountBalance } from '~evm/_common/ui/balance-provider/use-balance'
 
 interface PoolPositionContext {
   balance: Amount<Type> | null | undefined
@@ -29,8 +27,6 @@ export const PoolPositionProvider: FC<{
   children: ReactNode
   watch?: boolean
 }> = ({ pool, children }) => {
-  const { address: account } = useAccount()
-
   const { liquidityToken, reserve0, reserve1, totalSupply } = useMemo(() => {
     if (!pool)
       return {
@@ -54,15 +50,7 @@ export const PoolPositionProvider: FC<{
     }
   }, [pool])
 
-  const {
-    data: balance,
-    isInitialLoading: isLoading,
-    isError,
-  } = useBalanceWeb3({
-    chainId: pool.chainId as ChainId,
-    currency: liquidityToken,
-    account,
-  })
+  const { data: balance, isLoading, isError } = useAmountBalance(liquidityToken)
 
   const underlying = useUnderlyingTokenBalanceFromPool({
     reserve0,

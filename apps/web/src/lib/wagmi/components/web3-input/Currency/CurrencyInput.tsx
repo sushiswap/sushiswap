@@ -12,11 +12,11 @@ import {
   useState,
   useTransition,
 } from 'react'
-import { useBalanceWeb3 } from 'src/lib/wagmi/hooks/balances/useBalanceWeb3'
 import { ChainId } from 'sushi/chain'
 import { Token, Type, tryParseAmount } from 'sushi/currency'
 import { Percent } from 'sushi/math'
 import { useAccount } from 'wagmi'
+import { useAmountBalance } from '~evm/_common/ui/balance-provider/use-balance'
 import { usePrice } from '~evm/_common/ui/price-provider/price-provider/use-price'
 import { TokenSelector } from '../../token-selector/token-selector'
 import { BalancePanel } from './BalancePanel'
@@ -79,11 +79,8 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
   const { address } = useAccount()
   const [pending, startTransition] = useTransition()
 
-  const { data: balance, isInitialLoading: isBalanceLoading } = useBalanceWeb3({
-    chainId,
-    account: address,
-    currency,
-  })
+  const { data: balance, isLoading: isBalanceLoading } =
+    useAmountBalance(currency)
 
   const { data: price, isLoading: isPriceLoading } = usePrice({
     chainId: currency?.chainId,

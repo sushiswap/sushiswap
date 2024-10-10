@@ -1,10 +1,10 @@
 'use client'
 
 import { FC, ReactNode, createContext, useContext, useMemo } from 'react'
-import { useBalanceWeb3 } from 'src/lib/wagmi/hooks/balances/useBalanceWeb3'
 import { ChainId } from 'sushi/chain'
 import { Amount, SUSHI, Type, XSUSHI } from 'sushi/currency'
 import { useAccount } from 'wagmi'
+import { useAmountBalance } from '~evm/_common/ui/balance-provider/use-balance'
 
 interface BarBalanceContext {
   sushiBalance: Amount<Type>
@@ -20,27 +20,19 @@ export const BarBalanceProvider: FC<{
   children: ReactNode
   watch?: boolean
 }> = ({ children }) => {
-  const { isConnected, address } = useAccount()
+  const { isConnected } = useAccount()
 
   const {
     data: sushiBalance,
     isLoading: isSushiBalanceLoading,
     isError: isSushiBalanceError,
-  } = useBalanceWeb3({
-    chainId: ChainId.ETHEREUM,
-    account: address,
-    currency: SUSHI[ChainId.ETHEREUM],
-  })
+  } = useAmountBalance(SUSHI[ChainId.ETHEREUM])
 
   const {
     data: xSushiBalance,
     isLoading: isXSushiBalanceLoading,
     isError: isXSushiBalanceError,
-  } = useBalanceWeb3({
-    chainId: ChainId.ETHEREUM,
-    account: address,
-    currency: XSUSHI[ChainId.ETHEREUM],
-  })
+  } = useAmountBalance(XSUSHI[ChainId.ETHEREUM])
 
   return (
     <Context.Provider

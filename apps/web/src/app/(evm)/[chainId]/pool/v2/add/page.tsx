@@ -338,7 +338,10 @@ const _Add: FC<AddProps> = ({
                 <Checker.Amounts
                   fullWidth
                   chainId={chainId}
-                  amounts={[parsedInput0, parsedInput1]}
+                  amounts={useMemo(
+                    () => [parsedInput0, parsedInput1],
+                    [parsedInput0, parsedInput1],
+                  )}
                 >
                   {(!pool || isSushiSwapV2Pool(pool)) &&
                     isSushiSwapV2ChainId(chainId) && (

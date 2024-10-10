@@ -39,6 +39,7 @@ import { useAccount } from 'wagmi'
 import { useSimulateContract } from 'wagmi'
 import { useWaitForTransactionReceipt } from 'wagmi'
 import { useWriteContract } from 'wagmi'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 import { useTokenAmountDollarValues } from '../../../../../lib/hooks'
 import { useSteerPositionAddDerivedInfo } from './SteerPositionAddProvider'
 
@@ -105,7 +106,7 @@ export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
       [newPositionValues],
     )
 
-    // const hasExistingPosition = !!existingPosition
+    const { refetchChain: refetchBalances } = useRefetchBalances()
 
     const onSuccess = useCallback(
       (hash: SendTransactionReturnType) => {
@@ -113,13 +114,18 @@ export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
 
         if (!currencies) return
 
+        const receipt = client.waitForTransactionReceipt({ hash })
+        receipt.then(() => {
+          refetchBalances(vault.chainId)
+        })
+
         const ts = new Date().getTime()
         void createToast({
           account: address,
           type: 'mint',
           chainId: vault.chainId,
           txHash: hash,
-          promise: client.waitForTransactionReceipt({ hash }),
+          promise: receipt,
           summary: {
             pending: `Adding liquidity to the ${currencies.CURRENCY_A?.symbol}/${currencies.CURRENCY_B?.symbol} smart pool`,
             completed: `Successfully added liquidity to the ${currencies.CURRENCY_A?.symbol}/${currencies.CURRENCY_B?.symbol} smart pool`,
@@ -129,7 +135,7 @@ export const SteerPositionAddReviewModal: FC<SteerPositionAddReviewModalProps> =
           groupTimestamp: ts,
         })
       },
-      [client, currencies, address, vault.chainId, _onSuccess],
+      [refetchBalances, client, currencies, address, vault.chainId, _onSuccess],
     )
 
     const onError = useCallback((e: Error) => {

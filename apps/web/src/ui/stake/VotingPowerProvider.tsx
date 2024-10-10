@@ -2,7 +2,6 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { FC, ReactNode, createContext, useContext, useMemo } from 'react'
-import { useBalancesWeb3 } from 'src/lib/wagmi/hooks/balances/useBalancesWeb3'
 import {
   erc20Abi_balanceOf,
   erc20Abi_totalSupply,
@@ -21,6 +20,7 @@ import {
 } from 'sushi/currency'
 import { Fraction } from 'sushi/math'
 import { useAccount, useReadContract, useReadContracts } from 'wagmi'
+import { useAmountBalances } from '~evm/_common/ui/balance-provider/use-balances'
 
 const SnapshotStrategies = [
   {
@@ -110,12 +110,10 @@ export const VotingPowerProvider: FC<{
     data: ethereumBalances,
     isLoading: isBalancesLoading,
     isError: isBalancesError,
-  } = useBalancesWeb3({
-    chainId: ChainId.ETHEREUM,
-    currencies: [XSUSHI[ChainId.ETHEREUM], SUSHI_ETH_SLP],
-    account: address,
-    enabled: Boolean(address),
-  })
+  } = useAmountBalances(
+    ChainId.ETHEREUM,
+    useMemo(() => [XSUSHI[ChainId.ETHEREUM], SUSHI_ETH_SLP], []),
+  )
 
   const {
     data: contractData,
@@ -212,8 +210,12 @@ export const VotingPowerProvider: FC<{
   }, [contractData])
 
   const balances = useMemo(() => {
+    const xSushiBalance = ethereumBalances?.get(XSUSHI[ChainId.ETHEREUM].id)
+    const slpBalance = ethereumBalances?.get(SUSHI_ETH_SLP.id)
+
     if (
-      !ethereumBalances ||
+      !xSushiBalance ||
+      !slpBalance ||
       !votingPowerData?.vp_by_strategy?.[1] ||
       !userStakedSLP
     ) {
@@ -221,8 +223,8 @@ export const VotingPowerProvider: FC<{
     }
 
     return {
-      xsushi: ethereumBalances[XSUSHI_ADDRESS[ChainId.ETHEREUM]],
-      slp: ethereumBalances[SUSHI_ETH_SLP_ADDRESS].add(
+      xsushi: xSushiBalance,
+      slp: slpBalance.add(
         Amount.fromRawAmount(SUSHI_ETH_SLP, userStakedSLP[0]),
       ) as Amount<Type>,
       xsushiPolygon: tryParseAmount(

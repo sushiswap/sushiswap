@@ -9,6 +9,7 @@ import {
   useWriteContract,
 } from 'wagmi'
 import { SendTransactionReturnType } from 'wagmi/actions'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 
 interface UseHarvestAngleRewards {
   account: Address | undefined
@@ -59,15 +60,22 @@ export const useHarvestAngleRewards = ({
 
   const client = usePublicClient()
 
+  const { refetchChain: refetchBalances } = useRefetchBalances()
+
   const onSuccess = useCallback(
     (data: SendTransactionReturnType) => {
+      const receipt = client.waitForTransactionReceipt({ hash: data })
+      receipt.then(() => {
+        refetchBalances(chainId)
+      })
+
       const ts = new Date().getTime()
       void createToast({
         account,
         type: 'approval',
         chainId,
         txHash: data,
-        promise: client.waitForTransactionReceipt({ hash: data }),
+        promise: receipt,
         summary: {
           pending: 'Harvesting rewards',
           completed: 'Successfully harvested rewards',
@@ -77,7 +85,7 @@ export const useHarvestAngleRewards = ({
         timestamp: ts,
       })
     },
-    [client, account, chainId],
+    [refetchBalances, client, account, chainId],
   )
 
   const onError = useCallback((e: Error) => {

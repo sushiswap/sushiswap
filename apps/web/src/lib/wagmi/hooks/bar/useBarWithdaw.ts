@@ -14,6 +14,7 @@ import {
 import { SendTransactionReturnType } from 'wagmi/actions'
 
 import { ChainId } from 'sushi/chain'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 
 interface UseBarWithdrawParams {
   amount?: Amount<Token>
@@ -27,9 +28,16 @@ export function useBarWithdraw({
   const { address } = useAccount()
   const client = usePublicClient()
 
+  const { refetchChain: refetchBalances } = useRefetchBalances()
+
   const onSuccess = useCallback(
     (data: SendTransactionReturnType) => {
       if (!amount) return
+
+      const receipt = client.waitForTransactionReceipt({ hash: data })
+      receipt.then(() => {
+        refetchBalances(ChainId.ETHEREUM)
+      })
 
       const ts = new Date().getTime()
       void createToast({
@@ -37,7 +45,7 @@ export function useBarWithdraw({
         type: 'leaveBar',
         chainId: ChainId.ETHEREUM,
         txHash: data,
-        promise: client.waitForTransactionReceipt({ hash: data }),
+        promise: receipt,
         summary: {
           pending: `Unstaking ${amount.toSignificant(6)} XSUSHI`,
           completed: 'Successfully unstaked XSUSHI',
@@ -47,7 +55,7 @@ export function useBarWithdraw({
         timestamp: ts,
       })
     },
-    [address, amount, client],
+    [refetchBalances, address, amount, client],
   )
 
   const onError = useCallback((e: Error) => {

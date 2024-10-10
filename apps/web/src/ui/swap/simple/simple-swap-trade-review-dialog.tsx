@@ -38,7 +38,6 @@ import React, {
 import { UseTradeReturn } from 'src/lib/hooks/react-query'
 import { useSimulateTrade } from 'src/lib/hooks/useSimulateTrade'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'
-import { useBalanceWeb3Refetch } from 'src/lib/wagmi/hooks/balances/useBalanceWeb3Refetch'
 import { useApproved } from 'src/lib/wagmi/systems/Checker/Provider'
 import { Chain, ChainId } from 'sushi/chain'
 import { Native } from 'sushi/currency'
@@ -55,6 +54,7 @@ import {
   useSendTransaction,
   useWaitForTransactionReceipt,
 } from 'wagmi'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 import { APPROVE_TAG_SWAP } from '../../../lib/constants'
 import {
   warningSeverity,
@@ -84,7 +84,7 @@ export const SimpleSwapTradeReviewDialog: FC<{
   const tradeRef = useRef<UseTradeReturn | null>(null)
   const client = usePublicClient()
 
-  const refetchBalances = useBalanceWeb3Refetch()
+  const { refetchChain: refetchBalances } = useRefetchBalances()
 
   useEffect(() => {
     if (!trade) return
@@ -220,7 +220,7 @@ export const SimpleSwapTradeReviewDialog: FC<{
         }
       } finally {
         setSwapAmount('')
-        await refetchBalances()
+        refetchBalances(chainId)
       }
     },
     [

@@ -5,25 +5,30 @@ import { FC, useMemo } from 'react'
 import { ChainId } from 'sushi/chain'
 import { Amount, Type } from 'sushi/currency'
 import { ZERO } from 'sushi/math'
-import { zeroAddress } from 'viem'
-import { useAccount } from 'wagmi'
-import { useBalancesWeb3 } from '../../hooks/balances/useBalancesWeb3'
+import { useAmountBalances } from '~evm/_common/ui/balance-provider/use-balances'
 
-interface AmountsProps extends ButtonProps {
+type AmountsProps = ButtonProps & {
   chainId: ChainId | undefined
-  amounts: (Amount<Type> | undefined)[]
-}
+} & (
+    | { amounts: (Amount<Type> | undefined)[]; amount?: undefined }
+    | { amounts?: undefined; amount: Amount<Type> | undefined }
+  )
 
 const Amounts: FC<AmountsProps> = ({
   type: _type,
-  amounts,
+  amounts: _amounts,
+  amount,
   chainId,
   children,
   fullWidth = true,
   size = 'xl',
   ...props
 }) => {
-  const { address } = useAccount()
+  const amounts = useMemo(() => {
+    if (_amounts) return _amounts
+    return [amount]
+  }, [_amounts, amount])
+
   const amountsAreDefined = useMemo(
     () => amounts.every((el) => el?.greaterThan(ZERO)),
     [amounts],
@@ -33,19 +38,12 @@ const Amounts: FC<AmountsProps> = ({
     [amounts],
   )
 
-  const { data: balances } = useBalancesWeb3({
-    currencies,
-    chainId,
-    account: address,
-    enabled: amountsAreDefined,
-  })
+  const { data: balances } = useAmountBalances(chainId, currencies)
 
   const sufficientBalance = useMemo(() => {
     return amounts?.every((amount) => {
       if (!amount) return true
-      return !balances?.[
-        amount.currency.isNative ? zeroAddress : amount.currency.wrapped.address
-      ]?.lessThan(amount)
+      return !balances?.get(amount.currency.id)?.lessThan(amount)
     })
   }, [amounts, balances])
 

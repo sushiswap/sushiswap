@@ -31,6 +31,7 @@ import {
   useSimulateContract,
   useWriteContract,
 } from 'wagmi'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 
 interface SteerPositionRemoveProps {
   vault: SteerVault
@@ -90,9 +91,16 @@ export const SteerPositionRemove: FC<SteerPositionRemoveProps> = ({
     return { token0Amount, token1Amount, steerTokenAmount }
   }, [position, tokenAmountsTotal, debouncedValue, token0, token1])
 
+  const { refetchChain: refetchBalances } = useRefetchBalances()
+
   const onSuccess = useCallback(
     (hash: SendTransactionReturnType) => {
       setValue('0')
+
+      const receipt = client.waitForTransactionReceipt({ hash })
+      receipt.then(() => {
+        refetchBalances(vault.chainId)
+      })
 
       const ts = new Date().getTime()
       void createToast({
@@ -100,7 +108,7 @@ export const SteerPositionRemove: FC<SteerPositionRemoveProps> = ({
         type: 'burn',
         chainId: vault.chainId,
         txHash: hash,
-        promise: client.waitForTransactionReceipt({ hash }),
+        promise: receipt,
         summary: {
           pending: `Removing liquidity from the ${token0.symbol}/${token1.symbol} smart pool`,
           completed: `Successfully removed liquidity from the ${token0.symbol}/${token1.symbol} smart pool`,
@@ -110,7 +118,14 @@ export const SteerPositionRemove: FC<SteerPositionRemoveProps> = ({
         groupTimestamp: ts,
       })
     },
-    [client, account, vault.chainId, token0.symbol, token1.symbol],
+    [
+      refetchBalances,
+      client,
+      account,
+      vault.chainId,
+      token0.symbol,
+      token1.symbol,
+    ],
   )
 
   const onError = useCallback((e: Error) => {

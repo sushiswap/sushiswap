@@ -14,6 +14,7 @@ import { SendTransactionReturnType } from 'wagmi/actions'
 
 import { xsushiAbi_enter } from 'sushi/abi'
 import { ChainId } from 'sushi/chain'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 
 interface UseBarDepositParams {
   amount?: Amount<Token>
@@ -24,9 +25,16 @@ export function useBarDeposit({ amount, enabled = true }: UseBarDepositParams) {
   const { address } = useAccount()
   const client = usePublicClient()
 
+  const { refetchChain: refetchBalances } = useRefetchBalances()
+
   const onSuccess = useCallback(
     (data: SendTransactionReturnType) => {
       if (!amount) return
+
+      const receipt = client.waitForTransactionReceipt({ hash: data })
+      receipt.then(() => {
+        refetchBalances(ChainId.ETHEREUM)
+      })
 
       const ts = new Date().getTime()
       void createToast({
@@ -34,7 +42,7 @@ export function useBarDeposit({ amount, enabled = true }: UseBarDepositParams) {
         type: 'enterBar',
         chainId: ChainId.ETHEREUM,
         txHash: data,
-        promise: client.waitForTransactionReceipt({ hash: data }),
+        promise: receipt,
         summary: {
           pending: `Staking ${amount.toSignificant(6)} SUSHI`,
           completed: 'Successfully staked SUSHI',
@@ -44,7 +52,7 @@ export function useBarDeposit({ amount, enabled = true }: UseBarDepositParams) {
         timestamp: ts,
       })
     },
-    [amount, address, client],
+    [refetchBalances, amount, address, client],
   )
 
   const onError = useCallback((e: Error) => {

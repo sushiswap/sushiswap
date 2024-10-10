@@ -68,7 +68,7 @@ export const _SimpleSwapTradeButton: FC<{
         >
           <Checker.Connect>
             <Checker.Network chainId={chainId}>
-              <Checker.Amounts chainId={chainId} amounts={[swapAmount]}>
+              <Checker.Amounts chainId={chainId} amount={swapAmount}>
                 <Checker.ApproveERC20
                   id="approve-erc20"
                   amount={swapAmount}

@@ -42,7 +42,7 @@ const _UnstakeSection = () => {
             size="xl"
             fullWidth
             chainId={ChainId.ETHEREUM}
-            amounts={[parsedInput]}
+            amount={parsedInput}
           >
             <Button
               size="xl"

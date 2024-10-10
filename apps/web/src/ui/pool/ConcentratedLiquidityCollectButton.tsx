@@ -23,6 +23,7 @@ import {
   usePublicClient,
   useSendTransaction,
 } from 'wagmi'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 
 interface ConcentratedLiquidityCollectButton {
   positionDetails: ConcentratedLiquidityPosition | undefined
@@ -52,6 +53,8 @@ export const ConcentratedLiquidityCollectButton: FC<
 }) => {
   const { chain } = useAccount()
   const client = usePublicClient()
+
+  const { refetchChain: refetchBalances } = useRefetchBalances()
 
   const prepare = useMemo(() => {
     if (
@@ -94,6 +97,11 @@ export const ConcentratedLiquidityCollectButton: FC<
     (hash: SendTransactionReturnType) => {
       if (!position) return
 
+      const receipt = client.waitForTransactionReceipt({ hash })
+      receipt.then(() => {
+        refetchBalances(chainId)
+      })
+
       const ts = new Date().getTime()
       void createToast({
         account,
@@ -110,7 +118,7 @@ export const ConcentratedLiquidityCollectButton: FC<
         groupTimestamp: ts,
       })
     },
-    [account, chainId, client, position],
+    [refetchBalances, account, chainId, client, position],
   )
 
   const onError = useCallback((e: Error) => {

@@ -53,6 +53,7 @@ import {
 import { useSimulateContract } from 'wagmi'
 import { useAccount } from 'wagmi'
 import { useWaitForTransactionReceipt } from 'wagmi'
+import { useRefetchBalances } from '~evm/_common/ui/balance-provider/use-refetch-balances'
 import { AddSectionReviewModal } from './AddSectionReviewModal'
 
 interface UseAddSushiSwapV2 {
@@ -315,6 +316,8 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
     const client = usePublicClient()
     const trace = useTrace()
 
+    const { refetchChain: refetchBalances } = useRefetchBalances()
+
     const onSuccess = useCallback(
       (hash: SendTransactionReturnType) => {
         _onSuccess()
@@ -335,13 +338,18 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
           ...trace,
         })
 
+        const receipt = client.waitForTransactionReceipt({ hash })
+        receipt.then(() => {
+          refetchBalances(chainId)
+        })
+
         const ts = new Date().getTime()
         void createToast({
           account: address,
           type: 'mint',
           chainId,
           txHash: hash,
-          promise: client.waitForTransactionReceipt({ hash }),
+          promise: receipt,
           summary: {
             pending: `Adding liquidity to the ${token0.symbol}/${token1.symbol} pair`,
             completed: `Successfully added liquidity to the ${token0.symbol}/${token1.symbol} pair`,
@@ -352,6 +360,7 @@ export const AddSectionReviewModalLegacy: FC<AddSectionReviewModalLegacyProps> =
         })
       },
       [
+        refetchBalances,
         client,
         chainId,
         token0,

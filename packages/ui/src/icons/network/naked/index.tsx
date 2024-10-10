@@ -24,8 +24,10 @@ import { HarmonyNaked } from './HarmonyNaked'
 import { HecoNaked } from './HecoNaked'
 import { KavaNaked } from './KavaNaked'
 import { LineaNaked } from './LineaNaked'
+import { MantaNaked } from './MantaNaked'
 import { MantleNaked } from './MantleNaked'
 import { MetisNaked } from './MetisNaked'
+import { ModeNaked } from './ModeNaked'
 import { MoonbeamNaked } from './MoonbeamNaked'
 import { MoonriverNaked } from './MoonriverNaked'
 import { OkexNaked } from './OkexNaked'
@@ -36,8 +38,10 @@ import { PolygonZKNaked } from './PolygonZKNaked'
 import { RootstockNaked } from './RootstockNaked'
 import { ScrollNaked } from './ScrollNaked'
 import { SkaleNaked } from './SkaleNaked'
+import { TaikoNaked } from './TaikoNaked'
 import { TelosNaked } from './TelosNaked'
 import { ThunderCoreNaked } from './ThunderCoreNaked'
+import { ZKLinkNaked } from './ZKLinkNaked'
 import { ZKSyncNaked } from './ZKSyncNaked'
 import { ZetaChainNaked } from './ZetaChainNaked'
 
@@ -64,8 +68,10 @@ export * from './HarmonyNaked'
 export * from './HecoNaked'
 export * from './KavaNaked'
 export * from './LineaNaked'
+export * from './MantaNaked'
 export * from './MantleNaked'
 export * from './MetisNaked'
+export * from './ModeNaked'
 export * from './MoonbeamNaked'
 export * from './MoonriverNaked'
 export * from './OkexNaked'
@@ -76,8 +82,10 @@ export * from './PolygonZKNaked'
 export * from './RootstockNaked'
 export * from './ScrollNaked'
 export * from './SkaleNaked'
+export * from './TaikoNaked'
 export * from './TelosNaked'
 export * from './TronNaked'
+export * from './ZKLinkNaked'
 export * from './ZKSyncNaked'
 export * from './ZetaChainNaked'
 
@@ -121,4 +129,8 @@ export const NETWORK_NAKED_ICON: Partial<Record<ChainId, IconComponent>> = {
   [ChainId.ROOTSTOCK]: RootstockNaked,
   [ChainId.CRONOS]: CronosNaked,
   [ChainId.MANTLE]: MantleNaked,
+  [ChainId.MANTA]: MantaNaked,
+  [ChainId.MODE]: ModeNaked,
+  [ChainId.TAIKO]: TaikoNaked,
+  [ChainId.ZKLINK]: ZKLinkNaked,
 }

@@ -62,8 +62,10 @@ export interface NetworkSelectorProps<T extends number = ChainId> {
 }
 
 const NEW_CHAINS: number[] = [
-  ChainId.ZKSYNC_ERA,
-  ChainId.MANTLE,
+  ChainId.MANTA,
+  ChainId.MODE,
+  ChainId.TAIKO,
+  ChainId.ZKLINK,
 ] satisfies ChainId[]
 
 function Aptos() {

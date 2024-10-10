@@ -6,9 +6,9 @@ import { Amount, Token } from 'sushi/currency'
 import { Position, SushiSwapV3Pool } from 'sushi/pool/sushiswap-v3'
 
 import { useMemo } from 'react'
-import { usePrices } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
 import { Address } from 'viem'
 import { useConfig } from 'wagmi'
+import { usePrices } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 import { getConcentratedLiquidityPool } from '../../pools/actions/getConcentratedLiquidityPool'
 import {
   getTokenWithCacheQueryFn,

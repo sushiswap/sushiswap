@@ -117,43 +117,49 @@ export const ConcentratedPositionsTable: FC<ConcentratedPositionsTableProps> =
         <CardHeader>
           <CardTitle>
             <div className="flex items-center justify-between gap-4 flex-wrap">
-              <span>
+              <span className="flex-grow whitespace-nowrap">
                 My Positions{' '}
                 <span className="text-gray-400 dark:text-slate-500">
                   ({_positions.length})
                 </span>
               </span>
-              <div className="flex gap-4">
-                <div className="flex gap-3 items-center px-2.5">
-                  <span className="text-sm font-medium text-gray-600 dark:text-slate-400">
-                    Hide closed
-                  </span>
-                  <Switch
-                    checked={hide}
-                    onCheckedChange={() => setHide((prev) => !prev)}
-                  />
-                </div>
-                {!hideNewSmartPositionButton ? (
-                  <LinkInternal
-                    shallow={true}
-                    href={`/${ChainKey[chainId]}/pool/v3/${poolAddress}/smart`}
-                  >
-                    <Button icon={PlusIcon} asChild size="sm" variant="outline">
-                      Create smart position
-                    </Button>
-                  </LinkInternal>
-                ) : null}
-                {!hideNewPositionButton ? (
-                  <LinkInternal
-                    shallow={true}
-                    href={`/${ChainKey[chainId]}/pool/v3/${poolAddress}/create`}
-                  >
-                    <Button icon={PlusIcon} asChild size="sm">
-                      Create position
-                    </Button>
-                  </LinkInternal>
-                ) : null}
+              <div className="flex gap-3 items-center whitespace-nowrap">
+                <span className="text-sm font-medium text-gray-600 dark:text-slate-400">
+                  Hide closed
+                </span>
+                <Switch
+                  checked={hide}
+                  onCheckedChange={() => setHide((prev) => !prev)}
+                />
               </div>
+              {!hideNewSmartPositionButton ? (
+                <LinkInternal
+                  shallow={true}
+                  href={`/${ChainKey[chainId]}/pool/v3/${poolAddress}/smart`}
+                  className="basis-full md:basis-[unset]"
+                >
+                  <Button
+                    icon={PlusIcon}
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Create smart position
+                  </Button>
+                </LinkInternal>
+              ) : null}
+              {!hideNewPositionButton ? (
+                <LinkInternal
+                  shallow={true}
+                  href={`/${ChainKey[chainId]}/pool/v3/${poolAddress}/create`}
+                  className="basis-full md:basis-[unset]"
+                >
+                  <Button icon={PlusIcon} asChild size="sm" className="w-full">
+                    Create position
+                  </Button>
+                </LinkInternal>
+              ) : null}
             </div>
           </CardTitle>
         </CardHeader>

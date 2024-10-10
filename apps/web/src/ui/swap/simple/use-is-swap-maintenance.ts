@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import ms from 'ms'
-import { SwapEdgeConfig } from 'src/app/(evm)/(trade)/swap/get-swap-edge-config'
 import { useEdgeConfig } from 'src/providers/edge-config-provider'
+import { SwapEdgeConfig } from '~evm/[chainId]/(trade)/swap/get-swap-edge-config'
 
 export const useIsSwapMaintenance = () => {
   const { maintenance } = useEdgeConfig<SwapEdgeConfig>()

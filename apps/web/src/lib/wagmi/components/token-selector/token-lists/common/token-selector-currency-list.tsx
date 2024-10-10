@@ -4,9 +4,9 @@ import { ChainId } from 'sushi/chain'
 import { Amount, Native, Type } from 'sushi/currency'
 import { useAccount } from 'wagmi'
 
-import type { PriceMap } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
 import type { Token } from 'sushi/currency'
 import { Address } from 'viem'
+import type { PriceMap } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 import { TokenSelectorImportRow } from './token-selector-import-row'
 import { TokenSelectorRow, TokenSelectorRowLoading } from './token-selector-row'
 

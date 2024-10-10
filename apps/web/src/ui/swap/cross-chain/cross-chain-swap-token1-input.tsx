@@ -1,15 +1,10 @@
 'use client'
 
-import {
-  Button,
-  Collapsible,
-  Label,
-  NetworkSelector,
-  SelectIcon,
-} from '@sushiswap/ui'
+import { Button, Collapsible, Label, SelectIcon } from '@sushiswap/ui'
 import { NetworkIcon } from '@sushiswap/ui/icons/NetworkIcon'
 import { Chain } from 'sushi/chain'
 
+import { NetworkSelector } from 'src/lib/wagmi/components/network-selector'
 import { Web3Input } from 'src/lib/wagmi/components/web3-input'
 import {
   SUSHIXSWAP_2_SUPPORTED_CHAIN_IDS,

@@ -1,7 +1,6 @@
 import { ArrowTrendingUpIcon } from '@heroicons/react/20/solid'
 import { Button, SkeletonText } from '@sushiswap/ui'
 import { useMemo, useState } from 'react'
-import { usePrices } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
 import { useTokenAmountDollarValues } from 'src/lib/hooks'
 import { ChainId } from 'sushi/chain'
 import {
@@ -13,6 +12,7 @@ import {
   tryParseAmount,
 } from 'sushi/currency'
 import { formatUSD } from 'sushi/format'
+import { usePrices } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 
 export const XSushiPrice = ({
   totalSupply,

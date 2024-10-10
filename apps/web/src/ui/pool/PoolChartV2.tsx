@@ -31,17 +31,21 @@ const PoolChartV2: FC<PoolChartV2Props> = ({ pool }) => {
 
   return (
     <Card>
-      <div className="border-b border-accent px-6 py-4 flex flex-col items-center justify-between gap-4 md:flex-row">
-        <PoolChartTypes
-          charts={charts}
-          selectedChart={chart}
-          setChart={setChart}
-        />
-        <PoolChartPeriods
-          periods={periods}
-          selectedPeriod={period}
-          setPeriod={setPeriod}
-        />
+      <div className="border-b border-accent px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex mx-auto">
+          <PoolChartTypes
+            charts={charts}
+            selectedChart={chart}
+            setChart={setChart}
+          />
+        </div>
+        <div className="flex mx-auto">
+          <PoolChartPeriods
+            periods={periods}
+            selectedPeriod={period}
+            setPeriod={setPeriod}
+          />
+        </div>
       </div>
       <PoolChartGraph
         chart={chart}

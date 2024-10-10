@@ -15,7 +15,7 @@ import {
 } from '@sushiswap/ui'
 import Image from 'next/image'
 import { Dispatch, FC, SetStateAction, useMemo, useState } from 'react'
-import { SUPPORTED_CHAIN_IDS } from 'src/config'
+import { SUPPORTED_NETWORKS } from 'src/config'
 import { HeaderNetworkSelector } from 'src/lib/wagmi/components/header-network-selector'
 import { ChainId, chains, shortenAddress } from 'sushi'
 import { useAccount, useDisconnect } from 'wagmi'
@@ -119,7 +119,7 @@ export const PortfolioDefaultView: FC<PortfolioDefaultProps> = ({
               )}
             </ClipboardController>
             <LinkExternal
-              href={chains[chainId as ChainId].getAccountUrl(address!)}
+              href={chains[chainId as ChainId]?.getAccountUrl(address!)}
             >
               <IconButton
                 size="xs"
@@ -137,7 +137,7 @@ export const PortfolioDefaultView: FC<PortfolioDefaultProps> = ({
             />
           </div>
         </div>
-        <HeaderNetworkSelector networks={SUPPORTED_CHAIN_IDS} hideNetworkName />
+        <HeaderNetworkSelector networks={SUPPORTED_NETWORKS} hideNetworkName />
       </div>
       <div className="flex px-5 gap-x-2">
         {Object.values(PortfolioTab).map((_tab) => (

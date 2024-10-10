@@ -1,7 +1,13 @@
 'use client'
 
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
-import { Chip, Popover, PopoverContent, PopoverTrigger } from '@sushiswap/ui'
+import {
+  Chip,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  classNames,
+} from '@sushiswap/ui'
 import { Button } from '@sushiswap/ui'
 import {
   Command,
@@ -14,26 +20,46 @@ import { CheckIcon } from '@sushiswap/ui/icons/CheckIcon'
 import { NetworkIcon } from '@sushiswap/ui/icons/NetworkIcon'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { FC, useCallback, useState } from 'react'
-import { AMM_SUPPORTED_CHAIN_IDS } from 'src/config'
-import { Chain, ChainId, ChainKey } from 'sushi/chain'
+import { NonStandardChainId, SUPPORTED_NETWORKS } from 'src/config'
+import { getNetworkName, replaceNetworkSlug } from 'src/lib/network'
+import { ChainId, isChainId } from 'sushi/chain'
 
 export const TableFiltersNetwork: FC<{
-  chainId: ChainId
-  chainIds?: ChainId[]
-}> = ({ chainId, chainIds = AMM_SUPPORTED_CHAIN_IDS }) => {
+  network: ChainId | NonStandardChainId
+  supportedNetworks?: readonly (ChainId | NonStandardChainId)[]
+  unsupportedNetworkHref?: string
+  className?: string
+}> = ({
+  network,
+  supportedNetworks = SUPPORTED_NETWORKS,
+  unsupportedNetworkHref,
+  className,
+}) => {
   const [open, setOpen] = useState(false)
 
-  const router = useRouter()
+  const { push } = useRouter()
   const pathname = usePathname()
 
   const onSelect = useCallback(
     (value: string) => {
-      const chainId = +value.split('__')[1]
-      const pathSegments = pathname.split('/')
-      pathSegments[1] = ChainKey[+chainId as ChainId]
-      router.push(pathSegments.join('/'), { scroll: false })
+      const network = value.split('__')[1]
+      push(
+        replaceNetworkSlug(
+          isChainId(+network)
+            ? (+network as ChainId)
+            : (network as NonStandardChainId),
+          pathname,
+        ),
+        { scroll: false },
+      )
     },
-    [pathname, router],
+    [pathname, push],
+  )
+
+  const isSupportedNetwork = useCallback(
+    (network: ChainId | NonStandardChainId) =>
+      supportedNetworks.includes(network),
+    [supportedNetworks],
   )
 
   return (
@@ -45,10 +71,10 @@ export const TableFiltersNetwork: FC<{
           role="combobox"
           size="sm"
           aria-expanded={open}
-          className="!border-dashed"
+          className={classNames(className, '!border-dashed')}
         >
           <span>Network</span>
-          <Chip variant="secondary">{Chain.from(chainId)?.name}</Chip>
+          <Chip variant="secondary">{getNetworkName(network)}</Chip>
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -62,32 +88,47 @@ export const TableFiltersNetwork: FC<{
           />
           <CommandEmpty>No network found.</CommandEmpty>
           <CommandGroup>
-            {chainIds.map((_chainId) => (
-              <CommandItem
-                key={_chainId}
-                value={`${Chain.from(_chainId)?.name}__${_chainId}`}
-                onSelect={onSelect}
-                className="py-2 pl-8 pr-2"
-              >
-                {chainId === _chainId ? (
-                  <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                    <CheckIcon
-                      strokeWidth={3}
-                      width={16}
-                      height={16}
-                      className="text-blue"
-                    />
-                  </span>
-                ) : null}
-                <NetworkIcon
-                  chainId={_chainId}
-                  width={20}
-                  height={20}
-                  className="mr-2"
-                />
-                {Chain.from(_chainId)?.name}
-              </CommandItem>
-            ))}
+            {SUPPORTED_NETWORKS.map((_network) => {
+              const name = getNetworkName(_network)
+              const isSupported = isSupportedNetwork(_network)
+
+              return (
+                <CommandItem
+                  key={_network}
+                  value={`${name}__${_network}`}
+                  onSelect={
+                    isSupported
+                      ? onSelect
+                      : unsupportedNetworkHref
+                        ? () => push(unsupportedNetworkHref)
+                        : undefined
+                  }
+                  className={classNames(
+                    'py-2 pl-8 pr-2',
+                    !isSupported ? 'opacity-30' : null,
+                  )}
+                >
+                  {network === _network ? (
+                    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                      <CheckIcon
+                        strokeWidth={3}
+                        width={16}
+                        height={16}
+                        className="text-blue"
+                      />
+                    </span>
+                  ) : null}
+                  <NetworkIcon
+                    type="circle"
+                    chainId={_network}
+                    width={20}
+                    height={20}
+                    className="mr-2"
+                  />
+                  {name}
+                </CommandItem>
+              )
+            })}
           </CommandGroup>
         </Command>
       </PopoverContent>

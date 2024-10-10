@@ -1,6 +1,7 @@
 import { ChainId } from 'sushi/chain'
 
 import { IconComponent } from '../../../types'
+import { AptosCircle } from './AptosCircle'
 import { ArbitrumCircle } from './ArbitrumCircle'
 import { ArbitrumNovaCircle } from './ArbitrumNovaCircle'
 import { AvalancheCircle } from './AvalancheCircle'
@@ -38,6 +39,7 @@ import { ScrollCircle } from './ScrollCircle'
 import { SkaleCircle } from './SkaleCircle'
 import { TelosCircle } from './TelosCircle'
 import { ThunderCoreCircle } from './ThunderCoreCircle'
+import { TronCircle } from './TronCircle'
 import { ZKSyncCircle } from './ZKSyncCircle'
 import { ZetaChainCircle } from './ZetaChainCircle'
 
@@ -83,7 +85,9 @@ export * from './TronCircle'
 export * from './ZKSyncCircle'
 export * from './ZetaChainCircle'
 
-export const NETWORK_CIRCLE_ICON: Partial<Record<ChainId, IconComponent>> = {
+export const NETWORK_CIRCLE_ICON: Partial<
+  Record<ChainId | string, IconComponent>
+> = {
   [ChainId.ETHEREUM]: EthereumCircle,
   [ChainId.FANTOM]: FantomCircle,
   [ChainId.POLYGON]: PolygonCircle,
@@ -123,4 +127,6 @@ export const NETWORK_CIRCLE_ICON: Partial<Record<ChainId, IconComponent>> = {
   [ChainId.ROOTSTOCK]: RootstockCircle,
   [ChainId.CRONOS]: CronosCircle,
   [ChainId.MANTLE]: MantleCircle,
+  aptos: AptosCircle,
+  tron: TronCircle,
 }

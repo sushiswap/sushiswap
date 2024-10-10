@@ -33,6 +33,7 @@ const Network: FC<NetworkProps> = ({
         onClick={async () => {
           await switchChainAsync?.({ chainId })
         }}
+        testId={`switch-network-${chainId}`}
         {...rest}
       >
         Switch to {chainName[chainId]}
@@ -43,6 +44,7 @@ const Network: FC<NetworkProps> = ({
           fullWidth={fullWidth}
           size={size}
           onClick={async () => await switchChainAsync?.({ chainId })}
+          testId={`switch-network-${chainId}`}
           {...rest}
         >
           Switch to {chainName[chainId]}

@@ -45,7 +45,7 @@ export const PortfolioSettingsView: FC<PortfolioSettingsViewProps> = ({
         <List.Control className="bg-gray-100 dark:bg-slate-800">
           <List.KeyValue flex title="Theme">
             <RadioGroup value={theme} onChange={setTheme}>
-              <div className="items-center relative bg-black/[0.04] dark:bg-white/[0.02] ring-4 ring-black/[0.04] dark:ring-white/[0.02] rounded-lg overflow-hidden flex gap-1">
+              <div className="items-center relative bg-black/[0.04] dark:bg-white/[0.02] rounded-lg px-1 overflow-hidden flex gap-1">
                 {Object.entries(map).map(([k, v], i) => (
                   <RadioGroup.Option as={Fragment} key={i} value={k}>
                     {({ checked }) => (
@@ -53,7 +53,7 @@ export const PortfolioSettingsView: FC<PortfolioSettingsViewProps> = ({
                         type="button"
                         className={classNames(
                           checked
-                            ? 'text-gray-900 dark:text-slate-50 bg-white dark:bg-white/[0.08]'
+                            ? 'text-gray-900 dark:text-slate-50 bg-[#FDFDFD] dark:bg-white/[0.08]'
                             : 'text-gray-500 dark:text-slate-500 hover:bg-gray-100 hover:dark:bg-white/[0.04]',
                           'min-w-[60px] z-[1] relative rounded-lg text-sm h-8 font-medium flex flex-grow items-center justify-center',
                         )}
@@ -66,7 +66,7 @@ export const PortfolioSettingsView: FC<PortfolioSettingsViewProps> = ({
               </div>
             </RadioGroup>
           </List.KeyValue>
-          <List.KeyValue flex title="Show testnets">
+          <List.KeyValue title="Show testnets">
             <Switch checked={showTestnets} onCheckedChange={setShowTestnets} />
           </List.KeyValue>
         </List.Control>

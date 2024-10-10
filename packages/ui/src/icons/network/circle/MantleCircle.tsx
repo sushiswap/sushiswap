@@ -7,12 +7,6 @@ import { IconComponent } from '../../../types'
 export const MantleCircle: IconComponent = (props) => (
   <MantleNaked
     {...props}
-    circle={
-      <defs>
-        <clipPath id="circle">
-          <circle cx="64" cy="64" r="64" />
-        </clipPath>
-      </defs>
-    }
+    circle={<rect width="128" height="128" rx="64" fill="#000" />}
   />
 )

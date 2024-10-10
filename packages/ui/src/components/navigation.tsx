@@ -78,14 +78,16 @@ const navigationContainerVariants = cva(
 interface NavContainerProps
   extends VariantProps<typeof navigationContainerVariants> {
   children: React.ReactNode
+  className?: string
 }
 
 const NavigationContainer: React.FC<NavContainerProps> = ({
   children,
   variant,
+  className,
 }) => {
   return (
-    <div className={navigationContainerVariants({ variant })}>
+    <div className={navigationContainerVariants({ variant, className })}>
       <div className="flex items-center justify-between flex-grow gap-4">
         {children}
       </div>
@@ -141,12 +143,16 @@ export type NavigationElement =
 interface NavProps extends VariantProps<typeof navigationContainerVariants> {
   leftElements: NavigationElement[]
   rightElement?: React.ReactNode
+  className?: string
+  hideSushiDropdown?: boolean
 }
 
 const Navigation: React.FC<NavProps> = ({
   leftElements: _leftElements,
   rightElement,
   variant,
+  className,
+  hideSushiDropdown = false,
 }) => {
   const leftElements = React.useMemo(() => {
     const SingleItem = (entry: NavigationElementSingle) => {
@@ -214,109 +220,13 @@ const Navigation: React.FC<NavProps> = ({
   }, [_leftElements])
 
   return (
-    <NavigationContainer variant={variant}>
+    <NavigationContainer variant={variant} className={className}>
       <div className="flex space-x-1">
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>
-                <SushiIcon width={24} height={24} />
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="w-[200px] flex flex-col gap-6 p-4">
-                  <div className="flex flex-col gap-1 pt-2">
-                    <span className="font-semibold px-2">Company</span>
-                    <div>
-                      {COMPANY_NAVIGATION_LINKS.map((component) => (
-                        <li key={component.title}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              href={component.href}
-                              target="_blank"
-                              className={
-                                'cursor-pointer block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'
-                              }
-                            >
-                              <span className="text-sm font-medium text-muted-foreground">
-                                {component.title}
-                              </span>
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="font-semibold px-2">Protocol</span>
-                    <div>
-                      {PROTOCOL_NAVIGATION_LINKS.map((component) => (
-                        <li key={component.title}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              href={component.href}
-                              target="_blank"
-                              className={
-                                'cursor-pointer block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'
-                              }
-                            >
-                              <span className="text-sm font-medium text-muted-foreground">
-                                {component.title}
-                              </span>
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="font-semibold px-2">Partnership</span>
-                    <div>
-                      {PARTNER_NAVIGATION_LINKS.map((component) => (
-                        <li key={component.title}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              href={component.href}
-                              target="_blank"
-                              className={
-                                'cursor-pointer block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'
-                              }
-                            >
-                              <span className="text-sm font-medium text-muted-foreground">
-                                {component.title}
-                              </span>
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="font-semibold px-2">Support</span>
-                    <div>
-                      {SUPPORT_NAVIGATION_LINKS.map((component) => (
-                        <li key={component.title}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              href={component.href}
-                              target="_blank"
-                              className={
-                                'cursor-pointer block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'
-                              }
-                            >
-                              <span className="text-sm font-medium text-muted-foreground">
-                                {component.title}
-                              </span>
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </div>
-                  </div>
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+        {!hideSushiDropdown ? (
+          <SushiNavigationDropdown>
+            <SushiIcon width={24} height={24} />
+          </SushiNavigationDropdown>
+        ) : null}
         <NavigationMenu>
           <NavigationMenuList>{leftElements}</NavigationMenuList>
         </NavigationMenu>
@@ -373,4 +283,118 @@ const NavigationListItem = React.forwardRef<
 
 NavigationListItem.displayName = 'NavListItem'
 
-export { Navigation, NavigationContainer, NavigationListItem }
+const SushiNavigationDropdown: React.FC<{
+  children?: React.ReactElement
+  className?: string
+}> = ({ children, className }) => {
+  return (
+    <NavigationMenu>
+      <NavigationMenuList>
+        <NavigationMenuItem>
+          <NavigationMenuTrigger className={className}>
+            {children}
+          </NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className={'w-[216px] flex flex-col gap-6 p-4'}>
+              <div className="flex flex-col gap-1 pt-2">
+                <span className="font-semibold px-2">Company</span>
+                <div>
+                  {COMPANY_NAVIGATION_LINKS.map((component) => (
+                    <li key={component.title}>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href={component.href}
+                          target="_blank"
+                          className={
+                            'cursor-pointer block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'
+                          }
+                        >
+                          <span className="text-sm font-medium text-muted-foreground">
+                            {component.title}
+                          </span>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold px-2">Protocol</span>
+                <div>
+                  {PROTOCOL_NAVIGATION_LINKS.map((component) => (
+                    <li key={component.title}>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href={component.href}
+                          target="_blank"
+                          className={
+                            'cursor-pointer block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'
+                          }
+                        >
+                          <span className="text-sm font-medium text-muted-foreground">
+                            {component.title}
+                          </span>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold px-2">Partnership</span>
+                <div>
+                  {PARTNER_NAVIGATION_LINKS.map((component) => (
+                    <li key={component.title}>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href={component.href}
+                          target="_blank"
+                          className={
+                            'cursor-pointer block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'
+                          }
+                        >
+                          <span className="text-sm font-medium text-muted-foreground">
+                            {component.title}
+                          </span>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold px-2">Support</span>
+                <div>
+                  {SUPPORT_NAVIGATION_LINKS.map((component) => (
+                    <li key={component.title}>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href={component.href}
+                          target="_blank"
+                          className={
+                            'cursor-pointer block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'
+                          }
+                        >
+                          <span className="text-sm font-medium text-muted-foreground">
+                            {component.title}
+                          </span>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                  ))}
+                </div>
+              </div>
+            </ul>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+      </NavigationMenuList>
+    </NavigationMenu>
+  )
+}
+
+export {
+  Navigation,
+  NavigationContainer,
+  NavigationListItem,
+  SushiNavigationDropdown,
+}

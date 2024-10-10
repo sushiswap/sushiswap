@@ -27,6 +27,7 @@ type PoolHeader = {
   }
   priceRange?: string
   hasEnabledStrategies?: boolean
+  showAddLiquidityButton?: boolean
 }
 
 export const PoolHeader: FC<PoolHeader> = ({
@@ -35,6 +36,7 @@ export const PoolHeader: FC<PoolHeader> = ({
   pool,
   apy,
   priceRange,
+  showAddLiquidityButton = false,
 }) => {
   const [token0, token1] = useMemo(() => {
     if (!pool) return [undefined, undefined]
@@ -67,7 +69,7 @@ export const PoolHeader: FC<PoolHeader> = ({
             href={backUrl}
             className="text-blue hover:underline text-sm"
           >
-            ← Pools
+            ← Back
           </LinkInternal>
           <div className="flex justify-between flex-wrap gap-6">
             <div className="relative flex items-center gap-3 max-w-[100vh]">
@@ -107,21 +109,23 @@ export const PoolHeader: FC<PoolHeader> = ({
                     : 'UNKNOWN'}
               </div>
             </div>
-            <Button asChild>
-              <LinkInternal
-                href={
-                  pool.protocol === 'SUSHISWAP_V2'
-                    ? `/${ChainKey[pool.chainId]}/pool/v2/${pool.address}/add`
-                    : pool.protocol === 'SUSHISWAP_V3'
-                      ? `/${ChainKey[pool.chainId]}/pool/v3/${
-                          pool.address
-                        }/create`
-                      : ''
-                }
-              >
-                Add Liquidity
-              </LinkInternal>
-            </Button>
+            {showAddLiquidityButton ? (
+              <Button asChild>
+                <LinkInternal
+                  href={
+                    pool.protocol === 'SUSHISWAP_V2'
+                      ? `/${ChainKey[pool.chainId]}/pool/v2/${pool.address}/add`
+                      : pool.protocol === 'SUSHISWAP_V3'
+                        ? `/${ChainKey[pool.chainId]}/pool/v3/${
+                            pool.address
+                          }/positions`
+                        : ''
+                  }
+                >
+                  Add Liquidity
+                </LinkInternal>
+              </Button>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-y-5 gap-x-[32px] text-secondary-foreground mb-8 mt-1.5">

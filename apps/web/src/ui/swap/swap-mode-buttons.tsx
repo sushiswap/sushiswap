@@ -11,29 +11,51 @@ import {
 } from '@sushiswap/ui'
 import { ShuffleIcon } from '@sushiswap/ui/icons/ShuffleIcon'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { isTwapSupportedChainId } from 'src/config'
+import { ChainId, ChainKey } from 'sushi/chain'
+import { isSushiXSwap2ChainId } from 'sushi/config'
 import { PathnameButton } from '../pathname-button'
 
 export const SwapModeButtons = () => {
+  const { chainId: _chainId } = useParams()
+  const chainId = +_chainId as ChainId
+
   return (
     <div className="flex gap-2 flex-wrap">
-      <Link href="/swap">
-        <PathnameButton pathname="/swap" size="sm">
+      <Link href={`/${ChainKey[chainId]}/swap`}>
+        <PathnameButton pathname={`/${ChainKey[chainId]}/swap`} size="sm">
           Swap
         </PathnameButton>
       </Link>
-      <Link href="/limit">
-        <PathnameButton pathname="/limit" size="sm">
+      <Link
+        href={`/${
+          isTwapSupportedChainId(chainId) ? ChainKey[chainId] : 'ethereum'
+        }/limit`}
+      >
+        <PathnameButton pathname={`/${ChainKey[chainId]}/limit`} size="sm">
           Limit
         </PathnameButton>
       </Link>
-      <Link href="/dca">
-        <PathnameButton pathname="/dca" size="sm">
+      <Link
+        href={`/${
+          isTwapSupportedChainId(chainId) ? ChainKey[chainId] : 'ethereum'
+        }/dca`}
+      >
+        <PathnameButton pathname={`/${ChainKey[chainId]}/dca`} size="sm">
           DCA
         </PathnameButton>
       </Link>
       <HoverCard>
-        <Link href="/cross-chain-swap">
-          <PathnameButton pathname="/cross-chain-swap" size="sm">
+        <Link
+          href={`/${
+            isSushiXSwap2ChainId(chainId) ? ChainKey[chainId] : 'ethereum'
+          }/cross-chain-swap`}
+        >
+          <PathnameButton
+            pathname={`/${ChainKey[chainId]}/cross-chain-swap`}
+            size="sm"
+          >
             <HoverCardTrigger asChild>
               <span className="saturate-200 flex items-center gap-2 bg-gradient-to-r from-blue to-pink bg-clip-text text-transparent">
                 <ShuffleIcon width={20} height={20} className="text-blue" />

@@ -38,7 +38,7 @@ export const SteerBaseStrategy: SteerStrategyComponent = ({
   generic: { priceExtremes, tokenRatios, adjustment, positions },
 }) => {
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <Card>
           <CardHeader>

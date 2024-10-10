@@ -1,7 +1,11 @@
 'use client'
 
-import { watchChainId } from '@wagmi/core'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
 import {
   FC,
   createContext,
@@ -14,7 +18,7 @@ import {
 import { useTrade as useApiTrade } from 'src/lib/hooks/react-query'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'
 import { useTokenWithCache } from 'src/lib/wagmi/hooks/tokens/useTokenWithCache'
-import { ChainId, TestnetChainId } from 'sushi/chain'
+import { ChainId } from 'sushi/chain'
 import {
   defaultCurrency,
   defaultQuoteCurrency,
@@ -23,8 +27,8 @@ import {
 import { Amount, Native, Type, tryParseAmount } from 'sushi/currency'
 import { Percent, ZERO } from 'sushi/math'
 import { Address, isAddress } from 'viem'
-import { useAccount, useChainId, useConfig, useGasPrice } from 'wagmi'
-import { isSupportedChainId } from '../../../config'
+import { useAccount, useGasPrice } from 'wagmi'
+import { SupportedChainId, isSupportedChainId } from '../../../config'
 import { useCarbonOffset } from '../../../lib/swap/useCarbonOffset'
 
 const getTokenAsString = (token: Type | string) =>
@@ -42,7 +46,6 @@ const getQuoteCurrency = (chainId: number) =>
 
 interface State {
   mutate: {
-    setChainId(chainId: number): void
     setToken0(token0: Type | string): void
     setToken1(token1: Type | string): void
     setTokens(token0: Type | string, token1: Type | string): void
@@ -72,14 +75,12 @@ interface DerivedStateSimpleSwapProviderProps {
 
 /* Parses the URL and provides the chainId, token0, and token1 globally.
  * URL example:
- * /swap?chainId=1&token0=NATIVE&token1=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2
- *
- * If no chainId is provided, it defaults to current connected chainId or Ethereum if wallet is not connected.
+ * /swap?token0=NATIVE&token1=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2
  */
 const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
   ({ children }) => {
     const { push } = useRouter()
-    const _chainId = useChainId()
+    const { chainId: _chainId } = useParams()
     const { address } = useAccount()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -90,26 +91,23 @@ const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
       new Map(),
     )
 
+    const chainId = isSupportedChainId(+_chainId)
+      ? (+_chainId as SupportedChainId)
+      : ChainId.ETHEREUM
+
     // Get the searchParams and complete with defaults.
     // This handles the case where some params might not be provided by the user
     const defaultedParams = useMemo(() => {
       const params = new URLSearchParams(searchParams)
-      if (!params.has('chainId') || !params.get('chainId'))
-        params.set(
-          'chainId',
-          (isSupportedChainId(_chainId)
-            ? _chainId
-            : ChainId.ETHEREUM
-          ).toString(),
-        )
+
       if (!params.has('token0')) {
-        params.set('token0', getDefaultCurrency(Number(params.get('chainId'))))
+        params.set('token0', getDefaultCurrency(chainId))
       }
       if (!params.has('token1')) {
-        params.set('token1', getQuoteCurrency(Number(params.get('chainId'))))
+        params.set('token1', getQuoteCurrency(chainId))
       }
       return params
-    }, [_chainId, searchParams])
+    }, [chainId, searchParams])
 
     // Get a new searchParams string by merging the current
     // searchParams with a provided key/value pair
@@ -126,22 +124,6 @@ const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
         return params.toString()
       },
       [defaultedParams],
-    )
-
-    // Update the URL with a new chainId
-    const setChainId = useCallback(
-      (chainId: number) => {
-        push(
-          `${pathname}?${createQueryString([
-            { name: 'swapAmount', value: null },
-            { name: 'chainId', value: chainId.toString() },
-            { name: 'token0', value: getDefaultCurrency(chainId) },
-            { name: 'token1', value: getQuoteCurrency(chainId) },
-          ])}`,
-          { scroll: false },
-        )
-      },
-      [createQueryString, pathname, push],
     )
 
     // Switch token0 and token1
@@ -267,35 +249,6 @@ const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
       [createQueryString, pathname, push],
     )
 
-    // Derive chainId from defaultedParams
-    const chainId = Number(defaultedParams.get('chainId')) as Exclude<
-      ChainId,
-      TestnetChainId
-    >
-
-    // console.log(_chainId, chainId)
-
-    // const { switchChain } = useSwitchChain()
-
-    // useEffect(() => {
-    //   if (_chainId !== chainId) {
-    //     // setChainId(chainId)
-    //     switchChain({ chainId })
-    //   }
-    // }, [_chainId, chainId, switchChain, setChainId])
-
-    const config = useConfig()
-
-    useEffect(() => {
-      const unwatch = watchChainId(config, {
-        onChange: (newChainId) => {
-          if (newChainId === chainId) return
-          setChainId(newChainId)
-        },
-      })
-      return () => unwatch()
-    }, [config, chainId, setChainId])
-
     const token0Param = defaultedParams.get('token0') as string
     const token1Param = defaultedParams.get('token1') as string
 
@@ -342,7 +295,6 @@ const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
 
           return {
             mutate: {
-              setChainId,
               setToken0,
               setToken1,
               setTokens,
@@ -367,7 +319,6 @@ const DerivedstateSimpleSwapProvider: FC<DerivedStateSimpleSwapProviderProps> =
           address,
           chainId,
           defaultedParams,
-          setChainId,
           setSwapAmount,
           setToken0,
           setToken1,

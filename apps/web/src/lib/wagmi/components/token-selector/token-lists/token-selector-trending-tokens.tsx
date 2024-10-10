@@ -1,7 +1,7 @@
 import { TrendingTokensChainId } from '@sushiswap/graph-client/data-api'
 import { List } from '@sushiswap/ui'
-import { usePrices } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
 import type { Type } from 'sushi/currency'
+import { usePrices } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 import { useTrendingTokens } from '../hooks/use-trending-tokens'
 import {
   TokenSelectorCurrencyList,

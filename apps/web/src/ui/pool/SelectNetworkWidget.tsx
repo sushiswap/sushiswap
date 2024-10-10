@@ -1,8 +1,7 @@
-import { FormSection, NetworkSelector } from '@sushiswap/ui'
-import { Button } from '@sushiswap/ui'
-import { SelectIcon } from '@sushiswap/ui'
+import { Button, FormSection, SelectIcon } from '@sushiswap/ui'
 import { NetworkIcon } from '@sushiswap/ui/icons/NetworkIcon'
 import React, { FC, memo } from 'react'
+import { NetworkSelector } from 'src/lib/wagmi/components/network-selector'
 import { ChainId, chainName } from 'sushi/chain'
 
 interface SelectNetworkWidgetProps {

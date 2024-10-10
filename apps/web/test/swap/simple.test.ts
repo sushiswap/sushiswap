@@ -8,7 +8,7 @@ import {
   // loadSnapshot,
 } from 'test/intercept-anvil'
 
-const url = 'http://localhost:3000/swap'
+const BASE_URL = 'http://localhost:3000'
 
 const native = Native.onChain(chainId)
 const wnative = native.wrapped
@@ -49,6 +49,7 @@ test.beforeEach(async ({ page, next }) => {
 
 test('Wrap and unwrap', async ({ page }) => {
   // test.slow()
+  const url = BASE_URL.concat(`/${chainId}/swap`)
   const swapPage = new SwapPage(page, chainId)
   await swapPage.goTo(url)
   await swapPage.connect()
@@ -60,6 +61,7 @@ test('Wrap and unwrap', async ({ page }) => {
 })
 
 test('swap Native to USDC, then USDC to NATIVE', async ({ page }) => {
+  const url = BASE_URL.concat(`/${chainId}/swap`)
   const swapPage = new SwapPage(page, chainId)
   await swapPage.goTo(url)
   await swapPage.connect()
@@ -72,6 +74,7 @@ test('swap Native to USDC, then USDC to NATIVE', async ({ page }) => {
 })
 
 test('swap Native to USDT, then USDT to NATIVE', async ({ page }) => {
+  const url = BASE_URL.concat(`/${chainId}/swap`)
   const swapPage = new SwapPage(page, chainId)
   await swapPage.goTo(url)
   await swapPage.connect()
@@ -85,6 +88,7 @@ test('swap Native to USDT, then USDT to NATIVE', async ({ page }) => {
 
 test('Swap Native to WBTC', async ({ page }) => {
   // test.slow()
+  const url = BASE_URL.concat(`/${chainId}/swap`)
   const swapPage = new SwapPage(page, chainId)
   await swapPage.goTo(url)
   await swapPage.connect()

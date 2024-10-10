@@ -1,26 +1,41 @@
 import { createErrorToast } from '@sushiswap/notifications'
 import { Button } from '@sushiswap/ui'
-import { NetworkSelector, NetworkSelectorOnSelectCallback } from '@sushiswap/ui'
 import { NetworkIcon } from '@sushiswap/ui/icons/NetworkIcon'
 import React, { FC, Suspense, useCallback } from 'react'
-import { Chain, ChainId } from 'sushi/chain'
+import { NonStandardChainId } from 'src/config'
+import { getNetworkName } from 'src/lib/network'
+import { ChainId } from 'sushi/chain'
 import { ProviderRpcError, UserRejectedRequestError } from 'viem'
-import { useChainId, useSwitchChain } from 'wagmi'
+import { useAccount, useChainId, useSwitchChain } from 'wagmi'
+import {
+  NetworkSelector,
+  NetworkSelectorOnSelectCallback,
+} from './network-selector'
 
 export const HeaderNetworkSelector: FC<{
-  networks: ChainId[]
-  selectedNetwork?: ChainId
-  onChange?(chainId: ChainId): void
+  networks: readonly (ChainId | NonStandardChainId)[]
+  selectedNetwork?: ChainId | NonStandardChainId
+  onChange?(network: ChainId | NonStandardChainId): void
   hideNetworkName?: boolean
-}> = ({ networks, selectedNetwork, onChange, hideNetworkName = false }) => {
+  className?: string
+}> = ({
+  networks,
+  selectedNetwork,
+  onChange,
+  className,
+  hideNetworkName = false,
+}) => {
   const { switchChainAsync } = useSwitchChain()
   const chainId = useChainId()
+
+  const { address } = useAccount()
+  console.log('address', address)
 
   const onSwitchNetwork = useCallback<NetworkSelectorOnSelectCallback>(
     async (el, close) => {
       console.debug('onSwitchNetwork', el)
       try {
-        if (switchChainAsync && chainId !== el) {
+        if (typeof el === 'number' && switchChainAsync && chainId !== el) {
           await switchChainAsync({ chainId: el })
         }
 
@@ -42,16 +57,25 @@ export const HeaderNetworkSelector: FC<{
 
   return (
     <NetworkSelector
-      showNonEvm
-      selected={chainId}
+      selected={selectedNetwork ?? chainId}
       onSelect={onSwitchNetwork}
       networks={networks}
     >
-      <Button variant="secondary" testId="network-selector">
+      <Button
+        variant="secondary"
+        testId="network-selector"
+        className={className}
+      >
         <Suspense fallback={null}>
-          <NetworkIcon chainId={chainId} width={20} height={20} />
+          <NetworkIcon
+            chainId={selectedNetwork ?? chainId}
+            width={20}
+            height={20}
+          />
           {hideNetworkName ? null : (
-            <div className="hidden xl:block">{Chain.from(chainId)?.name}</div>
+            <div className="hidden xl:block">
+              {getNetworkName(selectedNetwork ?? chainId)}
+            </div>
           )}
         </Suspense>
       </Button>

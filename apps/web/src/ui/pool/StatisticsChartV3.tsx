@@ -39,17 +39,21 @@ export const StatisticsChartsV3: FC<Charts> = ({ address, chainId, pool }) => {
 
   return (
     <Card>
-      <div className="border-b border-accent px-6 py-4 flex flex-col items-center justify-between gap-4 md:flex-row">
-        <PoolChartTypes
-          charts={statisticsChart}
-          selectedChart={chart}
-          setChart={setChart}
-        />
-        <PoolChartPeriods
-          periods={periods}
-          selectedPeriod={period}
-          setPeriod={setPeriod}
-        />
+      <div className="border-b border-accent px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex mx-auto">
+          <PoolChartTypes
+            charts={statisticsChart}
+            selectedChart={chart}
+            setChart={setChart}
+          />
+        </div>
+        <div className="flex mx-auto">
+          <PoolChartPeriods
+            periods={periods}
+            selectedPeriod={period}
+            setPeriod={setPeriod}
+          />
+        </div>
       </div>
       {chart === PoolChartType.Depth ? (
         <LiquidityDepthWidget chainId={chainId} address={address} />

@@ -13,6 +13,7 @@ import { SushiSwapV2ChainId, isSushiSwapV3ChainId } from 'sushi/config'
 import { useIsMounted } from '@sushiswap/hooks'
 import { ConnectButton } from 'src/lib/wagmi/components/connect-button'
 import { useAccount } from 'wagmi'
+import { useSidebar } from '../sidebar'
 import { PositionCard, PositionCardSkeleton } from './PositionCard'
 import { PositionCardList } from './PositionCardList'
 
@@ -20,6 +21,8 @@ const MigrateTabContentPositions: FC<{ chainId: SushiSwapV2ChainId }> = ({
   chainId,
 }) => {
   const { isConnected } = useAccount()
+
+  const { isOpen: isSidebarOpen } = useSidebar()
 
   if (!isConnected) {
     return (
@@ -49,10 +52,11 @@ const MigrateTabContentPositions: FC<{ chainId: SushiSwapV2ChainId }> = ({
               isSushiSwapV3ChainId(position?.pool.chainId),
             )}
             render={(position) => <PositionCard position={position} />}
-            className="px-2"
+            containerWidth={isSidebarOpen ? 1504 : 1280}
+            className="px-4"
           />
         ) : (
-          <Container maxWidth="7xl" className="pt-4 px-2 pb-10 mx-auto">
+          <Container maxWidth="7xl" className="pt-4 px-4 pb-10 mx-auto">
             <PositionCardSkeleton />
           </Container>
         )

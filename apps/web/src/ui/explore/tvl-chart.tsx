@@ -63,11 +63,11 @@ export const TVLChart: FC<TVLChart> = ({ data, chainId }) => {
     if (v2TVLNode)
       v2TVLNode.innerHTML = params[0].data[1]
         ? formatUSD(params[0].data[1])
-        : 'v2'
+        : ''
     if (v3TVLNode)
       v3TVLNode.innerHTML = params[1].data[1]
         ? formatUSD(params[1].data[1])
-        : 'v3'
+        : ''
   }, [])
 
   const onMouseLeave = useCallback(() => {
@@ -79,8 +79,8 @@ export const TVLChart: FC<TVLChart> = ({ data, chainId }) => {
     if (tvlNode) tvlNode.innerHTML = formatUSD(combinedTVL)
     if (dateNode)
       dateNode.innerHTML = format(new Date(currentDate), 'dd MMM yyyy HH:mm aa')
-    if (v2TVLNode) v2TVLNode.innerHTML = 'v2'
-    if (v3TVLNode) v3TVLNode.innerHTML = 'v3'
+    if (v2TVLNode) v2TVLNode.innerHTML = ''
+    if (v3TVLNode) v3TVLNode.innerHTML = ''
   }, [combinedTVL, currentDate])
 
   const DEFAULT_OPTION: EChartsOption = useMemo(
@@ -200,17 +200,19 @@ export const TVLChart: FC<TVLChart> = ({ data, chainId }) => {
             </div>
           </div>
           <div className="flex flex-col">
-            <div className="flex justify-end items-center gap-1">
-              <span id="hoveredV2TVL" className="text-sm">
-                v2
+            <div className="flex justify-between items-center gap-2 text-sm">
+              <span id="hoveredV2TVL" />
+              <span className="flex gap-1 items-center">
+                <span className="font-medium">v2</span>
+                <span className="bg-[#3B7EF6] rounded-[4px] w-3 h-3" />
               </span>
-              <span className="bg-[#3B7EF6] rounded-[4px] w-3 h-3" />
             </div>
-            <div className="flex justify-end items-center gap-1">
-              <span id="hoveredV3TVL" className="text-sm">
-                v3
+            <div className="flex justify-between items-center gap-2 text-sm">
+              <span id="hoveredV3TVL" />
+              <span className="flex gap-1 items-center">
+                <span className="font-medium">v3</span>
+                <span className="bg-[#A755DD] rounded-[4px] w-3 h-3" />
               </span>
-              <span className="bg-[#A755DD] rounded-[4px] w-3 h-3" />
             </div>
           </div>
         </div>

@@ -1,10 +1,10 @@
 import { isTokenListChainId } from '@sushiswap/graph-client/data-api'
 import { List } from '@sushiswap/ui'
 import { useMemo } from 'react'
-import { usePrices } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
 import { Address } from 'sushi'
 import type { ChainId } from 'sushi/chain'
 import type { Type } from 'sushi/currency'
+import { usePrices } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 import { useMyTokens } from '../hooks/use-my-tokens'
 import { TokenSelectorCurrencyList } from './common/token-selector-currency-list'
 

@@ -64,5 +64,7 @@ export const SimpleSwapBridgeBanner: FC = () => {
         </div>
       </div>
     </a>
-  ) : null
+  ) : (
+    <div />
+  )
 }

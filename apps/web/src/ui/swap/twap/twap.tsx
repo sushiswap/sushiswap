@@ -7,12 +7,15 @@ import {
 } from '@orbs-network/twap-ui-sushiswap'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import {
+  TokenListChainId,
+  isTokenListChainId,
+} from '@sushiswap/graph-client/data-api'
+import {
   Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  NetworkSelector,
   Tooltip as SushiTooltip,
   TooltipContent,
   TooltipProvider,
@@ -20,18 +23,14 @@ import {
 } from '@sushiswap/ui'
 import { useTheme } from 'next-themes'
 import { ReactNode, useCallback, useEffect } from 'react'
-import { ChainId } from 'sushi/chain'
-import { Currency, Native } from 'sushi/currency'
-import { useAccount, useChainId, useSwitchChain } from 'wagmi'
-
-import {
-  TokenListChainId,
-  isTokenListChainId,
-} from '@sushiswap/graph-client/data-api'
+import { NetworkSelector } from 'src/lib/wagmi/components/network-selector'
 import { useSearchTokens } from 'src/lib/wagmi/components/token-selector/hooks/use-search-tokens'
 import { TokenSelector } from 'src/lib/wagmi/components/token-selector/token-selector'
 import { Checker } from 'src/lib/wagmi/systems/Checker'
+import { ChainId } from 'sushi/chain'
+import { Currency, Native } from 'sushi/currency'
 import { Address, zeroAddress } from 'viem'
+import { useAccount, useChainId, useSwitchChain } from 'wagmi'
 import { usePrice } from '~evm/_common/ui/price-provider/price-provider/use-price'
 import {
   useDerivedStateSimpleSwap,

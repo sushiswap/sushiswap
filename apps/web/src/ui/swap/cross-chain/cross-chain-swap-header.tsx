@@ -8,7 +8,7 @@ import { useTokenAmountDollarValues } from 'src/lib/hooks'
 import { Amount, Price, Token, tryParseAmount } from 'sushi/currency'
 import { formatUSD } from 'sushi/format'
 
-import { usePrices } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
+import { usePrices } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 import { useDerivedStateCrossChainSwap } from './derivedstate-cross-chain-swap-provider'
 
 export const CrossChainSwapHeader = () => {

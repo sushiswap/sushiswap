@@ -53,11 +53,11 @@ export const VolumeChart: FC<VolumeChart> = ({ data, chainId }) => {
     if (v2VolumeNode)
       v2VolumeNode.innerHTML = params[0].data[1]
         ? formatUSD(params[0].data[1])
-        : 'v2'
+        : ''
     if (v3VolumeNode)
       v3VolumeNode.innerHTML = params[1].data[1]
         ? formatUSD(params[1].data[1])
-        : 'v3'
+        : ''
   }, [])
 
   const onMouseLeave = useCallback(() => {
@@ -68,8 +68,8 @@ export const VolumeChart: FC<VolumeChart> = ({ data, chainId }) => {
 
     if (volumeNode) volumeNode.innerHTML = formatUSD(totalVolume)
     if (dateNode) dateNode.innerHTML = 'Past month'
-    if (v2VolumeNode) v2VolumeNode.innerHTML = 'v2'
-    if (v3VolumeNode) v3VolumeNode.innerHTML = 'v3'
+    if (v2VolumeNode) v2VolumeNode.innerHTML = ''
+    if (v3VolumeNode) v3VolumeNode.innerHTML = ''
   }, [totalVolume])
 
   const DEFAULT_OPTION: EChartsOption = useMemo(
@@ -166,17 +166,19 @@ export const VolumeChart: FC<VolumeChart> = ({ data, chainId }) => {
             </div>
           </div>
           <div className="flex flex-col">
-            <div className="flex justify-end items-center gap-1">
-              <span id="hoveredV2Volume" className="text-sm">
-                v2
+            <div className="flex justify-between items-center gap-2 text-sm">
+              <span id="hoveredV2Volume" />
+              <span className="flex gap-1 items-center">
+                <span className="font-medium">v2</span>
+                <span className="bg-[#3B7EF6] rounded-[4px] w-3 h-3" />
               </span>
-              <span className="bg-[#3B7EF6] rounded-[4px] w-3 h-3" />
             </div>
-            <div className="flex justify-end items-center gap-1">
-              <span id="hoveredV3Volume" className="text-sm">
-                v3
+            <div className="flex justify-between items-center gap-2 text-sm">
+              <span id="hoveredV3Volume" />
+              <span className="flex gap-1 items-center">
+                <span className="font-medium">v3</span>
+                <span className="bg-[#A755DD] rounded-[4px] w-3 h-3" />
               </span>
-              <span className="bg-[#A755DD] rounded-[4px] w-3 h-3" />
             </div>
           </div>
         </div>

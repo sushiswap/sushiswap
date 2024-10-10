@@ -3,8 +3,8 @@
 import { SteerVault, getTokenRatios } from '@sushiswap/steer-sdk'
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { usePrices } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
 import { stringify } from 'src/instrumentation'
+import { usePrices } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 
 interface SteerTokenDistributionBarProps {
   vault: SteerVault

@@ -3,9 +3,9 @@ import { useCustomTokens } from '@sushiswap/hooks'
 import { List } from '@sushiswap/ui'
 import { useMemo } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
-import { usePrices } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
 import type { Type } from 'sushi/currency'
 import type { Address } from 'viem'
+import { usePrices } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 import { useSearchTokens } from '../hooks/use-search-tokens'
 import {
   TokenSelectorCurrencyList,

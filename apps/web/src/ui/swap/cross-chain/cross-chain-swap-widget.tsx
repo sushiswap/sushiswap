@@ -12,6 +12,7 @@ import { CrossChainSwapTradeStats } from './cross-chain-swap-trade-stats'
 export const CrossChainSwapWidget = () => {
   return (
     <div className="flex flex-col gap-4">
+      <div />
       <CrossChainSwapHeader />
       <div className="flex items-center justify-between">
         <SwapModeButtons />

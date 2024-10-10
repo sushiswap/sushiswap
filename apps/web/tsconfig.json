@@ -4,9 +4,9 @@
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "paths": {
-      "~aptos/*": ["src/app/(non-evm)/aptos/*"],
-      "~tron/*": ["src/app/(non-evm)/tron/*"],
-      "~evm/*": ["src/app/(evm)/*"],
+      "~aptos/*": ["src/app/(networks)/(non-evm)/aptos/*"],
+      "~tron/*": ["src/app/(networks)/(non-evm)/tron/*"],
+      "~evm/*": ["src/app/(networks)/(evm)/*"],
     },
     "allowJs": true,
     "skipLibCheck": true,

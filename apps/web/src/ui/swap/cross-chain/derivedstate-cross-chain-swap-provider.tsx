@@ -1,8 +1,12 @@
 'use client'
 
-import { watchAccount } from '@wagmi/core'
 import { nanoid } from 'nanoid'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
 import {
   Dispatch,
   FC,
@@ -10,7 +14,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -18,7 +21,7 @@ import { useCrossChainTrade } from 'src/lib/hooks'
 import { useSlippageTolerance } from 'src/lib/hooks/useSlippageTolerance'
 import { SushiXSwap2Adapter } from 'src/lib/swap/cross-chain'
 import { useTokenWithCache } from 'src/lib/wagmi/hooks/tokens/useTokenWithCache'
-import { ChainId } from 'sushi/chain'
+import { ChainId, ChainKey } from 'sushi/chain'
 import {
   SushiXSwap2ChainId,
   defaultCurrency,
@@ -30,7 +33,7 @@ import { defaultQuoteCurrency } from 'sushi/config'
 import { Amount, Native, Type, tryParseAmount } from 'sushi/currency'
 import { ZERO } from 'sushi/math'
 import { Address, isAddress } from 'viem'
-import { useAccount, useChainId, useConfig, useGasPrice } from 'wagmi'
+import { useAccount, useGasPrice } from 'wagmi'
 
 const getTokenAsString = (token: Type | string) =>
   typeof token === 'string'
@@ -81,7 +84,7 @@ interface DerivedStateCrossChainSwapProviderProps {
 
 /* Parses the URL and provides the chainId, token0, and token1 globally.
  * URL example:
- * /swap?chainId0=1&chainId1=2token0=NATIVE&token1=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2
+ * /swap?chainId1=2token0=NATIVE&token1=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2
  *
  * If no chainId is provided, it defaults to current connected chainId or Ethereum if wallet is not connected.
  */
@@ -89,36 +92,35 @@ const DerivedstateCrossChainSwapProvider: FC<
   DerivedStateCrossChainSwapProviderProps
 > = ({ children }) => {
   const { push } = useRouter()
-  const chainId = useChainId()
+  const { chainId: _chainId } = useParams()
   const { address } = useAccount()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [tradeId, setTradeId] = useState(nanoid())
+
+  const chainId0 = isSushiXSwap2ChainId(+_chainId as ChainId)
+    ? (+_chainId as SushiXSwap2ChainId)
+    : ChainId.ETHEREUM
 
   // Get the searchParams and complete with defaults.
   // This handles the case where some params might not be provided by the user
   const defaultedParams = useMemo(() => {
     const params = new URLSearchParams(Array.from(searchParams.entries()))
 
-    if (!params.has('chainId0'))
-      params.set(
-        'chainId0',
-        (isSushiXSwap2ChainId(chainId) ? chainId : ChainId.ETHEREUM).toString(),
-      )
     if (!params.has('chainId1'))
       params.set(
         'chainId1',
-        params.get('chainId0') === ChainId.ARBITRUM.toString()
+        chainId0 === ChainId.ARBITRUM
           ? ChainId.ETHEREUM.toString()
           : ChainId.ARBITRUM.toString(),
       )
     if (!params.has('token0'))
-      params.set('token0', getDefaultCurrency(Number(params.get('chainId0'))))
+      params.set('token0', getDefaultCurrency(chainId0))
     if (!params.has('token1'))
       params.set('token1', getQuoteCurrency(Number(params.get('chainId1'))))
 
     return params
-  }, [chainId, searchParams])
+  }, [chainId0, searchParams])
 
   // Get a new searchParams string by merging the current
   // searchParams with a provided key/value pair
@@ -140,22 +142,24 @@ const DerivedstateCrossChainSwapProvider: FC<
   // Switch token0 and token1
   const switchTokens = useCallback(() => {
     const params = new URLSearchParams(defaultedParams)
-    const chainId0 = params.get('chainId0')
     const chainId1 = params.get('chainId1')
     const token0 = params.get('token0')
     const token1 = params.get('token1')
 
-    // Can safely cast as defaultedParams are always defined
-    params.set('token0', token1 as string)
-    params.set('token1', token0 as string)
-    params.set('chainId0', chainId1 as string)
-    params.set('chainId1', chainId0 as string)
-    if (params.has('swapAmount')) {
-      params.delete('swapAmount')
-    }
+    const pathSegments = pathname.split('/')
+    pathSegments[1] = ChainKey[Number(chainId1) as ChainId]
 
-    push(`${pathname}?${params.toString()}`, { scroll: false })
-  }, [pathname, push, defaultedParams])
+    // Can safely cast as defaultedParams are always defined
+    push(
+      `${pathSegments.join('/')}?${createQueryString([
+        { name: 'swapAmount', value: null },
+        { name: 'token0', value: token1 as string },
+        { name: 'token1', value: token0 as string },
+        { name: 'chainId1', value: chainId0.toString() },
+      ])}`,
+      { scroll: false },
+    )
+  }, [pathname, push, defaultedParams, chainId0, createQueryString])
 
   // Update the URL with new from chainId
   const setChainId0 = useCallback(
@@ -163,23 +167,32 @@ const DerivedstateCrossChainSwapProvider: FC<
       if (defaultedParams.get('chainId1') === chainId.toString()) {
         switchTokens()
       } else {
+        const pathSegments = pathname.split('/')
+        pathSegments[1] = ChainKey[chainId as ChainId]
+
         push(
-          `${pathname}?${createQueryString([
+          `${pathSegments.join('/')}?${createQueryString([
             { name: 'swapAmount', value: null },
-            { name: 'chainId0', value: chainId.toString() },
             { name: 'token0', value: getDefaultCurrency(chainId0) },
           ])}`,
           { scroll: false },
         )
       }
     },
-    [createQueryString, defaultedParams, pathname, push, switchTokens],
+    [
+      createQueryString,
+      defaultedParams,
+      pathname,
+      push,
+      switchTokens,
+      chainId0,
+    ],
   )
 
   // Update the URL with new to chainId
   const setChainId1 = useCallback(
     (chainId: number) => {
-      if (defaultedParams.get('chainId0') === chainId.toString()) {
+      if (chainId0 === chainId) {
         switchTokens()
       } else {
         push(
@@ -192,7 +205,7 @@ const DerivedstateCrossChainSwapProvider: FC<
         )
       }
     },
-    [createQueryString, defaultedParams, pathname, push, switchTokens],
+    [createQueryString, pathname, push, switchTokens, chainId0],
   )
 
   // Update the URL with a new token0
@@ -255,7 +268,6 @@ const DerivedstateCrossChainSwapProvider: FC<
   )
 
   // Derive chainId from defaultedParams
-  const chainId0 = Number(defaultedParams.get('chainId0')) as ChainId
   const chainId1 = Number(defaultedParams.get('chainId1')) as ChainId
 
   // Derive token0
@@ -284,23 +296,6 @@ const DerivedstateCrossChainSwapProvider: FC<
       : isSquidAdapterChainId(chainId0) && isSquidAdapterChainId(chainId1)
         ? SushiXSwap2Adapter.Squid
         : undefined
-
-  const config = useConfig()
-
-  useEffect(() => {
-    const unwatch = watchAccount(config, {
-      onChange: ({ chain }) => {
-        if (
-          !chain ||
-          chain.id === chainId0 ||
-          !isSushiXSwap2ChainId(chain.id as ChainId)
-        )
-          return
-        push(pathname, { scroll: false })
-      },
-    })
-    return () => unwatch()
-  }, [config, chainId0, pathname, push])
 
   return (
     <DerivedStateCrossChainSwapContext.Provider

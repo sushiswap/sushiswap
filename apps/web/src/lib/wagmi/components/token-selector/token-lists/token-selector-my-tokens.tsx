@@ -1,8 +1,8 @@
 import { TokenListChainId } from '@sushiswap/graph-client/data-api'
 import { List } from '@sushiswap/ui'
-import { usePrices } from 'src/app/(evm)/_common/ui/price-provider/price-provider/use-prices'
 import type { Type } from 'sushi/currency'
 import { useAccount } from 'wagmi'
+import { usePrices } from '~evm/_common/ui/price-provider/price-provider/use-prices'
 import { useMyTokens } from '../hooks/use-my-tokens'
 import {
   TokenSelectorCurrencyList,

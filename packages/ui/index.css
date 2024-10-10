@@ -19,6 +19,8 @@
     --accent: #00000014;
     --accent-foreground: #111827;
     --background: #f4f5f6;
+    --green: 34 197 94;
+    --red: 239 68 68;
   }
 
   .paper {
@@ -34,6 +36,8 @@
     --background-color: #0f172a;
     --color: #ffffff;
     --background: #0f172a;
+    --green: 19 155 109;
+    --red: 180 48 60;
   }
 
   .dark .paper {

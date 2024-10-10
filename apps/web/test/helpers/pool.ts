@@ -88,6 +88,8 @@ export class PoolPage extends BaseActions {
       .locator(`[testdata-id=add-liquidity-token${tokenOrderNumber}-input]`)
       .fill(args.amount)
 
+    await this.switchNetwork(this.chainId)
+
     if (
       (args.amountBelongsToToken0 && !args.token0.isNative) ||
       (!args.amountBelongsToToken0 && !args.token1.isNative)
@@ -127,6 +129,8 @@ export class PoolPage extends BaseActions {
     await expect(input1).toBeEnabled()
     await input1.fill(args.amount1)
     expect(input1).toHaveValue(args.amount1)
+
+    await this.switchNetwork(this.chainId)
 
     const approveTokenId = `approve-token-${
       args.token0.isNative ? 1 : 0
@@ -316,7 +320,6 @@ export class PoolPage extends BaseActions {
     )
     await this.page.goto(url)
     await this.connect()
-    await this.switchNetwork(this.chainId)
 
     // const removeLiquidityTabSelector = page.locator('[testdata-id=remove-tab]')
     // await expect(removeLiquidityTabSelector).toBeVisible()
@@ -327,6 +330,8 @@ export class PoolPage extends BaseActions {
     )
     await expect(removeMaxButtonSelector).toBeVisible()
     await removeMaxButtonSelector.click()
+
+    await this.switchNetwork(this.chainId)
 
     const selectApprovalTypeId = 'select-approval-type-button'
     const selectApprovalTypeLocator = this.page.locator(

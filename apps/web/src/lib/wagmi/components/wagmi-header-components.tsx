@@ -1,25 +1,25 @@
 'use client'
 
-import { ChainId } from 'sushi/chain'
-
 import { usePrevious } from '@sushiswap/hooks'
 import {
   InterfaceEventName,
   WalletConnectionResult,
   sendAnalyticsEvent,
 } from '@sushiswap/telemetry'
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
+import { NonStandardChainId } from 'src/config'
+import { ChainId } from 'sushi/chain'
 import { useAccount } from 'wagmi'
 import { HeaderNetworkSelector } from './header-network-selector'
 import { UserPortfolio } from './user-portfolio'
 
 interface WagmiHeaderComponentsProps {
-  chainIds: ChainId[]
+  networks: readonly (ChainId | NonStandardChainId)[]
   onChange?(chainId: ChainId): void
 }
 
 export const WagmiHeaderComponents: React.FC<WagmiHeaderComponentsProps> = ({
-  chainIds,
+  networks,
   onChange,
 }) => {
   const { chainId, address, connector } = useAccount()
@@ -40,9 +40,13 @@ export const WagmiHeaderComponents: React.FC<WagmiHeaderComponentsProps> = ({
   }, [address, chainId, connector, previousConnectedChainId])
 
   return (
-    <>
-      <HeaderNetworkSelector networks={chainIds} onChange={onChange} />
+    <Suspense>
+      <HeaderNetworkSelector
+        networks={networks}
+        onChange={onChange}
+        className="flex lg:hidden"
+      />
       <UserPortfolio />
-    </>
+    </Suspense>
   )
 }

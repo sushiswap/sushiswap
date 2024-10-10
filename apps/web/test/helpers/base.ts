@@ -17,20 +17,22 @@ export class BaseActions {
     await connectSelector.click({ delay: 500 })
   }
 
-  async switchNetwork(chainId: number) {
-    const networkSelector = this.page.locator(
-      '[testdata-id=network-selector-button]',
-    )
-    await expect(networkSelector).toBeVisible()
-    await expect(networkSelector).toBeEnabled()
-    await networkSelector.click()
-
+  async selectNetwork(chainId: number) {
     const networkToSelect = this.page.locator(
       `[testdata-id=network-selector-${chainId}]`,
     )
     await expect(networkToSelect).toBeVisible()
     await expect(networkToSelect).toBeEnabled()
     await networkToSelect.click()
+  }
+
+  async switchNetwork(chainId: number) {
+    const switchNetworkBtn = this.page.locator(
+      `[testdata-id=switch-network-${chainId}-button]`,
+    )
+    await expect(switchNetworkBtn).toBeVisible()
+    await expect(switchNetworkBtn).toBeEnabled()
+    await switchNetworkBtn.click()
   }
 
   async deployFakeToken(details: {
